@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Booking record</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#050316}
+.pg{min-height:100vh;background:#e9e7e2;color:#050316;font:400 14px/1.55 'Bricolage Grotesque',system-ui,sans-serif}
+.shell{display:flex;flex-wrap:wrap;align-items:flex-start;gap:32px;padding:28px 32px 72px;max-width:1440px;margin:0 auto}
+.side{flex:0 0 224px;max-width:100%}
+.body{flex:999 1 600px;min-width:0;display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.main{flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:20px}
+.rail{flex:1 1 300px;max-width:360px;min-width:0;display:flex;flex-direction:column;gap:18px}
+.full{flex:1 1 100%;min-width:0;display:flex;flex-direction:column;gap:20px}
+.nv{display:flex;align-items:center;gap:10px;min-height:38px;padding:0 14px;border-radius:10px;text-decoration:none;color:#163829;font:600 14px 'Bricolage Grotesque',system-ui,sans-serif;transition:background-color .15s ease}
+.nv:not([aria-current="page"]):hover{background:#c5dccf}
+.nv[aria-current="page"]{background:#fff;color:#245a43;font-weight:700}
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px}
+.t{font:700 28px/1.15 'Bricolage Grotesque',system-ui,sans-serif;letter-spacing:-.01em;margin:0}
+.sub{margin:4px 0 0;color:#545b5e;font-size:15px}
+.sec{font:700 16px/1.3 'Bricolage Grotesque',system-ui,sans-serif;margin:6px 0 -6px}
+.panel{background:#c8d3db;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.panel>.hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;padding:2px 2px 0}
+.ph2{font:700 17px/1.3 'Bricolage Grotesque',system-ui,sans-serif;margin:0}
+.card{background:#fff;border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:#050316}
+.row{background:#fff;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:14px;text-decoration:none;color:#050316}
+a.row:hover,a.card:hover{background:#f6f7f5}
+.list{background:#fff;border-radius:16px;padding:4px 16px}
+.li{display:flex;align-items:center;gap:14px;min-height:56px;padding:10px 0}
+.li+.li{box-shadow:0 -1px 0 #e9e7e2}
+.b{font-weight:700}
+.m{color:#545b5e;font-size:13px}
+.s{font-size:13px}
+.lk{color:#3f566a;font-weight:700;font-size:13px;text-decoration:none}
+.lk:hover{text-decoration:underline}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:0 20px;border-radius:999px;border:0;background:#70a992;color:#050316;font:600 14px 'Bricolage Grotesque',system-ui,sans-serif;text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn:hover{filter:brightness(.95)}
+.btn.w{background:#fff}
+.btn.sm{min-height:34px;padding:0 14px;font-size:13px}
+.btn.wide{width:100%}
+.chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{display:inline-flex;align-items:center;min-height:30px;padding:0 14px;border-radius:999px;border:0;background:#fff;color:#050316;font:600 13px 'Bricolage Grotesque',system-ui,sans-serif;cursor:pointer;white-space:nowrap;text-decoration:none}
+.chip.on{background:#70a992}
+.chip.i{background:#c8d3db;color:#2f4556}
+.panel .chip.i{background:#fff}
+.tg{display:inline-flex;align-items:center;min-height:24px;padding:0 10px;border-radius:999px;background:#fff;font:600 12px 'Bricolage Grotesque',system-ui,sans-serif;white-space:nowrap;color:#050316}
+.tg.ok{background:#cfe5da;color:#1f523c}
+.tg.wait{background:#e3e8da;color:#3b4a2e}
+.tg.org{background:#526c80;color:#fff}
+.tg.dk{background:#050316;color:#fff}
+.tg.p{background:#e9e7e2;color:#3b4a2e;font-style:italic;font-weight:500}
+.ban{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;border-radius:16px;background:#dfe5d6}
+.ban .dot{width:10px;height:10px;border-radius:50%;background:#3b4a2e;flex:0 0 auto}
+.ban.ok{background:#cfe5da}
+.ban.ok .dot{background:#1f523c}
+.ph{background-color:#d6d8d3;background-image:linear-gradient(to top right,transparent calc(50% - 1px),#c3c6c0 calc(50% - 1px),#c3c6c0 calc(50% + 1px),transparent calc(50% + 1px)),linear-gradient(to bottom right,transparent calc(50% - 1px),#c3c6c0 calc(50% - 1px),#c3c6c0 calc(50% + 1px),transparent calc(50% + 1px));border-radius:12px;position:relative}
+.ph>.tg{position:absolute;left:10px;top:10px}
+.thumb{width:56px;height:56px;border-radius:12px;background:#c8d3db;flex:0 0 auto}
+.av{width:40px;height:40px;border-radius:50%;background:#d3d6d0;flex:0 0 auto;position:relative;overflow:hidden}
+.av::before{content:"";position:absolute;left:50%;top:22%;width:38%;height:38%;margin-left:-19%;border-radius:50%;background:#eceee9}
+.av::after{content:"";position:absolute;left:50%;bottom:-18%;width:70%;height:46%;margin-left:-35%;border-radius:50%;background:#eceee9}
+.av.org{background:#526c80}
+.av.org::before,.av.org::after{background:#8ea3b3}
+.grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+.ec{background:#c8d3db;border-radius:20px;padding:10px 10px 16px;display:flex;flex-direction:column;gap:6px}
+.ec>.ecb{padding:6px 8px 0;display:flex;flex-direction:column;gap:6px}
+.sp{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.fld{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:13px}
+.in{min-height:44px;border:0;border-radius:12px;background:#fff;padding:0 14px;font:400 14px 'Bricolage Grotesque',system-ui,sans-serif;color:#050316;width:100%}
+textarea.in{padding:12px 14px;min-height:96px;resize:vertical}
+.panel .in{background:#fff}
+.tabs{display:flex;gap:26px;flex-wrap:wrap;box-shadow:inset 0 -1px 0 #d0d3cc}
+.tab{background:none;border:0;padding:10px 4px 12px;font:600 14px 'Bricolage Grotesque',system-ui,sans-serif;color:#545b5e;cursor:pointer}
+.tab[aria-selected="true"]{color:#050316;box-shadow:inset 0 -3px 0 #70a992}
+.ftabs{display:flex;gap:4px;flex-wrap:wrap}
+.ft{min-height:46px;padding:0 22px;border:0;border-radius:16px 16px 0 0;font:600 14px 'Bricolage Grotesque',system-ui,sans-serif;color:#050316;cursor:pointer}
+.fbody{background:#c8d3db;border-radius:0 20px 20px 20px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.tog{width:44px;height:26px;border-radius:999px;border:0;position:relative;cursor:pointer;flex:0 0 auto}
+
+.num{font:800 30px/1 'Bricolage Grotesque',system-ui,sans-serif;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.bar{height:8px;border-radius:4px;background:#e9e7e2;overflow:hidden;flex:1}
+.bar i{display:block;height:100%;background:#70a992;border-radius:4px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.test{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:12px;background:#dfe5d6;color:#3b4a2e;font-weight:700;font-size:13px}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:12px;color:#545b5e;font-weight:600;padding:8px 10px}
+td{padding:12px 10px;box-shadow:inset 0 1px 0 #e9e7e2}
+</style>
+</helmet>
+<div class="pg">
+  <dc-import name="Topbar" hint-size="100%,84px"></dc-import>
+  <div class="shell">
+    <div class="side"><dc-import name="Sidebar" active="bookings" hint-size="224px,880px"></dc-import></div>
+    <div class="body">
+      <main class="main">
+        <div class="top">
+          <div><h1 class="t">Colombo Food Fair</h1><p class="sub">Catering for crew and VIP tent · Sun 8 Nov · BMICH, Colombo 7</p></div>
+          <a class="btn w" href="Bookings.dc.html">Back to bookings</a>
+        </div>
+        <div class="row"><span class="av org"></span><span style="flex: 1"><span class="b" style="display: block">Harbour Lights Events ✓</span><span class="m">Organiser · ★ 4.7</span></span><span class="tg" style="background: {{stBg}}; color: {{stFg}}; min-height: 30px; padding: 0 14px">{{status}}</span></div>
+        <div class="grid3">
+          <div class="card"><span class="m">Agreed price</span><span class="num" style="font-size: 24px">LKR 150,000</span></div>
+          <div class="card"><span class="m">Received</span><span class="num" style="font-size: 24px">{{received}}</span></div>
+          <div class="card"><span class="m">Stall</span><span class="num" style="font-size: 24px">B-12</span></div>
+        </div>
+        <div class="test"><span aria-hidden="true" style="width: 9px; height: 9px; border-radius: 50%; background: #3b4a2e"></span>Test payment, no real money</div>
+        <h2 class="sec">Instalments <span class="tg p" style="vertical-align: middle">Should</span></h2>
+        <div class="list">
+          <sc-for list="{{inst}}" as="p" hint-placeholder-count="3">
+            <div class="li">
+              <span style="flex: 1; min-width: 0"><span class="b" style="display: block">{{p.name}}</span><span class="m">{{p.amount}} · due {{p.due}}</span></span>
+              <span class="tg" style="background: {{p.bg}}; color: {{p.fg}}">{{p.status}}</span>
+              <sc-if value="{{p.canMark}}" hint-placeholder-val="{{false}}"><button class="btn sm" onClick="{{p.mark}}">Mark received</button></sc-if>
+              <sc-if value="{{p.received}}" hint-placeholder-val="{{true}}"><a class="lk" href="Payments.dc.html">Receipt ›</a></sc-if>
+            </div>
+          </sc-for>
+        </div>
+        <h2 class="sec">Terms</h2>
+        <div class="grid2">
+          <div class="card"><span class="b">Payment</span><span class="m">30% deposit when confirmed, then two instalments. The last is due on the event day.</span></div>
+          <div class="card"><span class="b">Cancellation</span><span class="m">Organiser cancels within 7 days: you keep the deposit. You cancel: everything paid is refunded.</span></div>
+        </div>
+        <sc-if value="{{isNone}}" hint-placeholder-val="{{true}}">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px">
+            <a class="btn w" href="Messages.dc.html">Chat</a>
+            <button class="btn w" onClick="{{openChange}}">Change terms</button>
+            <button class="btn w" onClick="{{openCancel}}">Cancel booking</button>
+            <button class="btn w" onClick="{{openReport}}">Report a problem</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{isChange}}" hint-placeholder-val="{{false}}">
+          <section class="panel">
+            <div class="hd"><h2 class="ph2">Change terms</h2><span class="m">The organiser must accept</span></div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px"><label class="fld">New price (LKR)<input class="in" value="150,000"></label><label class="fld">New date or time<input class="in" placeholder="Leave blank to keep"></label></div>
+            <label class="fld">What's changing and why<textarea class="in"></textarea></label>
+            <div class="acts"><button class="btn" onClick="{{sent}}">Send to organiser</button><button class="btn w" onClick="{{close}}">Back</button></div>
+          </section>
+        </sc-if>
+        <sc-if value="{{isCancel}}" hint-placeholder-val="{{false}}">
+          <section class="panel">
+            <div class="hd"><h2 class="ph2">Cancel booking</h2></div>
+            <div class="ban"><span class="s"><span class="b">18 days to go.</span> Within 7 days, a cancellation shows on your profile <span class="tg p">Should</span></span></div>
+            <label class="fld">Reason<select class="in"><option>Choose a reason</option><option>Double booked</option><option>Staff or supply problem</option><option>Organiser didn't meet terms</option><option>Other</option></select></label>
+            <span class="m">Refund under the terms: LKR 45,000 back to the organiser.</span>
+            <div class="acts"><button class="btn" onClick="{{cancelled}}" style="background: #050316; color: #fff">Cancel booking</button><button class="btn w" onClick="{{close}}">Keep booking</button></div>
+          </section>
+        </sc-if>
+        <sc-if value="{{isReport}}" hint-placeholder-val="{{false}}">
+          <section class="panel">
+            <div class="hd"><h2 class="ph2">Report a problem</h2><span class="m">An admin sees the booking history</span></div>
+            <label class="fld">What happened<select class="in"><option>Payment not received</option><option>Paid but not given a stall</option><option>Brief changed</option><option>Something else</option></select></label>
+            <label class="fld">Details<textarea class="in"></textarea></label>
+            <div class="acts"><button class="btn" onClick="{{reported}}">Send report</button><button class="btn w" onClick="{{close}}">Back</button></div>
+          </section>
+        </sc-if>
+        <sc-if value="{{isDone}}" hint-placeholder-val="{{false}}"><div class="ban ok"><span class="b">{{doneText}}</span><button class="btn sm w" onClick="{{close}}">Done</button></div></sc-if>
+      </main>
+      <aside class="rail">
+        <section class="panel">
+          <div class="hd"><h2 class="ph2">Event</h2><a class="lk" href="Event.dc.html">Event page</a></div>
+          <div class="ph" style="height: 120px"></div>
+          <div class="card"><span class="b">Sun 8 Nov · 10:00 AM</span><span class="m">Load-in from 7:00 AM · Gate 3</span></div>
+        </section>
+        <section class="panel">
+          <div class="hd"><h2 class="ph2">After the event</h2></div>
+          <div class="list">
+            <div class="li"><span class="b">1</span><span>Organiser marks it completed</span></div>
+            <div class="li"><span class="b">2</span><span>Reviews open for 14 days <span class="tg p">Proposed</span></span></div>
+          </div>
+          <a class="btn w wide" href="Reviews.dc.html">Review the organiser</a>
+        </section>
+      </aside>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { got: { 0: true }, mode: 'none', done: '' }; }
+  renderVals() {
+    const { got, mode, done } = this.state;
+    const rows = [{ name: 'Deposit', amount: 'LKR 45,000', due: '10 Oct', v: 45000 }, { name: 'Instalment 1', amount: 'LKR 25,000', due: '2 Nov', v: 25000 }, { name: 'Instalment 2', amount: 'LKR 80,000', due: '8 Nov', v: 80000 }];
+    const total = rows.reduce((a, r, k) => a + (got[k] ? r.v : 0), 0);
+    const cancelled = done === 'cancelled';
+    return {
+      received: 'LKR ' + total.toLocaleString('en-US'),
+      inst: rows.map((r, k) => { const rec = !!got[k]; return { ...r, received: rec, canMark: !rec, status: rec ? 'Received' : 'Due', bg: rec ? '#cfe5da' : '#e3e8da', fg: rec ? '#1f523c' : '#3b4a2e', mark: () => this.setState({ got: { ...got, [k]: true } }) }; }),
+      status: cancelled ? 'Cancelled' : 'Confirmed', stBg: cancelled ? '#050316' : '#cfe5da', stFg: cancelled ? '#fff' : '#1f523c',
+      isNone: mode === 'none', isChange: mode === 'change', isCancel: mode === 'cancel', isReport: mode === 'report', isDone: mode === 'done',
+      doneText: done === 'sent' ? 'Sent. The organiser must accept the new terms.' : done === 'cancelled' ? 'Booking cancelled. The organiser has been told.' : 'Report sent. An admin will be in touch.',
+      openChange: () => this.setState({ mode: 'change' }), openCancel: () => this.setState({ mode: 'cancel' }), openReport: () => this.setState({ mode: 'report' }),
+      close: () => this.setState({ mode: 'none' }),
+      sent: () => this.setState({ mode: 'done', done: 'sent' }), cancelled: () => this.setState({ mode: 'done', done: 'cancelled' }), reported: () => this.setState({ mode: 'done', done: 'reported' })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Feed and events</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&amp;family=Instrument+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#050316}a:hover{color:#050316}
+.h{font-family:'Bricolage Grotesque',system-ui,sans-serif;letter-spacing:-.02em;margin:0;line-height:1.1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;box-sizing:border-box;border-radius:14px 14px 3px 14px;border:1.5px solid #70a992;background:#70a992;color:#050316;font:600 15px 'Instrument Sans',system-ui,sans-serif;text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn:hover{filter:brightness(.94)}
+.btn.o{background:transparent;border-color:#050316}
+.act{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border-radius:12px 12px 3px 12px;border:0;background:transparent;font:600 14px 'Instrument Sans',system-ui,sans-serif;color:#050316;cursor:pointer}
+.act:hover{background:#b6c3a7}
+.tag{display:inline-flex;align-items:center;min-height:24px;padding:0 10px;border-radius:999px;background:#b6c3a7;color:#050316;font:600 12px 'Instrument Sans',system-ui,sans-serif;white-space:nowrap}
+.org{background:#526c80;color:#fff}
+.muted{color:rgba(5,3,22,.72)}
+.post{background:rgba(255,255,255,.6);border:1.5px solid #b6c3a7;border-radius:22px 22px 5px 22px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.pnl{background:#658095;border-radius:22px 22px 5px 22px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.inner{background:#e9e7e2;border-radius:16px 16px 4px 16px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.in{min-height:44px;border:1.5px solid #658095;border-radius:12px 12px 3px 12px;background:#fff;padding:0 14px;font:400 15px 'Instrument Sans',system-ui,sans-serif;color:#050316;box-sizing:border-box;width:100%}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #e9e7e2; font-family: 'Instrument Sans', system-ui, sans-serif; color: #050316; font-size: 15px; line-height: 1.5">
+  <dc-import name="Topbar" hint-size="100%,84px"></dc-import>
+  <div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 28px; padding: 24px 28px 56px; max-width: 1440px; margin: 0 auto; box-sizing: border-box">
+    <div style="flex: 0 1 250px; min-width: 220px">
+      <dc-import name="Sidebar" active="feed" hint-size="100%,960px"></dc-import>
+    </div>
+    <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+      <div style="flex: 999 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 18px">
+        <div>
+          <h1 class="h" style="font-size: 40px; font-weight: 800">Feed</h1>
+          <p class="muted" style="margin: 6px 0 0">Posts, reels and new events from organisers you follow. Only organisers post here.</p>
+        </div>
+        <sc-for list="{{posts}}" as="p" hint-placeholder-count="2">
+          <article class="post">
+            <div style="display: flex; gap: 12px; align-items: center">
+              <span aria-hidden="true" style="width: 44px; height: 44px; border-radius: 13px 13px 3px 13px; background: #526c80"></span>
+              <span style="flex: 1"><strong style="display: block">{{p.org}}</strong><span class="muted" style="font-size: 14px">{{p.time}}</span></span>
+              <span class="tag">{{p.kind}}</span>
+            </div>
+            <p style="margin: 0">{{p.text}}</p>
+            <div role="img" aria-label="{{p.media}}" style="aspect-ratio: {{p.ratio}}; border-radius: 16px 16px 4px 16px; background: #b6c3a7; display: grid; place-items: center; font-weight: 600; font-size: 14px">{{p.media}}</div>
+            <sc-if value="{{p.isEvent}}" hint-placeholder-val="{{false}}">
+              <a href="Event.dc.html" style="display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 14px 14px 3px 14px; background: #e9e7e2; text-decoration: none">
+                <span><strong style="display: block">Colombo Food Fair</strong><span style="font-size: 14px">Sun 8 Nov · BMICH · 40 stalls</span></span><span class="btn o" style="min-height: 38px">Event page</span>
+              </a>
+            </sc-if>
+            <div style="display: flex; gap: 4px; flex-wrap: wrap; border-top: 1.5px solid #b6c3a7; padding-top: 6px">
+              <button class="act" onClick="{{p.like}}" aria-pressed="{{p.likedStr}}" style="background: {{p.likeBg}}">{{p.likeLabel}} · {{p.likes}}</button>
+              <button class="act" onClick="{{p.toggleComments}}">Comment · {{p.comments}}</button>
+              <button class="act" onClick="{{p.toggleShare}}">Share</button>
+            </div>
+            <sc-if value="{{p.showShare}}" hint-placeholder-val="{{false}}">
+              <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 12px; border-radius: 14px 14px 3px 14px; background: #e9e7e2">
+                <span aria-hidden="true" style="width: 84px; height: 64px; border-radius: 10px; background: #b6c3a7"></span>
+                <span style="flex: 1 1 200px"><strong style="display: block">tzra.lk/cff26</strong><span class="muted" style="font-size: 14px">Short link with a preview image</span></span>
+                <button class="btn" style="min-height: 40px">WhatsApp</button><button class="btn" style="min-height: 40px">Instagram</button><button class="btn o" style="min-height: 40px">Copy link</button>
+              </div>
+            </sc-if>
+            <sc-if value="{{p.showComments}}" hint-placeholder-val="{{false}}">
+              <div style="display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 14px 14px 3px 14px; background: #e9e7e2">
+                <p style="margin: 0; font-size: 14px"><strong>Lime and Leaf</strong> <span class="tag">Vendor</span> Can't wait, see you at zone B!</p>
+                <div style="display: flex; gap: 8px"><label style="flex: 1"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden">Comment</span><input class="in" placeholder="Add a comment"></label><button class="btn">Post</button></div>
+              </div>
+            </sc-if>
+          </article>
+        </sc-for>
+      </div>
+
+      <aside style="flex: 1 1 280px; display: flex; flex-direction: column; gap: 16px; min-width: 0">
+        <section class="pnl" aria-labelledby="fo">
+          <h2 id="fo" class="h" style="font-size: 20px; font-weight: 700">Organisers to follow</h2>
+          <sc-for list="{{orgs}}" as="o" hint-placeholder-count="3">
+            <div class="inner" style="flex-direction: row; align-items: center">
+              <span aria-hidden="true" style="width: 40px; height: 40px; border-radius: 12px 12px 3px 12px; background: #526c80; flex: 0 0 auto"></span>
+              <span style="flex: 1; min-width: 0"><strong style="display: block">{{o.name}}</strong><span style="font-size: 13px">{{o.meta}}</span></span>
+              <button class="btn" onClick="{{o.toggle}}" style="min-height: 38px; padding: 0 14px; background: {{o.bg}}; border-color: {{o.border}}">{{o.label}}</button>
+            </div>
+          </sc-for>
+        </section>
+        <section class="pnl" aria-labelledby="ue">
+          <h2 id="ue" class="h" style="font-size: 20px; font-weight: 700">New events near you</h2>
+          <a class="inner" href="Event.dc.html" style="text-decoration: none"><strong>Colombo Food Fair</strong><span style="font-size: 14px">Sun 8 Nov · You have stall B-12</span></a>
+          <a class="inner" href="Stalls.dc.html" style="text-decoration: none"><strong>Kandy Fest</strong><span style="font-size: 14px">Sat 5 Dec · Stall slots open</span></a>
+        </section>
+      </aside>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1400}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { liked: {}, share: -1, comm: -1, follow: { 0: true } }; }
+  renderVals() {
+    const { liked, share, comm, follow } = this.state;
+    const data = [
+      { org: 'Harbour Lights Events', time: '2 h ago', kind: 'New event', text: 'Colombo Food Fair is back. 40 stalls, live music and a kids zone.', media: 'Event poster', ratio: '16 / 9', isEvent: true, likes: 128, comments: 14 },
+      { org: 'Kandy Fest Co.', time: 'Yesterday', kind: 'Reel', text: 'Behind the scenes at last year’s lake-side stage build.', media: 'Reel, 0:42', ratio: '4 / 3', isEvent: false, likes: 342, comments: 31 }
+    ];
+    const orgs = [
+      { name: 'Harbour Lights Events', meta: 'Verified · 24 events' },
+      { name: 'Lotus Weddings', meta: 'Verified · 61 events' },
+      { name: 'Coastline Collective', meta: '6 events' }
+    ];
+    return {
+      posts: data.map((p, k) => {
+        const l = !!liked[k];
+        return { ...p, likes: p.likes + (l ? 1 : 0), likeLabel: l ? 'Liked' : 'Like', likedStr: String(l), likeBg: l ? '#70a992' : 'transparent',
+          showShare: share === k, showComments: comm === k,
+          like: () => this.setState({ liked: { ...liked, [k]: !l } }),
+          toggleShare: () => this.setState({ share: share === k ? -1 : k }),
+          toggleComments: () => this.setState({ comm: comm === k ? -1 : k }) };
+      }),
+      orgs: orgs.map((o, k) => {
+        const f = !!follow[k];
+        return { ...o, label: f ? 'Following' : 'Follow', bg: f ? 'transparent' : '#70a992', border: f ? '#050316' : '#70a992',
+          toggle: () => this.setState({ follow: { ...follow, [k]: !f } }) };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

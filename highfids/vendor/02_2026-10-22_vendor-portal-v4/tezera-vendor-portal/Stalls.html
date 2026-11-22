@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stalls · tezera vendor portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#050316}
+.pg{min-height:100vh;background:#e9e7e2;color:#050316;font:400 14px/1.55 'Bricolage Grotesque',system-ui,sans-serif}
+.shell{display:flex;flex-wrap:wrap;align-items:flex-start;gap:32px;padding:28px 32px 72px;max-width:1440px;margin:0 auto}
+.side{flex:0 0 224px;max-width:100%}
+.body{flex:999 1 600px;min-width:0;display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.main{flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:20px}
+.rail{flex:1 1 300px;max-width:360px;min-width:0;display:flex;flex-direction:column;gap:18px}
+.full{flex:1 1 100%;min-width:0;display:flex;flex-direction:column;gap:20px}
+.nv{display:flex;align-items:center;gap:10px;min-height:38px;padding:0 14px;border-radius:10px;text-decoration:none;color:#163829;font:600 14px 'Bricolage Grotesque',system-ui,sans-serif;transition:background-color .15s ease}
+.nv:not([aria-current="page"]):hover{background:#c5dccf}
+.nv[aria-current="page"]{background:#fff;color:#245a43;font-weight:700}
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px}
+.t{font:700 28px/1.15 'Bricolage Grotesque',system-ui,sans-serif;letter-spacing:-.01em;margin:0}
+.sub{margin:4px 0 0;color:#545b5e;font-size:15px}
+.sec{font:700 16px/1.3 'Bricolage Grotesque',system-ui,sans-serif;margin:6px 0 -6px}
+.panel{background:#c8d3db;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.panel>.hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;padding:2px 2px 0}
+.ph2{font:700 17px/1.3 'Bricolage Grotesque',system-ui,sans-serif;margin:0}
+.card{background:#fff;border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:#050316}
+.row{background:#fff;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:14px;text-decoration:none;color:#050316}
+a.row:hover,a.card:hover{background:#f6f7f5}
+.list{background:#fff;border-radius:16px;padding:4px 16px}
+.li{display:flex;align-items:center;gap:14px;min-height:56px;padding:10px 0}
+.li+.li{box-shadow:0 -1px 0 #e9e7e2}
+.b{font-weight:700}
+.m{color:#545b5e;font-size:13px}
+.s{font-size:13px}
+.lk{color:#3f566a;font-weight:700;font-size:13px;text-decoration:none}
+.lk:hover{text-decoration:underline}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:0 20px;border-radius:999px;border:0;background:#70a992;color:#050316;font:600 14px 'Bricolage Grotesque',system-ui,sans-serif;text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn:hover{filter:brightness(.95)}
+.btn.w{background:#fff}
+.btn.sm{min-height:34px;padding:0 14px;font-size:13px}
+.btn.wide{width:100%}
+.chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{display:inline-flex;align-items:center;min-height:30px;padding:0 14px;border-radius:999px;border:0;background:#fff;color:#050316;font:600 13px 'Bricolage Grotesque',system-ui,sans-serif;cursor:pointer;white-space:nowrap;text-decoration:none}
+.chip.on{background:#70a992}
+.chip.i{background:#c8d3db;color:#2f4556}
+.panel .chip.i{background:#fff}
+.tg{display:inline-flex;align-items:center;min-height:24px;padding:0 10px;border-radius:999px;background:#fff;font:600 12px 'Bricolage Grotesque',system-ui,sans-serif;white-space:nowrap;color:#050316}
+.tg.ok{background:#cfe5da;color:#1f523c}
+.tg.wait{background:#e3e8da;color:#3b4a2e}
+.tg.org{background:#526c80;color:#fff}
+.tg.dk{background:#050316;color:#fff}
+.tg.p{background:#e9e7e2;color:#3b4a2e;font-style:italic;font-weight:500}
+.ban{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;border-radius:16px;background:#dfe5d6}
+.ban .dot{width:10px;height:10px;border-radius:50%;background:#3b4a2e;flex:0 0 auto}
+.ban.ok{background:#cfe5da}
+.ban.ok .dot{background:#1f523c}
+.ph{background-color:#d6d8d3;background-image:linear-gradient(to top right,transparent calc(50% - 1px),#c3c6c0 calc(50% - 1px),#c3c6c0 calc(50% + 1px),transparent calc(50% + 1px)),linear-gradient(to bottom right,transparent calc(50% - 1px),#c3c6c0 calc(50% - 1px),#c3c6c0 calc(50% + 1px),transparent calc(50% + 1px));border-radius:12px;position:relative}
+.ph>.tg{position:absolute;left:10px;top:10px}
+.thumb{width:56px;height:56px;border-radius:12px;background:#c8d3db;flex:0 0 auto}
+.av{width:40px;height:40px;border-radius:50%;background:#d3d6d0;flex:0 0 auto;position:relative;overflow:hidden}
+.av::before{content:"";position:absolute;left:50%;top:22%;width:38%;height:38%;margin-left:-19%;border-radius:50%;background:#eceee9}
+.av::after{content:"";position:absolute;left:50%;bottom:-18%;width:70%;height:46%;margin-left:-35%;border-radius:50%;background:#eceee9}
+.av.org{background:#526c80}
+.av.org::before,.av.org::after{background:#8ea3b3}
+.grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+.ec{background:#c8d3db;border-radius:20px;padding:10px 10px 16px;display:flex;flex-direction:column;gap:6px}
+.ec>.ecb{padding:6px 8px 0;display:flex;flex-direction:column;gap:6px}
+.sp{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.fld{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:13px}
+.in{min-height:44px;border:0;border-radius:12px;background:#fff;padding:0 14px;font:400 14px 'Bricolage Grotesque',system-ui,sans-serif;color:#050316;width:100%}
+textarea.in{padding:12px 14px;min-height:96px;resize:vertical}
+.panel .in{background:#fff}
+.tabs{display:flex;gap:26px;flex-wrap:wrap;box-shadow:inset 0 -1px 0 #d0d3cc}
+.tab{background:none;border:0;padding:10px 4px 12px;font:600 14px 'Bricolage Grotesque',system-ui,sans-serif;color:#545b5e;cursor:pointer}
+.tab[aria-selected="true"]{color:#050316;box-shadow:inset 0 -3px 0 #70a992}
+.ftabs{display:flex;gap:4px;flex-wrap:wrap}
+.ft{min-height:46px;padding:0 22px;border:0;border-radius:16px 16px 0 0;font:600 14px 'Bricolage Grotesque',system-ui,sans-serif;color:#050316;cursor:pointer}
+.fbody{background:#c8d3db;border-radius:0 20px 20px 20px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.tog{width:44px;height:26px;border-radius:999px;border:0;position:relative;cursor:pointer;flex:0 0 auto}
+
+.num{font:800 30px/1 'Bricolage Grotesque',system-ui,sans-serif;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.bar{height:8px;border-radius:4px;background:#e9e7e2;overflow:hidden;flex:1}
+.bar i{display:block;height:100%;background:#70a992;border-radius:4px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.test{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:12px;background:#dfe5d6;color:#3b4a2e;font-weight:700;font-size:13px}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:12px;color:#545b5e;font-weight:600;padding:8px 10px}
+td{padding:12px 10px;box-shadow:inset 0 1px 0 #e9e7e2}
+</style>
+</head>
+<body>
+<div id="app" data-page="Stalls"></div>
+<template id="tpl-Stalls">
+<div class="pg">
+  <template data-dc-import name="Topbar" hint-size="100%,84px"></template>
+  <div class="shell">
+    <div class="side"><template data-dc-import name="Sidebar" active="stalls" hint-size="224px,880px"></template></div>
+    <div class="body">
+      <main class="main">
+        <div class="top">
+          <div><h1 class="t">Stalls</h1><p class="sub">Stall slots at upcoming events · vendors only</p></div>
+          <div class="chips"><button class="btn w">Sort: Deadline ▾</button></div>
+        </div>
+        <div class="tabs" role="tablist">
+          <template data-sc-for list="{{tabs}}" as="t" hint-placeholder-count="3"><button class="tab" role="tab" aria-selected="{{t.sel}}" onClick="{{t.pick}}">{{t.label}}</button></template>
+        </div>
+        <template data-sc-if value="{{isSlots}}" hint-placeholder-val="{{true}}">
+          <div class="chips">
+            <template data-sc-for list="{{types}}" as="f" hint-placeholder-count="4"><button class="chip" onClick="{{f.pick}}" aria-pressed="{{f.sel}}" style="background: {{f.bg}}">{{f.label}}</button></template>
+          </div>
+          <div class="grid2">
+            <template data-sc-for list="{{slots}}" as="s" hint-placeholder-count="4">
+              <article class="ec">
+                <div class="ph" style="height: 140px"><span class="tg">{{s.type}}</span></div>
+                <div class="ecb">
+                  <h2 class="ph2">{{s.event}}</h2>
+                  <span class="m">{{s.when}}</span>
+                  <div class="sp"><span class="s b">✓ {{s.org}}</span><span class="b">{{s.fee}}</span></div>
+                  <span class="m">Apply by {{s.deadline}} · {{s.left}}</span>
+                  <div class="acts">
+                    <template data-sc-if value="{{s.open}}" hint-placeholder-val="{{true}}"><button class="btn sm" onClick="{{s.apply}}">Apply</button></template>
+                    <template data-sc-if value="{{s.done}}" hint-placeholder-val="{{false}}"><span class="tg ok" style="min-height: 34px; padding: 0 14px">Applied ✓</span></template>
+                    <a class="btn sm w" href="Event.html">Event page</a>
+                  </div>
+                </div>
+              </article>
+            </template>
+          </div>
+        </template>
+        <template data-sc-if value="{{isApps}}" hint-placeholder-val="{{false}}">
+          <a class="row" href="MyStall.html"><span class="thumb"></span><span style="flex: 1"><span class="b" style="display: block">Colombo Food Fair</span><span class="m">Food stall · fee LKR 15,000 paid</span></span><span class="tg ok">Approved · B-12</span></a>
+          <a class="row" href="Messages.html"><span class="thumb"></span><span style="flex: 1"><span class="b" style="display: block">Kandy Fest</span><span class="m">Food stall · fee LKR 10,000</span></span><span class="tg wait">Waiting for organiser</span></a>
+          <div class="row"><span class="thumb"></span><span style="flex: 1"><span class="b" style="display: block">Negombo Beach Carnival</span><span class="m">Drinks stall · slots full</span></span><span class="tg dk">Rejected</span></div>
+          <span class="m">Paid but not given a stall? <a class="lk" href="Booking.html">Report it</a> and an admin handles the dispute.</span>
+        </template>
+        <template data-sc-if value="{{isInv}}" hint-placeholder-val="{{false}}">
+          <article class="ec" style="flex-direction: row; flex-wrap: wrap; gap: 16px; padding: 10px">
+            <div class="ph" style="flex: 1 1 240px; min-height: 200px"></div>
+            <div class="ecb" style="flex: 1 1 280px; padding: 10px 8px">
+              <span class="tg org" style="align-self: flex-start">Harbour Lights Events invited you</span>
+              <h2 class="ph2" style="font-size: 22px">Galle Face Night Market</h2>
+              <span class="m">Sun 15 Nov · 5:00 PM – midnight · Food stall</span>
+              <div class="card" style="margin-top: 4px"><span class="m">“Your kottu stall was a hit at the Food Fair. We'd love you near the main stage.”</span></div>
+              <div class="sp"><span class="b">Stall fee</span><span class="num" style="font-size: 22px">LKR 12,000</span></div>
+              <template data-sc-if value="{{invOpen}}" hint-placeholder-val="{{true}}">
+                <div class="acts"><button class="btn" onClick="{{acceptInv}}">Accept</button><button class="btn w" onClick="{{declineInv}}">Decline</button></div>
+                <span class="m">Accepting counts as approval.</span>
+              </template>
+              <template data-sc-if value="{{invAccepted}}" hint-placeholder-val="{{false}}"><div class="ban ok"><span class="b">You're in. Pay the fee and set up your listing.</span><a class="btn sm" href="MyStall.html">My stall</a></div></template>
+              <template data-sc-if value="{{invDeclined}}" hint-placeholder-val="{{false}}"><div class="ban"><span class="b">Declined. The organiser has been told.</span></div></template>
+            </div>
+          </article>
+        </template>
+      </main>
+      <aside class="rail">
+        <section class="panel">
+          <div class="hd"><h2 class="ph2">Your stalls</h2><a class="lk" href="MyStall.html">Listings</a></div>
+          <a class="row" href="MyStall.html"><span class="thumb" style="background: #70a992"></span><span><span class="b" style="display: block">B-12 · Colombo Food Fair</span><span class="m">Sun 8 Nov</span><br><span class="tg ok">Paid and confirmed</span></span></a>
+          <a class="row" href="MyStall.html"><span class="thumb"></span><span><span class="b" style="display: block">A-04 · Night Market</span><span class="m">Sun 15 Nov</span><br><span class="tg wait">Fee unpaid</span></span></a>
+        </section>
+        <section class="panel">
+          <div class="hd"><h2 class="ph2">Stall fees</h2></div>
+          <span class="m">Shown here, paid to the organiser outside the app or in the test sandbox.</span>
+          <a class="btn w wide" href="Payments.html">Payment history</a>
+        </section>
+      </aside>
+    </div>
+  </div>
+</div>
+</template>
+<script type="text/x-dc" id="js-Stalls">
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { tab: 'slots', type: 'All', applied: {}, inv: 'open' }; }
+  renderVals() {
+    const { tab, type, applied, inv } = this.state;
+    const data = [
+      { org: 'Kandy Fest Co.', event: 'Kandy Fest', when: 'Sat 5 – Sun 6 Dec', type: 'Food', fee: 'LKR 10,000', deadline: '20 Nov', left: '8 of 30 left' },
+      { org: 'Harbour Lights Events', event: 'Beach Party', when: 'Sun 20 Dec', type: 'Drinks', fee: 'LKR 8,000', deadline: '1 Dec', left: '4 of 12 left' },
+      { org: 'Coastline Collective', event: 'Makers Market', when: 'Sun 22 Nov', type: 'Merchandise', fee: 'LKR 5,000', deadline: '10 Nov', left: '15 of 40 left' },
+      { org: 'Lotus Weddings', event: 'Wedding Fair 2026', when: 'Sun 29 Nov', type: 'Food', fee: 'LKR 20,000', deadline: '15 Nov', left: '2 of 10 left' }
+    ];
+    const defs = [['slots', 'Stall slots'], ['apps', 'My applications'], ['inv', 'Invitations (1)']];
+    return {
+      tabs: defs.map(([k, label]) => ({ label, sel: String(k === tab), pick: () => this.setState({ tab: k }) })),
+      isSlots: tab === 'slots', isApps: tab === 'apps', isInv: tab === 'inv',
+      types: ['All', 'Food', 'Drinks', 'Merchandise'].map((t) => ({ label: t, sel: String(t === type), bg: t === type ? '#70a992' : '#fff', pick: () => this.setState({ type: t }) })),
+      slots: data.map((s, k) => ({ ...s, k })).filter((s) => type === 'All' || s.type === type).map((s) => ({ ...s, open: !applied[s.k], done: !!applied[s.k], apply: () => this.setState({ applied: { ...applied, [s.k]: true } }) })),
+      invOpen: inv === 'open', invAccepted: inv === 'accepted', invDeclined: inv === 'declined',
+      acceptInv: () => this.setState({ inv: 'accepted' }), declineInv: () => this.setState({ inv: 'declined' })
+    };
+  }
+}
+</script>
+<template id="tpl-Topbar">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; padding: 18px 32px; background: #e9e7e2; box-shadow: inset 0 -1px 0 #dcdad4; font-family: 'Bricolage Grotesque', system-ui, sans-serif; color: #050316; width: 100%">
+  <a href="Main.html" aria-label="tezera home" style="display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: #050316; flex: 0 0 auto">
+    <span aria-hidden="true" style="position: relative; width: 32px; height: 20px; display: inline-block">
+      <span style="position: absolute; left: 12px; top: 0; width: 20px; height: 20px; border-radius: 50%; background: #b6c3a7"></span>
+      <span style="position: absolute; left: 0; top: 0; width: 20px; height: 20px; border-radius: 50%; background: #70a992"></span>
+    </span>
+    <span style="font-weight: 700; font-size: 24px; letter-spacing: -0.01em">tezera</span>
+  </a>
+  <label style="flex: 1 1 280px; max-width: 520px; margin: 0 auto; display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 16px; background: #b6c3a7; border-radius: 999px">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b4a2e" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="6"></circle><path d="M15 15l5 5"></path></svg>
+    <span class="sr">Search</span>
+    <input type="search" placeholder="Search events, organisers, job posts…" style="flex: 1; min-width: 0; border: 0; background: transparent; font: 400 14px 'Bricolage Grotesque', system-ui, sans-serif; color: #3b4a2e">
+  </label>
+  <div style="display: flex; align-items: center; gap: 12px; flex: 0 0 auto">
+    <a href="Messages.html" aria-label="Messages, 2 unread" style="width: 38px; height: 38px; border-radius: 50%; background: #b6c3a7; display: grid; place-items: center; position: relative">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b4a2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H10l-5 4v-4H4z"></path></svg>
+    </a>
+    <a href="Notifications.html" aria-label="Notifications, 3 new" style="width: 38px; height: 38px; border-radius: 50%; background: #b6c3a7; display: grid; place-items: center; position: relative">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b4a2e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"></path><path d="M10 21h4"></path></svg>
+      <span style="position: absolute; top: 0; right: 0; width: 10px; height: 10px; border-radius: 50%; background: #050316"></span>
+    </a>
+    <a href="Profile.html" style="min-height: 30px; padding: 0 18px; display: inline-flex; align-items: center; border-radius: 999px; background: #70a992; color: #050316; font-weight: 700; font-size: 13px; text-decoration: none">Vendor</a>
+    <a href="Profile.html" aria-label="My profile" class="av" style="width: 36px; height: 36px; margin-left: 8px"></a>
+  </div>
+</header>
+</template>
+<script type="text/x-dc" id="js-Topbar">
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+<template id="tpl-Sidebar">
+<nav aria-label="Vendor menu" style="background: #70a992; border-radius: 26px; padding: 30px 20px 40px; min-height: 880px; display: flex; flex-direction: column; gap: 28px; font-family: 'Bricolage Grotesque', system-ui, sans-serif">
+  <template data-sc-for list="{{groups}}" as="group" hint-placeholder-count="2">
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <h2 style="margin: 0 0 8px; text-align: center; font-weight: 700; font-size: 18px; color: #fff">{{group.title}}</h2>
+      <template data-sc-for list="{{group.items}}" as="item" hint-placeholder-count="7">
+        <a class="nv" href="{{item.href}}" aria-current="{{item.current}}">
+          <span style="flex: 1">{{item.label}}</span>
+          <template data-sc-if value="{{item.hasCount}}" hint-placeholder-val="{{false}}"><span style="min-width: 22px; height: 22px; padding: 0 7px; border-radius: 999px; background: #163829; color: #fff; font-size: 12px; font-weight: 700; display: inline-grid; place-items: center">{{item.count}}</span></template>
+        </a>
+      </template>
+    </div>
+  </template>
+</nav>
+</template>
+<script type="text/x-dc" id="js-Sidebar">
+class Component extends DCLogic {
+  renderVals() {
+    const active = this.props.active ?? 'dashboard';
+    const mk = (key, label, href, count) => ({
+      label, href, current: key === active ? 'page' : 'false', hasCount: !!count, count: count || ''
+    });
+    return {
+      groups: [
+        { title: 'General', items: [
+          mk('dashboard', 'Dashboard', 'Main.html'),
+          mk('feed', 'Feed and events', 'Feed.html'),
+          mk('messages', 'Messages', 'Messages.html', 2),
+          mk('community', 'Community', 'Community.html'),
+          mk('notifications', 'Notifications', 'Notifications.html', 3),
+          mk('reviews', 'Reviews and rank', 'Reviews.html'),
+          mk('profile', 'Profile', 'Profile.html'),
+          mk('settings', 'Settings', 'Settings.html')
+        ]},
+        { title: 'Vendor tools', items: [
+          mk('requests', 'Booking requests', 'Requests.html', 2),
+          mk('jobs', 'Job posts', 'Jobs.html'),
+          mk('stalls', 'Stalls', 'Stalls.html', 1),
+          mk('bookings', 'My bookings', 'Bookings.html'),
+          mk('mystall', 'My stall listing', 'MyStall.html'),
+          mk('payments', 'Payments', 'Payments.html'),
+          mk('verification', 'Verification', 'Verification.html')
+        ]}
+      ]
+    };
+  }
+}
+</script>
+<script>
+/* tezera wireframe runtime: renders the page templates in this file and wires up buttons. */
+(function () {
+  class DCLogic {
+    constructor(props) { this.props = props || {}; this.state = {}; }
+    setState(patch) {
+      const p = typeof patch === 'function' ? patch(this.state, this.props) : patch;
+      this.state = Object.assign({}, this.state, p);
+      if (this.__inst) this.__inst.update();
+    }
+    forceUpdate() { if (this.__inst) this.__inst.update(); }
+  }
+
+  const HOLE = /\{\{\s*([^}]+?)\s*\}\}/g;
+  const WHOLE = /^\s*\{\{\s*([^}]+?)\s*\}\}\s*$/;
+
+  function lookup(path, scope) {
+    if (path === 'true') return true;
+    if (path === 'false') return false;
+    if (path === 'null') return null;
+    if (/^-?\d+(\.\d+)?$/.test(path)) return Number(path);
+    const parts = path.split('.');
+    let v = scope[parts[0]];
+    for (let i = 1; i < parts.length && v != null; i++) v = v[parts[i]];
+    return v;
+  }
+  const interp = (s, scope) => s.replace(HOLE, (_, p) => { const v = lookup(p, scope); return v == null ? '' : String(v); });
+  const camel = (s) => s.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+
+  const defs = {};
+  function def(name) {
+    if (defs[name]) return defs[name];
+    const tpl = document.getElementById('tpl-' + name);
+    const js = document.getElementById('js-' + name);
+    const Cls = new Function('DCLogic', js.textContent + '\nreturn Component;')(DCLogic);
+    return (defs[name] = { tpl, Cls });
+  }
+
+  class Instance {
+    constructor(name, props) {
+      this.name = name;
+      const d = def(name);
+      this.tpl = d.tpl;
+      this.logic = new d.Cls(props || {});
+      this.logic.props = props || {};
+      this.logic.__inst = this;
+      this.children = {};
+      if (this.logic.componentDidMount) setTimeout(() => this.logic.componentDidMount(), 0);
+    }
+    mount(host) { this.host = host; this.update(); }
+    update() {
+      if (!this.host) return;
+      const scope = this.logic.renderVals ? (this.logic.renderVals() || {}) : {};
+      this.importCount = 0;
+      const frag = document.createDocumentFragment();
+      this.renderInto(frag, this.tpl.content, scope);
+      this.host.replaceChildren(frag);
+    }
+    renderInto(out, parent, scope) {
+      for (const node of Array.from(parent.childNodes)) {
+        if (node.nodeType === 3) {
+          out.appendChild(document.createTextNode(node.data.indexOf('{{') >= 0 ? interp(node.data, scope) : node.data));
+        } else if (node.nodeType === 1) {
+          this.renderEl(out, node, scope);
+        }
+      }
+    }
+    renderEl(out, node, scope) {
+      if (node.tagName === 'TEMPLATE') {
+        if (node.hasAttribute('data-sc-for')) {
+          const m = (node.getAttribute('list') || '').match(WHOLE);
+          const list = m ? lookup(m[1], scope) : [];
+          const as = node.getAttribute('as') || 'item';
+          (list || []).forEach((item, i) => {
+            const s = Object.create(scope); s[as] = item; s.$index = i;
+            this.renderInto(out, node.content, s);
+          });
+          return;
+        }
+        if (node.hasAttribute('data-sc-if')) {
+          const m = (node.getAttribute('value') || '').match(WHOLE);
+          if (m && lookup(m[1], scope)) this.renderInto(out, node.content, scope);
+          return;
+        }
+        if (node.hasAttribute('data-dc-import')) {
+          const name = node.getAttribute('name');
+          const props = {};
+          for (const a of Array.from(node.attributes)) {
+            if (a.name === 'name' || a.name === 'data-dc-import' || a.name.indexOf('hint-') === 0) continue;
+            const m = a.value.match(WHOLE);
+            props[camel(a.name)] = m ? lookup(m[1], scope) : interp(a.value, scope);
+          }
+          const key = (this.importCount++) + ':' + name;
+          let child = this.children[key];
+          if (!child) child = this.children[key] = new Instance(name, props);
+          child.logic.props = props;
+          const host = document.createElement('div');
+          host.style.display = 'contents';
+          out.appendChild(host);
+          child.mount(host);
+          return;
+        }
+      }
+      const el = document.importNode(node, false);
+      for (const a of Array.from(node.attributes)) {
+        if (a.value.indexOf('{{') < 0) continue;
+        const m = a.value.match(WHOLE);
+        if (m) {
+          const v = lookup(m[1], scope);
+          if (/^on/.test(a.name) && typeof v === 'function') {
+            el.removeAttribute(a.name);
+            el.addEventListener(a.name.slice(2).toLowerCase(), v);
+          } else if (v === false || v == null) {
+            el.removeAttribute(a.name);
+          } else {
+            el.setAttribute(a.name, v === true ? '' : String(v));
+          }
+        } else {
+          el.setAttribute(a.name, interp(a.value, scope));
+        }
+      }
+      this.renderInto(el, node.tagName === 'TEMPLATE' ? node.content : node, scope);
+      out.appendChild(el);
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const app = document.getElementById('app');
+    new Instance(app.getAttribute('data-page')).mount(app);
+  });
+})();
+
+</script>
+</body>
+</html>

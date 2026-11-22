@@ -1,0 +1,250 @@
+{
+  "v": 3,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-21T17:30:00Z"
+  },
+  "title": "Tezera vendor web portal",
+  "launch": {
+    "view": "canvas"
+  },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 1500,
+      "title": "Dashboard",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Auth.dc.html": {
+      "x": 1520,
+      "y": 0,
+      "w": 1440,
+      "h": 1024,
+      "title": "Log in, sign up, reset",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Settings.dc.html": {
+      "x": 3040,
+      "y": 0,
+      "w": 1440,
+      "h": 1500,
+      "title": "Settings",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Verification.dc.html": {
+      "x": 4560,
+      "y": 0,
+      "w": 1440,
+      "h": 1100,
+      "title": "Verification",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Requests.dc.html": {
+      "x": 0,
+      "y": 2000,
+      "w": 1440,
+      "h": 1500,
+      "title": "Booking requests",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Jobs.dc.html": {
+      "x": 1520,
+      "y": 2000,
+      "w": 1440,
+      "h": 1400,
+      "title": "Job posts",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Stalls.dc.html": {
+      "x": 3040,
+      "y": 2000,
+      "w": 1440,
+      "h": 1400,
+      "title": "Stalls",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Bookings.dc.html": {
+      "x": 4560,
+      "y": 2000,
+      "w": 1440,
+      "h": 1100,
+      "title": "My bookings",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Booking.dc.html": {
+      "x": 0,
+      "y": 4000,
+      "w": 1440,
+      "h": 1500,
+      "title": "Booking record",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "MyStall.dc.html": {
+      "x": 1520,
+      "y": 4000,
+      "w": 1440,
+      "h": 1400,
+      "title": "My stall",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Payments.dc.html": {
+      "x": 3040,
+      "y": 4000,
+      "w": 1440,
+      "h": 1200,
+      "title": "Payments",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Messages.dc.html": {
+      "x": 4560,
+      "y": 4000,
+      "w": 1440,
+      "h": 1000,
+      "title": "Messages",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Profile.dc.html": {
+      "x": 0,
+      "y": 6000,
+      "w": 1440,
+      "h": 1400,
+      "title": "Vendor profile",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Reviews.dc.html": {
+      "x": 1520,
+      "y": 6000,
+      "w": 1440,
+      "h": 1500,
+      "title": "Reviews and rank",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Feed.dc.html": {
+      "x": 3040,
+      "y": 6000,
+      "w": 1440,
+      "h": 1500,
+      "title": "Feed",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Event.dc.html": {
+      "x": 4560,
+      "y": 6000,
+      "w": 1440,
+      "h": 1300,
+      "title": "Event page",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Community.dc.html": {
+      "x": 0,
+      "y": 8000,
+      "w": 1440,
+      "h": 1300,
+      "title": "Community",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Notifications.dc.html": {
+      "x": 1520,
+      "y": 8000,
+      "w": 1440,
+      "h": 1100,
+      "title": "Notifications",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Topbar.dc.html": {
+      "x": 3040,
+      "y": 8000,
+      "w": 1440,
+      "h": 84,
+      "title": "Component: top bar"
+    },
+    "Sidebar.dc.html": {
+      "x": 3040,
+      "y": 8204,
+      "w": 224,
+      "h": 880,
+      "title": "Component: side menu"
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Auth.dc.html",
+    "Settings.dc.html",
+    "Verification.dc.html",
+    "Requests.dc.html",
+    "Jobs.dc.html",
+    "Stalls.dc.html",
+    "Bookings.dc.html",
+    "Booking.dc.html",
+    "MyStall.dc.html",
+    "Payments.dc.html",
+    "Messages.dc.html",
+    "Profile.dc.html",
+    "Reviews.dc.html",
+    "Feed.dc.html",
+    "Event.dc.html",
+    "Community.dc.html",
+    "Notifications.dc.html",
+    "Topbar.dc.html",
+    "Sidebar.dc.html"
+  ],
+  "notes": {
+    "row1": {
+      "x": 0,
+      "y": -300,
+      "text": "Account and home",
+      "kind": "title1",
+      "maxW": 5880
+    },
+    "row2": {
+      "x": 0,
+      "y": 1700,
+      "text": "Work: requests, jobs, stalls, bookings",
+      "kind": "title1",
+      "maxW": 5880
+    },
+    "row3": {
+      "x": 0,
+      "y": 3700,
+      "text": "Booking detail, my stall, payments, messages",
+      "kind": "title1",
+      "maxW": 5880
+    },
+    "row4": {
+      "x": 0,
+      "y": 5700,
+      "text": "Profile, reviews, feed, events",
+      "kind": "title1",
+      "maxW": 5880
+    },
+    "row5": {
+      "x": 0,
+      "y": 7700,
+      "text": "Community, notifications, shared parts",
+      "kind": "title1",
+      "maxW": 5880
+    }
+  },
+  "designSystems": []
+}

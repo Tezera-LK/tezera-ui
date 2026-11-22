@@ -1,0 +1,10 @@
+{
+  "name": "Tezera Freelancer importer · 18 Nov",
+  "id": "tezera-tezera-freelancer-18-nov",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": [
+    "figma"
+  ],
+  "documentAccess": "dynamic-page"
+}

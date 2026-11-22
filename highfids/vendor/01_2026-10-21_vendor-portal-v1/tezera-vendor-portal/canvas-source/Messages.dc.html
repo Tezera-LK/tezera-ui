@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Messages</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&amp;family=Instrument+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#050316}a:hover{color:#050316}
+.h{font-family:'Bricolage Grotesque',system-ui,sans-serif;letter-spacing:-.02em;margin:0;line-height:1.1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;box-sizing:border-box;border-radius:14px 14px 3px 14px;border:1.5px solid #70a992;background:#70a992;color:#050316;font:600 15px 'Instrument Sans',system-ui,sans-serif;text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn:hover{filter:brightness(.94)}
+.btn.o{background:transparent;border-color:#050316}
+.btn.k{background:#050316;border-color:#050316;color:#e9e7e2}
+.tag{display:inline-flex;align-items:center;min-height:24px;padding:0 10px;border-radius:999px;background:#b6c3a7;color:#050316;font:600 12px 'Instrument Sans',system-ui,sans-serif;white-space:nowrap}
+.muted{color:rgba(5,3,22,.72)}
+.chat{display:flex;gap:12px;align-items:center;text-align:left;width:100%;padding:12px;border-radius:16px 16px 4px 16px;border:0;cursor:pointer;font:400 15px 'Instrument Sans',system-ui,sans-serif;color:#050316}
+.them{align-self:flex-start;max-width:70%;background:#526c80;color:#fff;padding:12px 14px;border-radius:18px 18px 18px 4px}
+.me{align-self:flex-end;max-width:70%;background:#70a992;color:#050316;padding:12px 14px;border-radius:18px 18px 4px 18px}
+.file{display:flex;align-items:center;gap:10px;margin-top:8px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.9);color:#050316;font-size:14px;font-weight:600}
+.in{min-height:46px;border:1.5px solid #658095;border-radius:12px 12px 3px 12px;background:#fff;padding:0 14px;font:400 15px 'Instrument Sans',system-ui,sans-serif;color:#050316;box-sizing:border-box;width:100%}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #e9e7e2; font-family: 'Instrument Sans', system-ui, sans-serif; color: #050316; font-size: 15px; line-height: 1.5">
+  <dc-import name="Topbar" hint-size="100%,84px"></dc-import>
+  <div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 28px; padding: 24px 28px 56px; max-width: 1440px; margin: 0 auto; box-sizing: border-box">
+    <div style="flex: 0 1 250px; min-width: 220px">
+      <dc-import name="Sidebar" active="messages" hint-size="100%,960px"></dc-import>
+    </div>
+    <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 20px">
+      <h1 class="h" style="font-size: 40px; font-weight: 800">Messages</h1>
+      <div style="display: flex; flex-wrap: wrap; gap: 0; background: #658095; border-radius: 24px 24px 6px 24px; padding: 14px; gap: 14px; align-items: stretch">
+        <div role="list" aria-label="Chats" style="flex: 1 1 240px; max-width: 320px; display: flex; flex-direction: column; gap: 8px">
+          <sc-for list="{{chats}}" as="c" hint-placeholder-count="4">
+            <div role="listitem">
+              <button class="chat" onClick="{{c.pick}}" aria-pressed="{{c.sel}}" style="background: {{c.bg}}">
+                <span aria-hidden="true" style="width: 44px; height: 44px; border-radius: 13px 13px 3px 13px; background: #526c80; flex: 0 0 auto"></span>
+                <span style="flex: 1; min-width: 0"><strong style="display: block">{{c.name}}</strong><span style="font-size: 14px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{c.last}}</span></span>
+                <sc-if value="{{c.unread}}" hint-placeholder-val="{{false}}"><span style="width: 10px; height: 10px; border-radius: 50%; background: #050316"></span></sc-if>
+              </button>
+            </div>
+          </sc-for>
+        </div>
+
+        <section aria-labelledby="ch" style="flex: 999 1 420px; min-width: 0; background: #e9e7e2; border-radius: 18px 18px 4px 18px; display: flex; flex-direction: column; min-height: 640px">
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; padding: 16px 20px; border-bottom: 1.5px solid #b6c3a7">
+            <div><h2 id="ch" class="h" style="font-size: 22px; font-weight: 700">{{cur.name}}</h2><span class="muted" style="font-size: 14px">{{cur.about}}</span></div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap">
+              <a class="btn o" href="{{cur.link}}" style="min-height: 40px">{{cur.linkLabel}}</a>
+              <button class="btn o" onClick="{{askBlock}}" style="min-height: 40px">Block</button>
+              <button class="btn o" onClick="{{askReport}}" style="min-height: 40px">Report</button>
+            </div>
+          </div>
+          <sc-if value="{{confirming}}" hint-placeholder-val="{{false}}">
+            <div style="margin: 14px 20px 0; padding: 14px; border: 1.5px dashed #050316; border-radius: 14px 14px 3px 14px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center">
+              <span style="flex: 1 1 260px">{{confirmText}}</span>
+              <button class="btn k" onClick="{{confirm}}" style="min-height: 40px">{{confirmLabel}}</button>
+              <button class="btn o" onClick="{{cancel}}" style="min-height: 40px">Cancel</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{doneMsg}}" hint-placeholder-val="{{false}}">
+            <p style="margin: 14px 20px 0; font-weight: 700">{{doneText}}</p>
+          </sc-if>
+          <div style="flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+            <span class="muted" style="align-self: center; font-size: 13px">Today</span>
+            <sc-for list="{{cur.msgs}}" as="m" hint-placeholder-count="4">
+              <div style="{{m.style}}">
+                {{m.text}}
+                <sc-if value="{{m.hasFile}}" hint-placeholder-val="{{false}}">
+                  <span class="file"><span aria-hidden="true" style="width: 22px; height: 26px; border-radius: 5px 5px 1px 5px; background: #658095"></span>{{m.file}}</span>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display: flex; gap: 8px; padding: 14px; border-top: 1.5px solid #b6c3a7; align-items: center">
+            <button aria-label="Attach a photo or file" style="width: 46px; height: 46px; border-radius: 12px; border: 1.5px solid #050316; background: none; cursor: pointer; flex: 0 0 auto; display: grid; place-items: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#050316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+            <label style="flex: 1"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden">Message</span><input class="in" placeholder="Write a message"></label>
+            <button class="btn">Send</button>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { i: 0, ask: '', done: '' }; }
+  renderVals() {
+    const { i, ask, done } = this.state;
+    const them = 'align-self: flex-start; max-width: 70%; background: #526c80; color: #fff; padding: 12px 14px; border-radius: 18px 18px 18px 4px';
+    const me = 'align-self: flex-end; max-width: 70%; background: #70a992; color: #050316; padding: 12px 14px; border-radius: 18px 18px 4px 18px';
+    const data = [
+      { name: 'Harbour Lights Events', about: 'Organiser · Colombo Food Fair booking', link: 'Booking.dc.html', linkLabel: 'Open booking', last: 'Sharing the run-of-show now', unread: true,
+        msgs: [
+          { style: them, text: 'Hi! Here is the brief for the Kandy Lake Lights dinner.', hasFile: true, file: 'kandy-lake-brief.pdf' },
+          { style: me, text: 'Thanks. Is there water and power at the catering tent?', hasFile: false },
+          { style: them, text: 'Yes, both. Sharing the run-of-show now.', hasFile: true, file: 'run-of-show-v2.pdf' },
+          { style: me, text: 'Great, my quote is attached. Happy to talk through it.', hasFile: true, file: 'kottu-lab-quote.pdf' }
+        ] },
+      { name: 'Coastline Collective', about: 'Organiser · Booking request', link: 'Requests.dc.html', linkLabel: 'Open request', last: 'Can you do finger food only?', unread: true,
+        msgs: [{ style: them, text: 'Can you do finger food only, no plated meals?', hasFile: false }] },
+      { name: 'Kandy Fest Co.', about: 'Organiser · Stall application', link: 'Stalls.dc.html', linkLabel: 'Open stall', last: 'You: Sent the menu photos', unread: false,
+        msgs: [{ style: me, text: 'Sent the menu photos for the stall review.', hasFile: true, file: 'menu-photos.zip' }] },
+      { name: 'Lotus Weddings', about: 'Organiser · Job post', link: 'Jobs.dc.html', linkLabel: 'Open job post', last: 'Thanks for the quote', unread: false,
+        msgs: [{ style: them, text: 'Thanks for the quote, we decide by 2 Nov.', hasFile: false }] }
+    ];
+    const cur = data[i];
+    return {
+      chats: data.map((c, k) => ({ ...c, sel: String(k === i), bg: k === i ? '#70a992' : '#e9e7e2', pick: () => this.setState({ i: k, ask: '', done: '' }) })),
+      cur,
+      confirming: !!ask,
+      confirmText: ask === 'block' ? 'Block ' + cur.name + '? They can no longer message you or send you requests.' : 'Report ' + cur.name + ' to an admin? They see this chat when they review it.',
+      confirmLabel: ask === 'block' ? 'Block' : 'Send report',
+      doneMsg: !!done, doneText: done === 'block' ? 'Blocked. Undo it in Settings, Blocked users.' : 'Report sent to an admin.',
+      askBlock: () => this.setState({ ask: 'block', done: '' }),
+      askReport: () => this.setState({ ask: 'report', done: '' }),
+      confirm: () => this.setState({ done: ask, ask: '' }),
+      cancel: () => this.setState({ ask: '' })
+    };
+  }
+}
+</script>
+</body>
+</html>

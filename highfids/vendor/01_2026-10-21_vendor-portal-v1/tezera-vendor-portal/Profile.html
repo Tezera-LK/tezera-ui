@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vendor profile · tezera vendor portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&amp;family=Instrument+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#050316}a:hover{color:#050316}
+.h{font-family:'Bricolage Grotesque',system-ui,sans-serif;letter-spacing:-.02em;margin:0;line-height:1.1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;box-sizing:border-box;border-radius:14px 14px 3px 14px;border:1.5px solid #70a992;background:#70a992;color:#050316;font:600 15px 'Instrument Sans',system-ui,sans-serif;text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn:hover{filter:brightness(.94)}
+.btn.o{background:transparent;border-color:#050316}
+.pnl{background:#658095;border-radius:22px 22px 5px 22px;padding:18px;box-sizing:border-box;display:flex;flex-direction:column;gap:10px;color:#050316}
+.inner{background:#e9e7e2;border-radius:16px 16px 4px 16px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.tag{display:inline-flex;align-items:center;min-height:24px;padding:0 10px;border-radius:999px;background:#b6c3a7;color:#050316;font:600 12px 'Instrument Sans',system-ui,sans-serif;white-space:nowrap}
+.pri{background:transparent;border:1px dashed #050316;font-weight:500}
+.muted{color:rgba(5,3,22,.72)}
+.badge{display:flex;flex-direction:column;align-items:center;gap:6px;width:96px;text-align:center;font-size:13px;font-weight:600}
+.badge b{width:76px;height:76px;border-radius:50%;background:#70a992;display:grid;place-items:center;font-family:'Bricolage Grotesque',system-ui,sans-serif;font-weight:800;font-size:20px;letter-spacing:-.02em}
+.in{min-height:42px;border:1.5px solid #658095;border-radius:12px 12px 3px 12px;background:#fff;padding:0 12px;font:400 15px 'Instrument Sans',system-ui,sans-serif;color:#050316;box-sizing:border-box;width:100%}
+.day{aspect-ratio:1;border:0;border-radius:10px 10px 3px 10px;font:600 13px 'Instrument Sans',system-ui,sans-serif;color:#050316;cursor:pointer;min-height:36px}
+</style>
+</head>
+<body>
+<div id="app" data-page="Profile"></div>
+<template id="tpl-Profile">
+<div style="min-height: 100vh; background: #e9e7e2; font-family: 'Instrument Sans', system-ui, sans-serif; color: #050316; font-size: 15px; line-height: 1.5">
+  <template data-dc-import name="Topbar" hint-size="100%,84px"></template>
+  <div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 28px; padding: 24px 28px 56px; max-width: 1440px; margin: 0 auto; box-sizing: border-box">
+    <div style="flex: 0 1 250px; min-width: 220px">
+      <template data-dc-import name="Sidebar" active="profile" hint-size="100%,960px"></template>
+    </div>
+    <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 24px">
+
+      <div style="display: flex; flex-wrap: wrap; gap: 32px; align-items: center">
+        <div aria-label="Profile photo" role="img" style="width: 160px; height: 160px; border-radius: 50%; background: #d6d6d7; display: grid; place-items: end center; overflow: hidden; flex: 0 0 auto">
+          <span aria-hidden="true" style="width: 54px; height: 52px; border-radius: 16px; background: #b4b4b4; margin-bottom: 8px"></span>
+          <span aria-hidden="true" style="width: 96px; height: 56px; border-radius: 16px 16px 0 0; background: #b4b4b4"></span>
+        </div>
+        <div style="flex: 1 1 280px; display: flex; flex-direction: column; gap: 8px">
+          <h1 class="h" style="font-size: 40px; font-weight: 800">Kottu Lab</h1>
+          <p style="margin: 0">F&amp;B stall and catering · Made-to-order kottu, rice and curry, fresh juice</p>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap">
+            <button class="btn" onClick="{{toggleEdit}}">{{editLabel}}</button>
+            <a class="btn o" href="Reviews.html">Reviews</a>
+          </div>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 14px; flex: 1 1 380px">
+          <div class="badge"><b>4.6</b>Rating</div>
+          <div class="badge"><b style="font-size: 16px">Rising</b>Tier</div>
+          <div class="badge"><b>#7</b>Colombo F&amp;B</div>
+          <div class="badge"><b>18</b>Reviews</div>
+          <div class="badge"><b style="background: #b6c3a7; font-size: 14px">Pending</b>Verified</div>
+          <div class="badge"><b>3</b>Districts</div>
+          <div class="badge"><b>0</b>Late cancels <span class="tag pri">Should</span></div>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+        <div style="flex: 1 1 320px; display: flex; flex-direction: column; gap: 16px; min-width: 0">
+          <section class="pnl" aria-labelledby="sv">
+            <h2 id="sv" class="h" style="font-size: 20px; font-weight: 700">Services and prices</h2>
+            <div class="inner">
+              <template data-sc-if value="{{viewing}}" hint-placeholder-val="{{true}}">
+                <div style="display: grid; grid-template-columns: 1fr auto; gap: 6px 12px">
+                  <span>Event catering, per head</span><strong>from LKR 650</strong>
+                  <span>Food stall at your event</span><strong>from LKR 40,000</strong>
+                  <span>Live kottu station</span><strong>from LKR 25,000</strong>
+                </div>
+              </template>
+              <template data-sc-if value="{{editing}}" hint-placeholder-val="{{false}}">
+                <div style="display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 8px">
+                  <input class="in" aria-label="Service" value="Event catering, per head"><input class="in" aria-label="Price LKR" value="650">
+                  <input class="in" aria-label="Service" value="Food stall at your event"><input class="in" aria-label="Price LKR" value="40,000">
+                  <input class="in" aria-label="Service" value="Live kottu station"><input class="in" aria-label="Price LKR" value="25,000">
+                </div>
+                <button class="btn o" style="align-self: flex-start; min-height: 40px">Add service</button>
+              </template>
+            </div>
+          </section>
+          <section class="pnl" aria-labelledby="cat">
+            <h2 id="cat" class="h" style="font-size: 20px; font-weight: 700">Category and districts</h2>
+            <div class="inner" style="flex-direction: row; flex-wrap: wrap; gap: 8px">
+              <span class="tag" style="background: #70a992">F&amp;B stall</span><span class="tag">Colombo</span><span class="tag">Gampaha</span><span class="tag">Kalutara</span>
+              <template data-sc-if value="{{editing}}" hint-placeholder-val="{{false}}"><button class="btn o" style="min-height: 32px; padding: 0 12px; font-size: 13px">Edit</button></template>
+            </div>
+          </section>
+          <section class="pnl" aria-labelledby="cal">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap"><h2 id="cal" class="h" style="font-size: 20px; font-weight: 700">Availability, November</h2><span class="tag pri">Should</span></div>
+            <div class="inner">
+              <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; font-size: 12px; font-weight: 700; text-align: center"><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span></div>
+              <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px">
+                <span></span><span></span><span></span><span></span><span></span><span></span>
+                <template data-sc-for list="{{days}}" as="d" hint-placeholder-count="30">
+                  <button class="day" onClick="{{d.toggle}}" aria-label="{{d.label}}" style="background: {{d.bg}}; color: {{d.fg}}">{{d.n}}</button>
+                </template>
+              </div>
+              <div style="display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; font-weight: 600">
+                <span style="display: flex; gap: 6px; align-items: center"><i style="width: 12px; height: 12px; border-radius: 3px; background: #050316"></i>Booked</span>
+                <span style="display: flex; gap: 6px; align-items: center"><i style="width: 12px; height: 12px; border-radius: 3px; background: #b6c3a7"></i>Unavailable</span>
+                <span style="display: flex; gap: 6px; align-items: center"><i style="width: 12px; height: 12px; border-radius: 3px; background: #fff; border: 1px solid #658095"></i>Free</span>
+              </div>
+              <p class="muted" style="margin: 0; font-size: 13px">Tap a free day to mark it unavailable. Confirmed bookings are added for you. Organisers can filter by free date.</p>
+            </div>
+          </section>
+        </div>
+
+        <section class="pnl" aria-labelledby="pf" style="flex: 1.4 1 380px; min-width: 0; align-self: stretch">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap">
+            <h2 id="pf" class="h" style="font-size: 20px; font-weight: 700">Portfolio</h2>
+            <button class="btn" style="min-height: 40px; background: #e9e7e2; border-color: #e9e7e2">Add photos or videos</button>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px">
+            <template data-sc-for list="{{portfolio}}" as="p" hint-placeholder-count="8">
+              <div style="aspect-ratio: {{p.ratio}}; background: #e9e7e2; border-radius: 14px 14px 3px 14px; display: flex; flex-direction: column; justify-content: flex-end; padding: 10px; box-sizing: border-box; grid-row: span {{p.span}}">
+                <span class="tag" style="align-self: flex-start">{{p.kind}}</span>
+                <span style="font-size: 13px; font-weight: 600; margin-top: 6px">{{p.label}}</span>
+              </div>
+            </template>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+</template>
+<script type="text/x-dc" id="js-Profile">
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { edit: false, off: { 3: true, 4: true } }; }
+  renderVals() {
+    const { edit, off } = this.state;
+    const booked = [8, 14, 29];
+    const days = [];
+    for (let n = 1; n <= 30; n++) {
+      const b = booked.indexOf(n) >= 0, u = !!off[n];
+      days.push({ n, label: n + ' November, ' + (b ? 'booked' : u ? 'unavailable' : 'free'),
+        bg: b ? '#050316' : u ? '#b6c3a7' : '#fff', fg: b ? '#e9e7e2' : '#050316',
+        toggle: () => { if (!b) this.setState({ off: { ...off, [n]: !u } }); } });
+    }
+    return {
+      editing: edit, viewing: !edit, editLabel: edit ? 'Save profile' : 'Edit profile',
+      toggleEdit: () => this.setState({ edit: !edit }),
+      days,
+      portfolio: [
+        { kind: 'Video', label: 'Kottu station at Colombo Food Fair', ratio: '1 / 1.3', span: 2 },
+        { kind: 'Photo', label: 'Stall menu board', ratio: '1', span: 1 },
+        { kind: 'Photo', label: 'Wedding buffet, Negombo', ratio: '1', span: 1 },
+        { kind: 'Photo', label: 'Team at a night market', ratio: '1', span: 1 },
+        { kind: 'Photo', label: 'Dessert table', ratio: '1', span: 1 },
+        { kind: 'Video', label: 'Setup time-lapse', ratio: '1 / 1.3', span: 2 },
+        { kind: 'Photo', label: 'Juice bar', ratio: '1', span: 1 }
+      ]
+    };
+  }
+}
+</script>
+<template id="tpl-Topbar">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px 24px; padding: 16px 28px; background: #e9e7e2; border-bottom: 1.5px solid #b6c3a7; font-family: 'Instrument Sans', system-ui, sans-serif; color: #050316; box-sizing: border-box; width: 100%">
+  <a href="Main.html" style="font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 800; font-size: 28px; letter-spacing: -0.02em; text-decoration: none; color: #050316; flex: 0 0 auto; padding: 4px 0">tezera</a>
+  <label style="flex: 1 1 280px; max-width: 540px; margin: 0 auto; display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 16px; background: rgba(255,255,255,0.75); border-radius: 999px; box-sizing: border-box">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#050316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="6"></circle><path d="M15 15l5 5"></path></svg>
+    <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search</span>
+    <input type="search" placeholder="Search events, organisers, job posts" style="flex: 1; min-width: 0; border: 0; background: transparent; font: 400 15px 'Instrument Sans', system-ui, sans-serif; color: #050316; outline-offset: 4px">
+  </label>
+  <div style="display: flex; align-items: center; gap: 10px; flex: 0 0 auto">
+    <a href="Messages.html" aria-label="Messages, 2 unread" style="width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.75); display: grid; place-items: center; position: relative">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#050316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H10l-5 4v-4H4z"></path></svg>
+      <span style="position: absolute; top: 6px; right: 6px; width: 10px; height: 10px; border-radius: 50%; background: #050316; border: 2px solid #e9e7e2"></span>
+    </a>
+    <a href="Notifications.html" aria-label="Notifications, 3 new" style="width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.75); display: grid; place-items: center; position: relative">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#050316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"></path><path d="M10 21h4"></path></svg>
+      <span style="position: absolute; top: 6px; right: 6px; width: 10px; height: 10px; border-radius: 50%; background: #050316; border: 2px solid #e9e7e2"></span>
+    </a>
+    <a href="Profile.html" style="min-height: 36px; padding: 0 18px; display: inline-flex; align-items: center; border-radius: 999px; background: #70a992; color: #050316; font-weight: 600; font-size: 14px; text-decoration: none">Vendor</a>
+  </div>
+</header>
+</template>
+<script type="text/x-dc" id="js-Topbar">
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+<template id="tpl-Sidebar">
+<nav aria-label="Vendor menu" style="width: 100%; box-sizing: border-box; background: #70a992; border-radius: 28px 28px 6px 28px; padding: 26px 16px 20px; display: flex; flex-direction: column; gap: 20px; font-family: 'Instrument Sans', system-ui, sans-serif; color: #050316">
+  <template data-sc-for list="{{groups}}" as="group" hint-placeholder-count="3">
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <h2 style="margin: 0 0 4px; text-align: center; font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.01em">{{group.title}}</h2>
+      <template data-sc-for list="{{group.items}}" as="item" hint-placeholder-count="5">
+        <a href="{{item.href}}" aria-current="{{item.current}}" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 12px 12px 3px 12px; text-decoration: none; color: #050316; font-size: 15px; background: {{item.bg}}; font-weight: {{item.weight}}">
+          <span aria-hidden="true" style="width: 12px; height: 11px; border-radius: 4px 4px 1px 4px; flex: 0 0 auto; background: {{item.tile}}"></span>
+          <span style="flex: 1">{{item.label}}</span>
+          <template data-sc-if value="{{item.hasCount}}" hint-placeholder-val="{{false}}">
+            <span style="min-width: 22px; height: 22px; padding: 0 6px; box-sizing: border-box; border-radius: 999px; background: #050316; color: #e9e7e2; font-size: 12px; font-weight: 700; display: grid; place-items: center">{{item.count}}</span>
+          </template>
+        </a>
+      </template>
+    </div>
+  </template>
+  <a href="Verification.html" style="display: block; margin-top: 4px; padding: 14px; border-radius: 16px 16px 4px 16px; background: #e9e7e2; color: #050316; text-decoration: none; font-size: 13px; line-height: 1.4">
+    <span style="display: block; font-weight: 700; font-size: 14px">Verification pending</span>
+    You need the Verified badge to accept bookings. Check status
+  </a>
+</nav>
+</template>
+<script type="text/x-dc" id="js-Sidebar">
+class Component extends DCLogic {
+  renderVals() {
+    const active = this.props.active ?? 'dashboard';
+    const mk = (key, label, href, count) => {
+      const on = key === active;
+      return {
+        key, label, href,
+        current: on ? 'page' : 'false',
+        bg: on ? '#e9e7e2' : '#b6c3a7',
+        weight: on ? '700' : '500',
+        tile: on ? '#050316' : '#658095',
+        hasCount: !!count, count: count || ''
+      };
+    };
+    return {
+      groups: [
+        { title: 'General', items: [
+          mk('dashboard', 'Dashboard', 'Main.html'),
+          mk('feed', 'Feed and events', 'Feed.html'),
+          mk('community', 'Community', 'Community.html'),
+          mk('messages', 'Messages', 'Messages.html', 2),
+          mk('notifications', 'Notifications', 'Notifications.html', 3)
+        ]},
+        { title: 'Vendor tools', items: [
+          mk('requests', 'Booking requests', 'Requests.html', 2),
+          mk('jobs', 'Job posts', 'Jobs.html'),
+          mk('stalls', 'Stalls', 'Stalls.html', 1),
+          mk('bookings', 'My bookings', 'Bookings.html'),
+          mk('mystall', 'My stall listing', 'MyStall.html'),
+          mk('payments', 'Payments', 'Payments.html')
+        ]},
+        { title: 'Account', items: [
+          mk('profile', 'My profile', 'Profile.html'),
+          mk('reviews', 'Reviews and rank', 'Reviews.html'),
+          mk('verification', 'Verification', 'Verification.html'),
+          mk('settings', 'Settings', 'Settings.html')
+        ]}
+      ]
+    };
+  }
+}
+</script>
+<script>
+/* tezera wireframe runtime: renders the page templates in this file and wires up buttons. */
+(function () {
+  class DCLogic {
+    constructor(props) { this.props = props || {}; this.state = {}; }
+    setState(patch) {
+      const p = typeof patch === 'function' ? patch(this.state, this.props) : patch;
+      this.state = Object.assign({}, this.state, p);
+      if (this.__inst) this.__inst.update();
+    }
+    forceUpdate() { if (this.__inst) this.__inst.update(); }
+  }
+
+  const HOLE = /\{\{\s*([^}]+?)\s*\}\}/g;
+  const WHOLE = /^\s*\{\{\s*([^}]+?)\s*\}\}\s*$/;
+
+  function lookup(path, scope) {
+    if (path === 'true') return true;
+    if (path === 'false') return false;
+    if (path === 'null') return null;
+    if (/^-?\d+(\.\d+)?$/.test(path)) return Number(path);
+    const parts = path.split('.');
+    let v = scope[parts[0]];
+    for (let i = 1; i < parts.length && v != null; i++) v = v[parts[i]];
+    return v;
+  }
+  const interp = (s, scope) => s.replace(HOLE, (_, p) => { const v = lookup(p, scope); return v == null ? '' : String(v); });
+  const camel = (s) => s.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+
+  const defs = {};
+  function def(name) {
+    if (defs[name]) return defs[name];
+    const tpl = document.getElementById('tpl-' + name);
+    const js = document.getElementById('js-' + name);
+    const Cls = new Function('DCLogic', js.textContent + '\nreturn Component;')(DCLogic);
+    return (defs[name] = { tpl, Cls });
+  }
+
+  class Instance {
+    constructor(name, props) {
+      this.name = name;
+      const d = def(name);
+      this.tpl = d.tpl;
+      this.logic = new d.Cls(props || {});
+      this.logic.props = props || {};
+      this.logic.__inst = this;
+      this.children = {};
+      if (this.logic.componentDidMount) setTimeout(() => this.logic.componentDidMount(), 0);
+    }
+    mount(host) { this.host = host; this.update(); }
+    update() {
+      if (!this.host) return;
+      const scope = this.logic.renderVals ? (this.logic.renderVals() || {}) : {};
+      this.importCount = 0;
+      const frag = document.createDocumentFragment();
+      this.renderInto(frag, this.tpl.content, scope);
+      this.host.replaceChildren(frag);
+    }
+    renderInto(out, parent, scope) {
+      for (const node of Array.from(parent.childNodes)) {
+        if (node.nodeType === 3) {
+          out.appendChild(document.createTextNode(node.data.indexOf('{{') >= 0 ? interp(node.data, scope) : node.data));
+        } else if (node.nodeType === 1) {
+          this.renderEl(out, node, scope);
+        }
+      }
+    }
+    renderEl(out, node, scope) {
+      if (node.tagName === 'TEMPLATE') {
+        if (node.hasAttribute('data-sc-for')) {
+          const m = (node.getAttribute('list') || '').match(WHOLE);
+          const list = m ? lookup(m[1], scope) : [];
+          const as = node.getAttribute('as') || 'item';
+          (list || []).forEach((item, i) => {
+            const s = Object.create(scope); s[as] = item; s.$index = i;
+            this.renderInto(out, node.content, s);
+          });
+          return;
+        }
+        if (node.hasAttribute('data-sc-if')) {
+          const m = (node.getAttribute('value') || '').match(WHOLE);
+          if (m && lookup(m[1], scope)) this.renderInto(out, node.content, scope);
+          return;
+        }
+        if (node.hasAttribute('data-dc-import')) {
+          const name = node.getAttribute('name');
+          const props = {};
+          for (const a of Array.from(node.attributes)) {
+            if (a.name === 'name' || a.name === 'data-dc-import' || a.name.indexOf('hint-') === 0) continue;
+            const m = a.value.match(WHOLE);
+            props[camel(a.name)] = m ? lookup(m[1], scope) : interp(a.value, scope);
+          }
+          const key = (this.importCount++) + ':' + name;
+          let child = this.children[key];
+          if (!child) child = this.children[key] = new Instance(name, props);
+          child.logic.props = props;
+          const host = document.createElement('div');
+          host.style.display = 'contents';
+          out.appendChild(host);
+          child.mount(host);
+          return;
+        }
+      }
+      const el = document.importNode(node, false);
+      for (const a of Array.from(node.attributes)) {
+        if (a.value.indexOf('{{') < 0) continue;
+        const m = a.value.match(WHOLE);
+        if (m) {
+          const v = lookup(m[1], scope);
+          if (/^on/.test(a.name) && typeof v === 'function') {
+            el.removeAttribute(a.name);
+            el.addEventListener(a.name.slice(2).toLowerCase(), v);
+          } else if (v === false || v == null) {
+            el.removeAttribute(a.name);
+          } else {
+            el.setAttribute(a.name, v === true ? '' : String(v));
+          }
+        } else {
+          el.setAttribute(a.name, interp(a.value, scope));
+        }
+      }
+      this.renderInto(el, node.tagName === 'TEMPLATE' ? node.content : node, scope);
+      out.appendChild(el);
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const app = document.getElementById('app');
+    new Instance(app.getAttribute('data-page')).mount(app);
+  });
+})();
+
+</script>
+</body>
+</html>

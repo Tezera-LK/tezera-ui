@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Vendor dashboard</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&amp;family=Instrument+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#050316}a:hover{color:#050316}
+.h{font-family:'Bricolage Grotesque',system-ui,sans-serif;letter-spacing:-.02em;margin:0;line-height:1.1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;box-sizing:border-box;border-radius:14px 14px 3px 14px;border:1.5px solid #70a992;background:#70a992;color:#050316;font:600 15px 'Instrument Sans',system-ui,sans-serif;text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn:hover{filter:brightness(.94)}
+.btn.o{background:transparent;border-color:#050316}
+.btn.k{background:#050316;border-color:#050316;color:#e9e7e2}
+.card{background:rgba(255,255,255,.6);border:1.5px solid #b6c3a7;border-radius:20px 20px 4px 20px;padding:20px;box-sizing:border-box}
+.panel{background:#658095;border-radius:24px 24px 6px 24px;padding:24px;box-sizing:border-box;color:#050316}
+.tag{display:inline-flex;align-items:center;min-height:24px;padding:0 10px;border-radius:999px;background:#b6c3a7;color:#050316;font:600 12px 'Instrument Sans',system-ui,sans-serif;white-space:nowrap}
+.org{background:#526c80;color:#fff}
+.pri{background:transparent;border:1px dashed #050316;font-weight:500}
+.muted{color:rgba(5,3,22,.72)}
+.tile{display:flex;flex-direction:column;gap:6px;background:#e9e7e2;border-radius:18px 18px 4px 18px;padding:18px;text-decoration:none;color:#050316;min-height:132px;box-sizing:border-box}
+.tile:hover{outline:2px solid #050316;outline-offset:-2px}
+.num{font-family:'Bricolage Grotesque',system-ui,sans-serif;font-weight:800;font-size:40px;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #e9e7e2; font-family: 'Instrument Sans', system-ui, sans-serif; color: #050316; font-size: 15px; line-height: 1.5">
+  <dc-import name="Topbar" hint-size="100%,84px"></dc-import>
+  <div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 28px; padding: 24px 28px 56px; max-width: 1440px; margin: 0 auto; box-sizing: border-box">
+    <div style="flex: 0 1 250px; min-width: 220px">
+      <dc-import name="Sidebar" active="dashboard" hint-size="100%,960px"></dc-import>
+    </div>
+    <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 24px">
+
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px">
+        <div>
+          <h1 class="h" style="font-size: 40px; font-weight: 800">Good evening, Kottu Lab</h1>
+          <p style="margin: 6px 0 0" class="muted">Four things need you this week.</p>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap">
+          <span class="tag">F&amp;B stall and catering</span>
+          <span class="tag">Rising</span>
+          <span class="tag pri">Not verified yet</span>
+        </div>
+      </div>
+
+      <div class="card" style="border-style: dashed; border-color: #050316; display: flex; flex-wrap: wrap; align-items: center; gap: 16px; justify-content: space-between">
+        <div style="flex: 1 1 320px">
+          <strong>Verification pending.</strong> You can reply to requests and send quotes, but you need the Verified badge before you can accept a booking.
+        </div>
+        <a class="btn o" href="Verification.dc.html">Check status</a>
+      </div>
+
+      <section class="panel" aria-labelledby="todo">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 16px">
+          <h2 id="todo" class="h" style="font-size: 26px; font-weight: 800">This week</h2>
+          <span style="font-weight: 600">Wed 21 Oct to Tue 27 Oct</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px">
+          <a class="tile" href="Requests.dc.html"><span class="num">2</span><strong>New booking requests</strong><span class="muted">Reply before the organiser's deadline</span></a>
+          <a class="tile" href="Stalls.dc.html"><span class="num">1</span><strong>Stall invitation</strong><span class="muted">Galle Face Night Market</span></a>
+          <a class="tile" href="Booking.dc.html"><span class="num">LKR 25,000</span><strong>Instalment due 2 Nov</strong><span class="muted">Colombo Food Fair catering</span></a>
+          <a class="tile" href="Jobs.dc.html"><span class="num">3</span><strong>Job posts match you</strong><span class="muted">Catering, Colombo and Gampaha</span></a>
+        </div>
+      </section>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; align-items: start">
+        <section class="card" aria-labelledby="req" style="display: flex; flex-direction: column; gap: 14px">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px">
+            <h2 id="req" class="h" style="font-size: 22px; font-weight: 700">Booking requests</h2>
+            <a href="Requests.dc.html" style="font-weight: 600">See all</a>
+          </div>
+          <a href="Requests.dc.html" style="display: flex; gap: 14px; align-items: center; padding: 14px; border-radius: 16px 16px 4px 16px; background: #e9e7e2; text-decoration: none">
+            <span aria-hidden="true" style="width: 48px; height: 48px; border-radius: 14px 14px 3px 14px; background: #526c80; flex: 0 0 auto"></span>
+            <span style="flex: 1; min-width: 0">
+              <span class="tag org">Harbour Lights Events</span>
+              <span style="display: block; font-weight: 700; margin-top: 4px">Catering for 300, Kandy Lake Lights</span>
+              <span class="muted">Sun 29 Nov · Budget LKR 180,000 to 220,000</span>
+            </span>
+            <span class="tag">New</span>
+          </a>
+          <a href="Requests.dc.html" style="display: flex; gap: 14px; align-items: center; padding: 14px; border-radius: 16px 16px 4px 16px; background: #e9e7e2; text-decoration: none">
+            <span aria-hidden="true" style="width: 48px; height: 48px; border-radius: 14px 14px 3px 14px; background: #526c80; flex: 0 0 auto"></span>
+            <span style="flex: 1; min-width: 0">
+              <span class="tag org">Coastline Collective</span>
+              <span style="display: block; font-weight: 700; margin-top: 4px">Snack stall for a product launch</span>
+              <span class="muted">Sat 14 Nov · Budget LKR 60,000</span>
+            </span>
+            <span class="tag">New</span>
+          </a>
+        </section>
+
+        <section class="card" aria-labelledby="up" style="display: flex; flex-direction: column; gap: 14px">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px">
+            <h2 id="up" class="h" style="font-size: 22px; font-weight: 700">Coming up</h2>
+            <a href="Bookings.dc.html" style="font-weight: 600">My bookings</a>
+          </div>
+          <a href="Booking.dc.html" style="display: grid; grid-template-columns: 64px 1fr; gap: 14px; align-items: center; padding: 14px; border-radius: 16px 16px 4px 16px; background: #e9e7e2; text-decoration: none">
+            <span style="text-align: center; background: #70a992; border-radius: 14px 14px 3px 14px; padding: 8px 0"><span class="h" style="display: block; font-size: 24px; font-weight: 800">8</span><span style="font-size: 12px; font-weight: 600">NOV</span></span>
+            <span><strong style="display: block">Colombo Food Fair</strong><span class="muted">Catering booking · Stall B-12 · Deposit received</span></span>
+          </a>
+          <a href="MyStall.dc.html" style="display: grid; grid-template-columns: 64px 1fr; gap: 14px; align-items: center; padding: 14px; border-radius: 16px 16px 4px 16px; background: #e9e7e2; text-decoration: none">
+            <span style="text-align: center; background: #b6c3a7; border-radius: 14px 14px 3px 14px; padding: 8px 0"><span class="h" style="display: block; font-size: 24px; font-weight: 800">15</span><span style="font-size: 12px; font-weight: 600">NOV</span></span>
+            <span><strong style="display: block">Galle Face Night Market</strong><span class="muted">Stall invitation · Fee LKR 12,000 unpaid</span></span>
+          </a>
+          <a class="btn o" href="Profile.dc.html" style="align-self: flex-start">Update my availability</a>
+        </section>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px">
+        <a class="card" href="Feed.dc.html" style="text-decoration: none; display: flex; gap: 16px; align-items: center">
+          <span aria-hidden="true" style="width: 96px; height: 96px; border-radius: 18px 18px 4px 18px; background: #b6c3a7; flex: 0 0 auto"></span>
+          <span><span class="tag org">Harbour Lights Events</span><strong style="display: block; margin-top: 6px">Posted a reel from Colombo Food Fair setup</strong><span class="muted">From organisers you follow · 2 h ago</span></span>
+        </a>
+        <a class="card" href="Reviews.dc.html" style="text-decoration: none; display: flex; flex-direction: column; gap: 6px">
+          <span style="display: flex; gap: 10px; align-items: center"><span class="num" style="font-size: 32px">4.6</span><span class="muted">average from 18 reviews</span></span>
+          <strong>Latest: "Fast service even at the evening rush."</strong>
+          <span class="muted">Organiser review · Rank 7 in Colombo, F&amp;B</span>
+        </a>
+      </div>
+
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

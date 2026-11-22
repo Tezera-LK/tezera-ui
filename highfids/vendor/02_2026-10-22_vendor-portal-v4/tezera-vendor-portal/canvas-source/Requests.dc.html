@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Booking requests</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#050316}
+.pg{min-height:100vh;background:#e9e7e2;color:#050316;font:400 14px/1.55 'Bricolage Grotesque',system-ui,sans-serif}
+.shell{display:flex;flex-wrap:wrap;align-items:flex-start;gap:32px;padding:28px 32px 72px;max-width:1440px;margin:0 auto}
+.side{flex:0 0 224px;max-width:100%}
+.body{flex:999 1 600px;min-width:0;display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.main{flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:20px}
+.rail{flex:1 1 300px;max-width:360px;min-width:0;display:flex;flex-direction:column;gap:18px}
+.full{flex:1 1 100%;min-width:0;display:flex;flex-direction:column;gap:20px}
+.nv{display:flex;align-items:center;gap:10px;min-height:38px;padding:0 14px;border-radius:10px;text-decoration:none;color:#163829;font:600 14px 'Bricolage Grotesque',system-ui,sans-serif;transition:background-color .15s ease}
+.nv:not([aria-current="page"]):hover{background:#c5dccf}
+.nv[aria-current="page"]{background:#fff;color:#245a43;font-weight:700}
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px}
+.t{font:700 28px/1.15 'Bricolage Grotesque',system-ui,sans-serif;letter-spacing:-.01em;margin:0}
+.sub{margin:4px 0 0;color:#545b5e;font-size:15px}
+.sec{font:700 16px/1.3 'Bricolage Grotesque',system-ui,sans-serif;margin:6px 0 -6px}
+.panel{background:#c8d3db;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.panel>.hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;padding:2px 2px 0}
+.ph2{font:700 17px/1.3 'Bricolage Grotesque',system-ui,sans-serif;margin:0}
+.card{background:#fff;border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:#050316}
+.row{background:#fff;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:14px;text-decoration:none;color:#050316}
+a.row:hover,a.card:hover{background:#f6f7f5}
+.list{background:#fff;border-radius:16px;padding:4px 16px}
+.li{display:flex;align-items:center;gap:14px;min-height:56px;padding:10px 0}
+.li+.li{box-shadow:0 -1px 0 #e9e7e2}
+.b{font-weight:700}
+.m{color:#545b5e;font-size:13px}
+.s{font-size:13px}
+.lk{color:#3f566a;font-weight:700;font-size:13px;text-decoration:none}
+.lk:hover{text-decoration:underline}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:0 20px;border-radius:999px;border:0;background:#70a992;color:#050316;font:600 14px 'Bricolage Grotesque',system-ui,sans-serif;text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn:hover{filter:brightness(.95)}
+.btn.w{background:#fff}
+.btn.sm{min-height:34px;padding:0 14px;font-size:13px}
+.btn.wide{width:100%}
+.chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{display:inline-flex;align-items:center;min-height:30px;padding:0 14px;border-radius:999px;border:0;background:#fff;color:#050316;font:600 13px 'Bricolage Grotesque',system-ui,sans-serif;cursor:pointer;white-space:nowrap;text-decoration:none}
+.chip.on{background:#70a992}
+.chip.i{background:#c8d3db;color:#2f4556}
+.panel .chip.i{background:#fff}
+.tg{display:inline-flex;align-items:center;min-height:24px;padding:0 10px;border-radius:999px;background:#fff;font:600 12px 'Bricolage Grotesque',system-ui,sans-serif;white-space:nowrap;color:#050316}
+.tg.ok{background:#cfe5da;color:#1f523c}
+.tg.wait{background:#e3e8da;color:#3b4a2e}
+.tg.org{background:#526c80;color:#fff}
+.tg.dk{background:#050316;color:#fff}
+.tg.p{background:#e9e7e2;color:#3b4a2e;font-style:italic;font-weight:500}
+.ban{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;border-radius:16px;background:#dfe5d6}
+.ban .dot{width:10px;height:10px;border-radius:50%;background:#3b4a2e;flex:0 0 auto}
+.ban.ok{background:#cfe5da}
+.ban.ok .dot{background:#1f523c}
+.ph{background-color:#d6d8d3;background-image:linear-gradient(to top right,transparent calc(50% - 1px),#c3c6c0 calc(50% - 1px),#c3c6c0 calc(50% + 1px),transparent calc(50% + 1px)),linear-gradient(to bottom right,transparent calc(50% - 1px),#c3c6c0 calc(50% - 1px),#c3c6c0 calc(50% + 1px),transparent calc(50% + 1px));border-radius:12px;position:relative}
+.ph>.tg{position:absolute;left:10px;top:10px}
+.thumb{width:56px;height:56px;border-radius:12px;background:#c8d3db;flex:0 0 auto}
+.av{width:40px;height:40px;border-radius:50%;background:#d3d6d0;flex:0 0 auto;position:relative;overflow:hidden}
+.av::before{content:"";position:absolute;left:50%;top:22%;width:38%;height:38%;margin-left:-19%;border-radius:50%;background:#eceee9}
+.av::after{content:"";position:absolute;left:50%;bottom:-18%;width:70%;height:46%;margin-left:-35%;border-radius:50%;background:#eceee9}
+.av.org{background:#526c80}
+.av.org::before,.av.org::after{background:#8ea3b3}
+.grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+.ec{background:#c8d3db;border-radius:20px;padding:10px 10px 16px;display:flex;flex-direction:column;gap:6px}
+.ec>.ecb{padding:6px 8px 0;display:flex;flex-direction:column;gap:6px}
+.sp{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.fld{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:13px}
+.in{min-height:44px;border:0;border-radius:12px;background:#fff;padding:0 14px;font:400 14px 'Bricolage Grotesque',system-ui,sans-serif;color:#050316;width:100%}
+textarea.in{padding:12px 14px;min-height:96px;resize:vertical}
+.panel .in{background:#fff}
+.tabs{display:flex;gap:26px;flex-wrap:wrap;box-shadow:inset 0 -1px 0 #d0d3cc}
+.tab{background:none;border:0;padding:10px 4px 12px;font:600 14px 'Bricolage Grotesque',system-ui,sans-serif;color:#545b5e;cursor:pointer}
+.tab[aria-selected="true"]{color:#050316;box-shadow:inset 0 -3px 0 #70a992}
+.ftabs{display:flex;gap:4px;flex-wrap:wrap}
+.ft{min-height:46px;padding:0 22px;border:0;border-radius:16px 16px 0 0;font:600 14px 'Bricolage Grotesque',system-ui,sans-serif;color:#050316;cursor:pointer}
+.fbody{background:#c8d3db;border-radius:0 20px 20px 20px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.tog{width:44px;height:26px;border-radius:999px;border:0;position:relative;cursor:pointer;flex:0 0 auto}
+
+.num{font:800 30px/1 'Bricolage Grotesque',system-ui,sans-serif;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.bar{height:8px;border-radius:4px;background:#e9e7e2;overflow:hidden;flex:1}
+.bar i{display:block;height:100%;background:#70a992;border-radius:4px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.test{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:12px;background:#dfe5d6;color:#3b4a2e;font-weight:700;font-size:13px}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:12px;color:#545b5e;font-weight:600;padding:8px 10px}
+td{padding:12px 10px;box-shadow:inset 0 1px 0 #e9e7e2}
+</style>
+</helmet>
+<div class="pg">
+  <dc-import name="Topbar" hint-size="100%,84px"></dc-import>
+  <div class="shell">
+    <div class="side"><dc-import name="Sidebar" active="requests" hint-size="224px,880px"></dc-import></div>
+    <div class="body">
+      <main class="main">
+        <div class="top">
+          <div><h1 class="t">{{cur.title}}</h1><p class="sub">{{cur.event}} · {{cur.when}}</p></div>
+          <span class="tg" style="background: {{cur.stBg}}; min-height: 30px; padding: 0 14px">{{cur.status}}</span>
+        </div>
+        <div class="row"><span class="av org"></span><span style="flex: 1"><span class="b" style="display: block">{{cur.org}} ✓</span><span class="m">{{cur.verified}} · {{cur.past}} · ★ {{cur.rating}} from providers</span></span><a class="btn sm w" href="Event.dc.html" style="background: #e9e7e2">Their events</a></div>
+        <div class="grid3">
+          <div class="card"><span class="m">Budget</span><span class="num" style="font-size: 24px">{{cur.budget}}</span></div>
+          <div class="card"><span class="m">Paid on time</span><span class="num" style="font-size: 24px">{{cur.ontime}}</span><span class="tg p" style="align-self: flex-start">Should</span></div>
+          <div class="card"><span class="m">Reply by</span><span class="num" style="font-size: 24px">{{cur.by}}</span></div>
+        </div>
+        <h2 class="sec">Brief</h2>
+        <div class="grid3">
+          <sc-for list="{{cur.brief}}" as="b" hint-placeholder-count="4"><div class="card"><span class="b">{{b.k}}</span><span class="m">{{b.v}}</span></div></sc-for>
+        </div>
+        <h2 class="sec">Terms you agree to</h2>
+        <div class="list">
+          <div class="li"><span class="b" style="width: 120px; flex: 0 0 auto">Payment</span><span>{{cur.pay}}</span></div>
+          <div class="li"><span class="b" style="width: 120px; flex: 0 0 auto">Cancellation</span><span>{{cur.cancel}}</span></div>
+        </div>
+
+        <sc-if value="{{isView}}" hint-placeholder-val="{{true}}">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px">
+            <button class="btn" onClick="{{accept}}">Accept booking</button>
+            <button class="btn w" onClick="{{openQuote}}">Send my own quote</button>
+            <a class="btn w" href="Messages.dc.html">Chat</a>
+            <button class="btn w" onClick="{{decline}}">Decline</button>
+          </div>
+          <span class="m">Accepting needs the Verified badge. Your own quote can carry your own terms <span class="tg p">Proposed</span></span>
+        </sc-if>
+
+        <sc-if value="{{isQuote}}" hint-placeholder-val="{{false}}">
+          <section class="panel">
+            <div class="hd"><h2 class="ph2">Your quote</h2><span class="tg p">Proposed</span></div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px">
+              <label class="fld">Total price (LKR)<input class="in" value="205,000"></label>
+              <label class="fld">Deposit<input class="in" value="30% on accepting"></label>
+              <label class="fld">Instalment 1<input class="in" value="LKR 71,750 · 15 Nov"></label>
+              <label class="fld">Instalment 2<input class="in" value="LKR 71,750 · 29 Nov"></label>
+            </div>
+            <label class="fld">Cancellation terms<textarea class="in">Organiser cancels within 7 days of the event: deposit kept. I cancel: full refund.</textarea></label>
+            <label class="fld">Message<textarea class="in" placeholder="What's included, what you need from them"></textarea></label>
+            <div class="acts"><button class="btn" onClick="{{sendQuote}}">Send quote</button><button class="btn w" onClick="{{toView}}">Back</button></div>
+          </section>
+        </sc-if>
+
+        <sc-if value="{{isDone}}" hint-placeholder-val="{{false}}">
+          <div class="ban ok"><span style="display: flex; gap: 12px; align-items: center"><span class="dot"></span><span><span class="b" style="display: block">{{doneTitle}}</span><span class="s">{{doneBody}}</span></span></span>
+            <span class="chips"><sc-if value="{{showBooking}}" hint-placeholder-val="{{true}}"><a class="btn sm" href="Booking.dc.html">Open booking</a></sc-if><button class="btn sm w" onClick="{{toView}}">Back</button></span></div>
+        </sc-if>
+      </main>
+      <aside class="rail">
+        <section class="panel">
+          <div class="hd"><h2 class="ph2">All requests</h2><span class="m">2 new</span></div>
+          <sc-for list="{{reqs}}" as="r" hint-placeholder-count="3">
+            <button class="row" onClick="{{r.pick}}" aria-pressed="{{r.sel}}" style="border: 0; cursor: pointer; text-align: left; font: inherit; background: {{r.bg}}">
+              <span class="thumb" style="width: 46px; height: 46px"></span>
+              <span style="flex: 1; min-width: 0"><span class="b" style="display: block">{{r.title}}</span><span class="m">{{r.org}}</span><br><span class="tg" style="background: {{r.stBg}}">{{r.status}}</span></span>
+            </button>
+          </sc-for>
+        </section>
+        <section class="panel">
+          <div class="hd"><h2 class="ph2">Your calendar</h2><a class="lk" href="Profile.dc.html">Open</a></div>
+          <div class="row"><span class="thumb" style="width: 40px; height: 40px; background: #cfe5da"></span><span><span class="b" style="display: block">{{cur.date}} is free</span><span class="m">No bookings that day</span></span></div>
+        </section>
+      </aside>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { i: 0, mode: 'view' }; }
+  renderVals() {
+    const { i, mode } = this.state;
+    const data = [
+      { org: 'Harbour Lights Events', title: 'Catering for 300 guests', event: 'Kandy Lake Lights', when: 'Sun 29 Nov · 5:00 – 11:00 PM', date: 'Sun 29 Nov', status: 'New', budget: '180–220k', by: 'Fri 30 Oct',
+        brief: [{ k: 'Service', v: 'Buffet dinner plus kottu station' }, { k: 'Duration', v: '6 hours' }, { k: 'Audience', v: '300 guests' }, { k: 'Deliverables', v: 'Food, staff, clean-up' }, { k: 'Run-of-show', v: 'Dinner 7 – 9 PM' }, { k: 'Provided', v: 'Tables, water, power' }],
+        verified: 'Verified', past: '24 events', rating: '4.7', ontime: '92%',
+        pay: '30% deposit on accepting, then two instalments, the last by the event day.', cancel: 'Organiser cancels within 7 days: you keep the deposit. You cancel: full refund.' },
+      { org: 'Coastline Collective', title: 'Snack stall, product launch', event: 'Launch night, Colombo 3', when: 'Sat 14 Nov · 6:00 – 9:00 PM', date: 'Sat 14 Nov', status: 'New', budget: '60k', by: 'Mon 2 Nov',
+        brief: [{ k: 'Service', v: 'Finger food, walk-around' }, { k: 'Audience', v: '120 guests' }],
+        verified: 'Verified', past: '6 events', rating: '4.3', ontime: '100%',
+        pay: 'Full amount outside the app, within 7 days after the event.', cancel: 'Either side can cancel up to 3 days before at no cost.' },
+      { org: 'Kandy Fest Co.', title: 'Drinks stall, two days', event: 'Kandy Fest', when: 'Sat 5 – Sun 6 Dec', date: 'Sat 5 Dec', status: 'Quoted', budget: '90k', by: 'Sent',
+        brief: [{ k: 'Service', v: 'Fresh juice and tea' }, { k: 'Duration', v: '2 days' }, { k: 'Audience', v: '2,000 a day' }],
+        verified: 'Pending', past: '2 events', rating: '–', ontime: 'n/a',
+        pay: '50% deposit, 50% on the first day.', cancel: 'Deposit refunded if cancelled more than 14 days before.' }
+    ];
+    const st = (s) => s === 'New' ? '#c5dccf' : '#e3e8da';
+    const cur = Object.assign({}, data[i], { stBg: st(data[i].status) });
+    let doneTitle = '', doneBody = '', showBooking = false;
+    if (mode === 'accepted') { doneTitle = 'Booked. The organiser has your details.'; doneBody = 'The deposit is due next.'; showBooking = true; }
+    if (mode === 'declined') { doneTitle = 'Request declined.'; doneBody = 'The organiser has been told.'; }
+    if (mode === 'quoted') { doneTitle = 'Quote sent.'; doneBody = 'If they accept, the booking is confirmed on your terms.'; }
+    return {
+      cur,
+      reqs: data.map((r, k) => ({ ...r, stBg: st(r.status), sel: String(k === i), bg: k === i ? '#c5dccf' : '#fff', pick: () => this.setState({ i: k, mode: 'view' }) })),
+      isView: mode === 'view', isQuote: mode === 'quote', isDone: ['accepted', 'declined', 'quoted'].indexOf(mode) >= 0,
+      doneTitle, doneBody, showBooking,
+      accept: () => this.setState({ mode: 'accepted' }), decline: () => this.setState({ mode: 'declined' }),
+      openQuote: () => this.setState({ mode: 'quote' }), sendQuote: () => this.setState({ mode: 'quoted' }), toView: () => this.setState({ mode: 'view' })
+    };
+  }
+}
+</script>
+</body>
+</html>

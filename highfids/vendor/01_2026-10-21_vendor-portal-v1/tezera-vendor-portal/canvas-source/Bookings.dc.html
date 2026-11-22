@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>My bookings</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&amp;family=Instrument+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#050316}a:hover{color:#050316}
+.h{font-family:'Bricolage Grotesque',system-ui,sans-serif;letter-spacing:-.02em;margin:0;line-height:1.1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;box-sizing:border-box;border-radius:14px 14px 3px 14px;border:1.5px solid #70a992;background:#70a992;color:#050316;font:600 15px 'Instrument Sans',system-ui,sans-serif;text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn:hover{filter:brightness(.94)}
+.btn.o{background:transparent;border-color:#050316}
+.tab{min-height:48px;padding:0 22px;border:0;border-radius:18px 18px 0 0;font:600 15px 'Instrument Sans',system-ui,sans-serif;color:#050316;cursor:pointer}
+.tag{display:inline-flex;align-items:center;min-height:24px;padding:0 10px;border-radius:999px;background:#b6c3a7;color:#050316;font:600 12px 'Instrument Sans',system-ui,sans-serif;white-space:nowrap}
+.org{background:#526c80;color:#fff}
+.pri{background:transparent;border:1px dashed #050316;font-weight:500}
+.muted{color:rgba(5,3,22,.72)}
+.bk{background:#e9e7e2;border-radius:18px 18px 4px 18px;padding:18px 20px;display:grid;grid-template-columns:72px minmax(0,2fr) minmax(0,1.4fr) auto;gap:16px;align-items:center;text-decoration:none;color:#050316}
+.bk:hover{outline:2px solid #050316;outline-offset:-2px}
+@media(max-width:760px){.bk{grid-template-columns:64px minmax(0,1fr)}}
+.date{text-align:center;border-radius:14px 14px 3px 14px;padding:8px 0}
+.bar{height:8px;border-radius:4px;background:#b6c3a7;overflow:hidden}
+.bar i{display:block;height:100%;background:#050316;border-radius:4px}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #e9e7e2; font-family: 'Instrument Sans', system-ui, sans-serif; color: #050316; font-size: 15px; line-height: 1.5">
+  <dc-import name="Topbar" hint-size="100%,84px"></dc-import>
+  <div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 28px; padding: 24px 28px 56px; max-width: 1440px; margin: 0 auto; box-sizing: border-box">
+    <div style="flex: 0 1 250px; min-width: 220px">
+      <dc-import name="Sidebar" active="bookings" hint-size="100%,960px"></dc-import>
+    </div>
+    <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 20px">
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 12px">
+        <div>
+          <h1 class="h" style="font-size: 40px; font-weight: 800">My bookings</h1>
+          <p class="muted" style="margin: 6px 0 0">Every confirmed booking with its agreed price, terms and instalments.</p>
+        </div>
+        <a class="btn o" href="Profile.dc.html">Availability calendar</a>
+      </div>
+
+      <div>
+        <div role="tablist" aria-label="Bookings" style="display: flex; gap: 4px; flex-wrap: wrap">
+          <sc-for list="{{tabs}}" as="t" hint-placeholder-count="3">
+            <button class="tab" role="tab" aria-selected="{{t.sel}}" onClick="{{t.pick}}" style="background: {{t.bg}}">{{t.label}}</button>
+          </sc-for>
+        </div>
+        <div style="background: #658095; border-radius: 0 24px 6px 24px; padding: 14px; display: flex; flex-direction: column; gap: 12px">
+          <sc-for list="{{rows}}" as="b" hint-placeholder-count="3">
+            <a class="bk" href="{{b.href}}">
+              <span class="date" style="background: {{b.dateBg}}"><span class="h" style="display: block; font-size: 26px; font-weight: 800">{{b.day}}</span><span style="font-size: 12px; font-weight: 700">{{b.mon}}</span></span>
+              <span style="min-width: 0">
+                <span class="tag org">{{b.org}}</span>
+                <strong style="display: block; margin-top: 4px">{{b.title}}</strong>
+                <span class="muted" style="font-size: 14px">{{b.service}}</span>
+              </span>
+              <span style="min-width: 0; display: flex; flex-direction: column; gap: 6px">
+                <span style="display: flex; justify-content: space-between; gap: 8px; font-size: 14px"><strong>{{b.price}}</strong><span>{{b.paidLabel}}</span></span>
+                <span class="bar" role="img" aria-label="{{b.paidLabel}}"><i style="width: {{b.paid}}"></i></span>
+                <span style="font-size: 13px">{{b.next}}</span>
+              </span>
+              <span class="tag" style="background: {{b.statusBg}}; color: {{b.statusFg}}">{{b.status}}</span>
+            </a>
+          </sc-for>
+          <sc-if value="{{isCancelled}}" hint-placeholder-val="{{false}}">
+            <p style="margin: 4px 6px; font-size: 14px">Cancelling within 7 days of an event shows on your profile as a late cancellation. <span class="tag pri">Should, proposed</span></p>
+          </sc-if>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1200}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { tab: 'up' }; }
+  renderVals() {
+    const tab = this.state.tab;
+    const ok = { statusBg: '#70a992', statusFg: '#050316' }, pend = { statusBg: '#b6c3a7', statusFg: '#050316' }, dark = { statusBg: '#050316', statusFg: '#e9e7e2' };
+    const sets = {
+      up: [
+        { href: 'Booking.dc.html', day: '8', mon: 'NOV', dateBg: '#70a992', org: 'Harbour Lights Events', title: 'Colombo Food Fair', service: 'Catering for crew and VIP tent', price: 'LKR 150,000', paid: '30%', paidLabel: 'LKR 45,000 of 150,000 paid', next: 'Next: LKR 25,000 due 2 Nov', status: 'Confirmed', ...ok },
+        { href: 'Booking.dc.html', day: '29', mon: 'NOV', dateBg: '#b6c3a7', org: 'Harbour Lights Events', title: 'Kandy Lake Lights', service: 'Catering for 300 guests', price: 'LKR 205,000', paid: '0%', paidLabel: 'Nothing paid yet', next: 'Deposit LKR 61,500 due on confirming', status: 'Change of terms asked', ...pend },
+        { href: 'Booking.dc.html', day: '5', mon: 'DEC', dateBg: '#b6c3a7', org: 'Kandy Fest Co.', title: 'Kandy Fest', service: 'Drinks stall, two days', price: 'LKR 90,000', paid: '50%', paidLabel: 'LKR 45,000 of 90,000 paid', next: 'Paid outside the app, tracked', status: 'Confirmed', ...ok }
+      ],
+      done: [
+        { href: 'Reviews.dc.html', day: '18', mon: 'OCT', dateBg: '#b6c3a7', org: 'Coastline Collective', title: 'Office party', service: 'Snacks for 80', price: 'LKR 45,000', paid: '100%', paidLabel: 'Paid in full', next: 'Review window closes 1 Nov', status: 'Leave a review', ...ok },
+        { href: 'Booking.dc.html', day: '27', mon: 'SEP', dateBg: '#b6c3a7', org: 'Lotus Weddings', title: 'Perera wedding', service: 'Dessert table', price: 'LKR 95,000', paid: '100%', paidLabel: 'Paid in full', next: 'Reviewed by both sides', status: 'Completed', ...pend }
+      ],
+      cancel: [
+        { href: 'Booking.dc.html', day: '4', mon: 'OCT', dateBg: '#b6c3a7', org: 'Kandy Fest Co.', title: 'Pop-up dinner', service: 'Catering for 60', price: 'LKR 70,000', paid: '30%', paidLabel: 'Deposit kept as agreed', next: 'Cancelled by organiser, 2 days before', status: 'Cancelled', ...dark }
+      ]
+    };
+    const defs = [['up', 'Upcoming'], ['done', 'Completed'], ['cancel', 'Cancelled']];
+    return {
+      tabs: defs.map(([k, label]) => ({ label, sel: String(k === tab), bg: k === tab ? '#658095' : '#b6c3a7', pick: () => this.setState({ tab: k }) })),
+      rows: sets[tab], isCancelled: tab === 'cancel'
+    };
+  }
+}
+</script>
+</body>
+</html>

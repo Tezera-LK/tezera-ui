@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Feed and events</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#050316}
+.pg{min-height:100vh;background:#e9e7e2;color:#050316;font:400 14px/1.55 'Bricolage Grotesque',system-ui,sans-serif}
+.shell{display:flex;flex-wrap:wrap;align-items:flex-start;gap:32px;padding:28px 32px 72px;max-width:1440px;margin:0 auto}
+.side{flex:0 0 224px;max-width:100%}
+.body{flex:999 1 600px;min-width:0;display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.main{flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:20px}
+.rail{flex:1 1 300px;max-width:360px;min-width:0;display:flex;flex-direction:column;gap:18px}
+.full{flex:1 1 100%;min-width:0;display:flex;flex-direction:column;gap:20px}
+.nv{display:flex;align-items:center;gap:10px;min-height:38px;padding:0 14px;border-radius:10px;text-decoration:none;color:#163829;font:600 14px 'Bricolage Grotesque',system-ui,sans-serif;transition:background-color .15s ease}
+.nv:not([aria-current="page"]):hover{background:#c5dccf}
+.nv[aria-current="page"]{background:#fff;color:#245a43;font-weight:700}
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px}
+.t{font:700 28px/1.15 'Bricolage Grotesque',system-ui,sans-serif;letter-spacing:-.01em;margin:0}
+.sub{margin:4px 0 0;color:#545b5e;font-size:15px}
+.sec{font:700 16px/1.3 'Bricolage Grotesque',system-ui,sans-serif;margin:6px 0 -6px}
+.panel{background:#c8d3db;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.panel>.hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;padding:2px 2px 0}
+.ph2{font:700 17px/1.3 'Bricolage Grotesque',system-ui,sans-serif;margin:0}
+.card{background:#fff;border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:#050316}
+.row{background:#fff;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:14px;text-decoration:none;color:#050316}
+a.row:hover,a.card:hover{background:#f6f7f5}
+.list{background:#fff;border-radius:16px;padding:4px 16px}
+.li{display:flex;align-items:center;gap:14px;min-height:56px;padding:10px 0}
+.li+.li{box-shadow:0 -1px 0 #e9e7e2}
+.b{font-weight:700}
+.m{color:#545b5e;font-size:13px}
+.s{font-size:13px}
+.lk{color:#3f566a;font-weight:700;font-size:13px;text-decoration:none}
+.lk:hover{text-decoration:underline}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:0 20px;border-radius:999px;border:0;background:#70a992;color:#050316;font:600 14px 'Bricolage Grotesque',system-ui,sans-serif;text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn:hover{filter:brightness(.95)}
+.btn.w{background:#fff}
+.btn.sm{min-height:34px;padding:0 14px;font-size:13px}
+.btn.wide{width:100%}
+.chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{display:inline-flex;align-items:center;min-height:30px;padding:0 14px;border-radius:999px;border:0;background:#fff;color:#050316;font:600 13px 'Bricolage Grotesque',system-ui,sans-serif;cursor:pointer;white-space:nowrap;text-decoration:none}
+.chip.on{background:#70a992}
+.chip.i{background:#c8d3db;color:#2f4556}
+.panel .chip.i{background:#fff}
+.tg{display:inline-flex;align-items:center;min-height:24px;padding:0 10px;border-radius:999px;background:#fff;font:600 12px 'Bricolage Grotesque',system-ui,sans-serif;white-space:nowrap;color:#050316}
+.tg.ok{background:#cfe5da;color:#1f523c}
+.tg.wait{background:#e3e8da;color:#3b4a2e}
+.tg.org{background:#526c80;color:#fff}
+.tg.dk{background:#050316;color:#fff}
+.tg.p{background:#e9e7e2;color:#3b4a2e;font-style:italic;font-weight:500}
+.ban{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;border-radius:16px;background:#dfe5d6}
+.ban .dot{width:10px;height:10px;border-radius:50%;background:#3b4a2e;flex:0 0 auto}
+.ban.ok{background:#cfe5da}
+.ban.ok .dot{background:#1f523c}
+.ph{background-color:#d6d8d3;background-image:linear-gradient(to top right,transparent calc(50% - 1px),#c3c6c0 calc(50% - 1px),#c3c6c0 calc(50% + 1px),transparent calc(50% + 1px)),linear-gradient(to bottom right,transparent calc(50% - 1px),#c3c6c0 calc(50% - 1px),#c3c6c0 calc(50% + 1px),transparent calc(50% + 1px));border-radius:12px;position:relative}
+.ph>.tg{position:absolute;left:10px;top:10px}
+.thumb{width:56px;height:56px;border-radius:12px;background:#c8d3db;flex:0 0 auto}
+.av{width:40px;height:40px;border-radius:50%;background:#d3d6d0;flex:0 0 auto;position:relative;overflow:hidden}
+.av::before{content:"";position:absolute;left:50%;top:22%;width:38%;height:38%;margin-left:-19%;border-radius:50%;background:#eceee9}
+.av::after{content:"";position:absolute;left:50%;bottom:-18%;width:70%;height:46%;margin-left:-35%;border-radius:50%;background:#eceee9}
+.av.org{background:#526c80}
+.av.org::before,.av.org::after{background:#8ea3b3}
+.grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+.ec{background:#c8d3db;border-radius:20px;padding:10px 10px 16px;display:flex;flex-direction:column;gap:6px}
+.ec>.ecb{padding:6px 8px 0;display:flex;flex-direction:column;gap:6px}
+.sp{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.fld{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:13px}
+.in{min-height:44px;border:0;border-radius:12px;background:#fff;padding:0 14px;font:400 14px 'Bricolage Grotesque',system-ui,sans-serif;color:#050316;width:100%}
+textarea.in{padding:12px 14px;min-height:96px;resize:vertical}
+.panel .in{background:#fff}
+.tabs{display:flex;gap:26px;flex-wrap:wrap;box-shadow:inset 0 -1px 0 #d0d3cc}
+.tab{background:none;border:0;padding:10px 4px 12px;font:600 14px 'Bricolage Grotesque',system-ui,sans-serif;color:#545b5e;cursor:pointer}
+.tab[aria-selected="true"]{color:#050316;box-shadow:inset 0 -3px 0 #70a992}
+.ftabs{display:flex;gap:4px;flex-wrap:wrap}
+.ft{min-height:46px;padding:0 22px;border:0;border-radius:16px 16px 0 0;font:600 14px 'Bricolage Grotesque',system-ui,sans-serif;color:#050316;cursor:pointer}
+.fbody{background:#c8d3db;border-radius:0 20px 20px 20px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.tog{width:44px;height:26px;border-radius:999px;border:0;position:relative;cursor:pointer;flex:0 0 auto}
+
+.num{font:800 30px/1 'Bricolage Grotesque',system-ui,sans-serif;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.bar{height:8px;border-radius:4px;background:#e9e7e2;overflow:hidden;flex:1}
+.bar i{display:block;height:100%;background:#70a992;border-radius:4px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.test{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:12px;background:#dfe5d6;color:#3b4a2e;font-weight:700;font-size:13px}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:12px;color:#545b5e;font-weight:600;padding:8px 10px}
+td{padding:12px 10px;box-shadow:inset 0 1px 0 #e9e7e2}
+</style>
+</helmet>
+<div class="pg">
+  <dc-import name="Topbar" hint-size="100%,84px"></dc-import>
+  <div class="shell">
+    <div class="side"><dc-import name="Sidebar" active="feed" hint-size="224px,880px"></dc-import></div>
+    <div class="body">
+      <main class="main">
+        <div class="top">
+          <div><h1 class="t">Feed</h1><p class="sub">Posts, reels and new events from organisers you follow</p></div>
+          <div class="chips"><button class="btn w">Sort: Newest ▾</button></div>
+        </div>
+        <div class="chips">
+          <sc-for list="{{filters}}" as="f" hint-placeholder-count="4"><button class="chip" onClick="{{f.pick}}" aria-pressed="{{f.sel}}" style="background: {{f.bg}}">{{f.label}}</button></sc-for>
+        </div>
+        <div class="grid2">
+          <sc-for list="{{posts}}" as="p" hint-placeholder-count="4">
+            <article class="ec">
+              <div class="ph" style="height: 170px"><span class="tg">{{p.kind}}</span>
+                <sc-if value="{{p.reel}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; background: #fff; display: grid; place-items: center"><span style="width: 0; height: 0; border-left: 14px solid #050316; border-top: 9px solid transparent; border-bottom: 9px solid transparent; margin-left: 4px"></span></span></sc-if>
+              </div>
+              <div class="ecb">
+                <h2 class="ph2">{{p.title}}</h2>
+                <span class="m">{{p.meta}}</span>
+                <div class="sp"><span class="s b">✓ {{p.org}}</span><span class="b">{{p.right}}</span></div>
+                <span class="m">{{p.likes}} likes · {{p.comments}} comments</span>
+                <div class="acts">
+                  <button class="btn sm" onClick="{{p.like}}" style="background: {{p.likeBg}}">{{p.likeLabel}}</button>
+                  <button class="btn sm w" onClick="{{p.toggleShare}}">Share</button>
+                  <a class="btn sm w" href="{{p.href}}">{{p.open}}</a>
+                </div>
+                <sc-if value="{{p.share}}" hint-placeholder-val="{{false}}">
+                  <div class="row" style="margin-top: 6px"><span class="ph" style="width: 64px; height: 48px; flex: 0 0 auto"></span><span style="flex: 1; min-width: 0"><span class="b" style="display: block">tzra.lk/cff26</span><span class="m">Link with preview image</span></span></div>
+                  <div class="acts"><button class="btn sm w">WhatsApp</button><button class="btn sm w">Instagram</button><button class="btn sm w">Copy link</button></div>
+                </sc-if>
+              </div>
+            </article>
+          </sc-for>
+        </div>
+      </main>
+      <aside class="rail">
+        <section class="panel">
+          <div class="hd"><h2 class="ph2">Organisers you follow</h2></div>
+          <sc-for list="{{orgs}}" as="o" hint-placeholder-count="3">
+            <div class="row"><span class="av org"></span><span style="flex: 1; min-width: 0"><span class="b" style="display: block">{{o.name}} ✓</span><span class="m">Organiser · ★ {{o.rating}}</span></span><button class="btn sm" onClick="{{o.toggle}}" style="background: {{o.bg}}">{{o.label}}</button></div>
+          </sc-for>
+        </section>
+        <section class="panel">
+          <div class="hd"><h2 class="ph2">New events near you</h2></div>
+          <a class="row" href="Event.dc.html"><span class="thumb"></span><span><span class="b" style="display: block">Colombo Food Fair</span><span class="m">Sun 8 Nov · BMICH</span><br><span class="tg ok">You: stall B-12</span></span></a>
+          <a class="row" href="Stalls.dc.html"><span class="thumb"></span><span><span class="b" style="display: block">Kandy Fest</span><span class="m">Sat 5 Dec · Kandy</span><br><span class="tg wait">Stall slots open</span></span></a>
+        </section>
+      </aside>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { f: 'all', liked: {}, share: -1, follow: { 0: true, 1: true } }; }
+  renderVals() {
+    const { f, liked, share, follow } = this.state;
+    const data = [
+      { type: 'event', kind: 'New event', reel: false, title: 'Colombo Food Fair', meta: 'Sun 8 Nov · BMICH, Colombo', org: 'Harbour Lights Events', right: '40 stalls', likes: 128, comments: 14, href: 'Event.dc.html', open: 'Event page' },
+      { type: 'reel', kind: 'Reel', reel: true, title: 'Stage build, behind the scenes', meta: 'Yesterday', org: 'Kandy Fest Co.', right: '0:42', likes: 342, comments: 31, href: 'Event.dc.html', open: 'View' },
+      { type: 'post', kind: 'Post', reel: false, title: 'Stall map is live', meta: '3 h ago', org: 'Harbour Lights Events', right: '', likes: 56, comments: 9, href: 'MyStall.dc.html', open: 'Open map' },
+      { type: 'event', kind: 'New event', reel: false, title: 'Makers Market', meta: 'Sun 22 Nov · Colombo 7', org: 'Coastline Collective', right: '15 stalls left', likes: 74, comments: 6, href: 'Stalls.dc.html', open: 'Stall slots' }
+    ];
+    const defs = [['all', 'All'], ['event', 'New events'], ['reel', 'Reels'], ['post', 'Posts']];
+    const orgs = [['Harbour Lights Events', '4.7'], ['Kandy Fest Co.', '4.3'], ['Lotus Weddings', '4.8']];
+    return {
+      filters: defs.map(([k, label]) => ({ label, sel: String(k === f), bg: k === f ? '#70a992' : '#fff', pick: () => this.setState({ f: k }) })),
+      posts: data.map((p, k) => ({ ...p, k })).filter((p) => f === 'all' || p.type === f).map((p) => {
+        const l = !!liked[p.k];
+        return { ...p, likes: p.likes + (l ? 1 : 0), likeLabel: l ? 'Liked ✓' : 'Like', likeBg: l ? '#70a992' : '#fff', share: share === p.k,
+          like: () => this.setState({ liked: { ...liked, [p.k]: !l } }), toggleShare: () => this.setState({ share: share === p.k ? -1 : p.k }) };
+      }),
+      orgs: orgs.map(([name, rating], k) => { const on = !!follow[k]; return { name, rating, label: on ? 'Following' : 'Follow', bg: on ? '#fff' : '#70a992', toggle: () => this.setState({ follow: { ...follow, [k]: !on } }) }; })
+    };
+  }
+}
+</script>
+</body>
+</html>

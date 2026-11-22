@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My bookings · tezera vendor portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&amp;family=Instrument+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#050316}a:hover{color:#050316}
+.h{font-family:'Bricolage Grotesque',system-ui,sans-serif;letter-spacing:-.02em;margin:0;line-height:1.1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;box-sizing:border-box;border-radius:14px 14px 3px 14px;border:1.5px solid #70a992;background:#70a992;color:#050316;font:600 15px 'Instrument Sans',system-ui,sans-serif;text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn:hover{filter:brightness(.94)}
+.btn.o{background:transparent;border-color:#050316}
+.tab{min-height:48px;padding:0 22px;border:0;border-radius:18px 18px 0 0;font:600 15px 'Instrument Sans',system-ui,sans-serif;color:#050316;cursor:pointer}
+.tag{display:inline-flex;align-items:center;min-height:24px;padding:0 10px;border-radius:999px;background:#b6c3a7;color:#050316;font:600 12px 'Instrument Sans',system-ui,sans-serif;white-space:nowrap}
+.org{background:#526c80;color:#fff}
+.pri{background:transparent;border:1px dashed #050316;font-weight:500}
+.muted{color:rgba(5,3,22,.72)}
+.bk{background:#e9e7e2;border-radius:18px 18px 4px 18px;padding:18px 20px;display:grid;grid-template-columns:72px minmax(0,2fr) minmax(0,1.4fr) auto;gap:16px;align-items:center;text-decoration:none;color:#050316}
+.bk:hover{outline:2px solid #050316;outline-offset:-2px}
+@media(max-width:760px){.bk{grid-template-columns:64px minmax(0,1fr)}}
+.date{text-align:center;border-radius:14px 14px 3px 14px;padding:8px 0}
+.bar{height:8px;border-radius:4px;background:#b6c3a7;overflow:hidden}
+.bar i{display:block;height:100%;background:#050316;border-radius:4px}
+</style>
+</head>
+<body>
+<div id="app" data-page="Bookings"></div>
+<template id="tpl-Bookings">
+<div style="min-height: 100vh; background: #e9e7e2; font-family: 'Instrument Sans', system-ui, sans-serif; color: #050316; font-size: 15px; line-height: 1.5">
+  <template data-dc-import name="Topbar" hint-size="100%,84px"></template>
+  <div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 28px; padding: 24px 28px 56px; max-width: 1440px; margin: 0 auto; box-sizing: border-box">
+    <div style="flex: 0 1 250px; min-width: 220px">
+      <template data-dc-import name="Sidebar" active="bookings" hint-size="100%,960px"></template>
+    </div>
+    <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 20px">
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 12px">
+        <div>
+          <h1 class="h" style="font-size: 40px; font-weight: 800">My bookings</h1>
+          <p class="muted" style="margin: 6px 0 0">Every confirmed booking with its agreed price, terms and instalments.</p>
+        </div>
+        <a class="btn o" href="Profile.html">Availability calendar</a>
+      </div>
+
+      <div>
+        <div role="tablist" aria-label="Bookings" style="display: flex; gap: 4px; flex-wrap: wrap">
+          <template data-sc-for list="{{tabs}}" as="t" hint-placeholder-count="3">
+            <button class="tab" role="tab" aria-selected="{{t.sel}}" onClick="{{t.pick}}" style="background: {{t.bg}}">{{t.label}}</button>
+          </template>
+        </div>
+        <div style="background: #658095; border-radius: 0 24px 6px 24px; padding: 14px; display: flex; flex-direction: column; gap: 12px">
+          <template data-sc-for list="{{rows}}" as="b" hint-placeholder-count="3">
+            <a class="bk" href="{{b.href}}">
+              <span class="date" style="background: {{b.dateBg}}"><span class="h" style="display: block; font-size: 26px; font-weight: 800">{{b.day}}</span><span style="font-size: 12px; font-weight: 700">{{b.mon}}</span></span>
+              <span style="min-width: 0">
+                <span class="tag org">{{b.org}}</span>
+                <strong style="display: block; margin-top: 4px">{{b.title}}</strong>
+                <span class="muted" style="font-size: 14px">{{b.service}}</span>
+              </span>
+              <span style="min-width: 0; display: flex; flex-direction: column; gap: 6px">
+                <span style="display: flex; justify-content: space-between; gap: 8px; font-size: 14px"><strong>{{b.price}}</strong><span>{{b.paidLabel}}</span></span>
+                <span class="bar" role="img" aria-label="{{b.paidLabel}}"><i style="width: {{b.paid}}"></i></span>
+                <span style="font-size: 13px">{{b.next}}</span>
+              </span>
+              <span class="tag" style="background: {{b.statusBg}}; color: {{b.statusFg}}">{{b.status}}</span>
+            </a>
+          </template>
+          <template data-sc-if value="{{isCancelled}}" hint-placeholder-val="{{false}}">
+            <p style="margin: 4px 6px; font-size: 14px">Cancelling within 7 days of an event shows on your profile as a late cancellation. <span class="tag pri">Should, proposed</span></p>
+          </template>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+</template>
+<script type="text/x-dc" id="js-Bookings">
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { tab: 'up' }; }
+  renderVals() {
+    const tab = this.state.tab;
+    const ok = { statusBg: '#70a992', statusFg: '#050316' }, pend = { statusBg: '#b6c3a7', statusFg: '#050316' }, dark = { statusBg: '#050316', statusFg: '#e9e7e2' };
+    const sets = {
+      up: [
+        { href: 'Booking.html', day: '8', mon: 'NOV', dateBg: '#70a992', org: 'Harbour Lights Events', title: 'Colombo Food Fair', service: 'Catering for crew and VIP tent', price: 'LKR 150,000', paid: '30%', paidLabel: 'LKR 45,000 of 150,000 paid', next: 'Next: LKR 25,000 due 2 Nov', status: 'Confirmed', ...ok },
+        { href: 'Booking.html', day: '29', mon: 'NOV', dateBg: '#b6c3a7', org: 'Harbour Lights Events', title: 'Kandy Lake Lights', service: 'Catering for 300 guests', price: 'LKR 205,000', paid: '0%', paidLabel: 'Nothing paid yet', next: 'Deposit LKR 61,500 due on confirming', status: 'Change of terms asked', ...pend },
+        { href: 'Booking.html', day: '5', mon: 'DEC', dateBg: '#b6c3a7', org: 'Kandy Fest Co.', title: 'Kandy Fest', service: 'Drinks stall, two days', price: 'LKR 90,000', paid: '50%', paidLabel: 'LKR 45,000 of 90,000 paid', next: 'Paid outside the app, tracked', status: 'Confirmed', ...ok }
+      ],
+      done: [
+        { href: 'Reviews.html', day: '18', mon: 'OCT', dateBg: '#b6c3a7', org: 'Coastline Collective', title: 'Office party', service: 'Snacks for 80', price: 'LKR 45,000', paid: '100%', paidLabel: 'Paid in full', next: 'Review window closes 1 Nov', status: 'Leave a review', ...ok },
+        { href: 'Booking.html', day: '27', mon: 'SEP', dateBg: '#b6c3a7', org: 'Lotus Weddings', title: 'Perera wedding', service: 'Dessert table', price: 'LKR 95,000', paid: '100%', paidLabel: 'Paid in full', next: 'Reviewed by both sides', status: 'Completed', ...pend }
+      ],
+      cancel: [
+        { href: 'Booking.html', day: '4', mon: 'OCT', dateBg: '#b6c3a7', org: 'Kandy Fest Co.', title: 'Pop-up dinner', service: 'Catering for 60', price: 'LKR 70,000', paid: '30%', paidLabel: 'Deposit kept as agreed', next: 'Cancelled by organiser, 2 days before', status: 'Cancelled', ...dark }
+      ]
+    };
+    const defs = [['up', 'Upcoming'], ['done', 'Completed'], ['cancel', 'Cancelled']];
+    return {
+      tabs: defs.map(([k, label]) => ({ label, sel: String(k === tab), bg: k === tab ? '#658095' : '#b6c3a7', pick: () => this.setState({ tab: k }) })),
+      rows: sets[tab], isCancelled: tab === 'cancel'
+    };
+  }
+}
+</script>
+<template id="tpl-Topbar">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px 24px; padding: 16px 28px; background: #e9e7e2; border-bottom: 1.5px solid #b6c3a7; font-family: 'Instrument Sans', system-ui, sans-serif; color: #050316; box-sizing: border-box; width: 100%">
+  <a href="Main.html" style="font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 800; font-size: 28px; letter-spacing: -0.02em; text-decoration: none; color: #050316; flex: 0 0 auto; padding: 4px 0">tezera</a>
+  <label style="flex: 1 1 280px; max-width: 540px; margin: 0 auto; display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 16px; background: rgba(255,255,255,0.75); border-radius: 999px; box-sizing: border-box">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#050316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="6"></circle><path d="M15 15l5 5"></path></svg>
+    <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search</span>
+    <input type="search" placeholder="Search events, organisers, job posts" style="flex: 1; min-width: 0; border: 0; background: transparent; font: 400 15px 'Instrument Sans', system-ui, sans-serif; color: #050316; outline-offset: 4px">
+  </label>
+  <div style="display: flex; align-items: center; gap: 10px; flex: 0 0 auto">
+    <a href="Messages.html" aria-label="Messages, 2 unread" style="width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.75); display: grid; place-items: center; position: relative">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#050316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H10l-5 4v-4H4z"></path></svg>
+      <span style="position: absolute; top: 6px; right: 6px; width: 10px; height: 10px; border-radius: 50%; background: #050316; border: 2px solid #e9e7e2"></span>
+    </a>
+    <a href="Notifications.html" aria-label="Notifications, 3 new" style="width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.75); display: grid; place-items: center; position: relative">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#050316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"></path><path d="M10 21h4"></path></svg>
+      <span style="position: absolute; top: 6px; right: 6px; width: 10px; height: 10px; border-radius: 50%; background: #050316; border: 2px solid #e9e7e2"></span>
+    </a>
+    <a href="Profile.html" style="min-height: 36px; padding: 0 18px; display: inline-flex; align-items: center; border-radius: 999px; background: #70a992; color: #050316; font-weight: 600; font-size: 14px; text-decoration: none">Vendor</a>
+  </div>
+</header>
+</template>
+<script type="text/x-dc" id="js-Topbar">
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+<template id="tpl-Sidebar">
+<nav aria-label="Vendor menu" style="width: 100%; box-sizing: border-box; background: #70a992; border-radius: 28px 28px 6px 28px; padding: 26px 16px 20px; display: flex; flex-direction: column; gap: 20px; font-family: 'Instrument Sans', system-ui, sans-serif; color: #050316">
+  <template data-sc-for list="{{groups}}" as="group" hint-placeholder-count="3">
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <h2 style="margin: 0 0 4px; text-align: center; font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.01em">{{group.title}}</h2>
+      <template data-sc-for list="{{group.items}}" as="item" hint-placeholder-count="5">
+        <a href="{{item.href}}" aria-current="{{item.current}}" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 12px 12px 3px 12px; text-decoration: none; color: #050316; font-size: 15px; background: {{item.bg}}; font-weight: {{item.weight}}">
+          <span aria-hidden="true" style="width: 12px; height: 11px; border-radius: 4px 4px 1px 4px; flex: 0 0 auto; background: {{item.tile}}"></span>
+          <span style="flex: 1">{{item.label}}</span>
+          <template data-sc-if value="{{item.hasCount}}" hint-placeholder-val="{{false}}">
+            <span style="min-width: 22px; height: 22px; padding: 0 6px; box-sizing: border-box; border-radius: 999px; background: #050316; color: #e9e7e2; font-size: 12px; font-weight: 700; display: grid; place-items: center">{{item.count}}</span>
+          </template>
+        </a>
+      </template>
+    </div>
+  </template>
+  <a href="Verification.html" style="display: block; margin-top: 4px; padding: 14px; border-radius: 16px 16px 4px 16px; background: #e9e7e2; color: #050316; text-decoration: none; font-size: 13px; line-height: 1.4">
+    <span style="display: block; font-weight: 700; font-size: 14px">Verification pending</span>
+    You need the Verified badge to accept bookings. Check status
+  </a>
+</nav>
+</template>
+<script type="text/x-dc" id="js-Sidebar">
+class Component extends DCLogic {
+  renderVals() {
+    const active = this.props.active ?? 'dashboard';
+    const mk = (key, label, href, count) => {
+      const on = key === active;
+      return {
+        key, label, href,
+        current: on ? 'page' : 'false',
+        bg: on ? '#e9e7e2' : '#b6c3a7',
+        weight: on ? '700' : '500',
+        tile: on ? '#050316' : '#658095',
+        hasCount: !!count, count: count || ''
+      };
+    };
+    return {
+      groups: [
+        { title: 'General', items: [
+          mk('dashboard', 'Dashboard', 'Main.html'),
+          mk('feed', 'Feed and events', 'Feed.html'),
+          mk('community', 'Community', 'Community.html'),
+          mk('messages', 'Messages', 'Messages.html', 2),
+          mk('notifications', 'Notifications', 'Notifications.html', 3)
+        ]},
+        { title: 'Vendor tools', items: [
+          mk('requests', 'Booking requests', 'Requests.html', 2),
+          mk('jobs', 'Job posts', 'Jobs.html'),
+          mk('stalls', 'Stalls', 'Stalls.html', 1),
+          mk('bookings', 'My bookings', 'Bookings.html'),
+          mk('mystall', 'My stall listing', 'MyStall.html'),
+          mk('payments', 'Payments', 'Payments.html')
+        ]},
+        { title: 'Account', items: [
+          mk('profile', 'My profile', 'Profile.html'),
+          mk('reviews', 'Reviews and rank', 'Reviews.html'),
+          mk('verification', 'Verification', 'Verification.html'),
+          mk('settings', 'Settings', 'Settings.html')
+        ]}
+      ]
+    };
+  }
+}
+</script>
+<script>
+/* tezera wireframe runtime: renders the page templates in this file and wires up buttons. */
+(function () {
+  class DCLogic {
+    constructor(props) { this.props = props || {}; this.state = {}; }
+    setState(patch) {
+      const p = typeof patch === 'function' ? patch(this.state, this.props) : patch;
+      this.state = Object.assign({}, this.state, p);
+      if (this.__inst) this.__inst.update();
+    }
+    forceUpdate() { if (this.__inst) this.__inst.update(); }
+  }
+
+  const HOLE = /\{\{\s*([^}]+?)\s*\}\}/g;
+  const WHOLE = /^\s*\{\{\s*([^}]+?)\s*\}\}\s*$/;
+
+  function lookup(path, scope) {
+    if (path === 'true') return true;
+    if (path === 'false') return false;
+    if (path === 'null') return null;
+    if (/^-?\d+(\.\d+)?$/.test(path)) return Number(path);
+    const parts = path.split('.');
+    let v = scope[parts[0]];
+    for (let i = 1; i < parts.length && v != null; i++) v = v[parts[i]];
+    return v;
+  }
+  const interp = (s, scope) => s.replace(HOLE, (_, p) => { const v = lookup(p, scope); return v == null ? '' : String(v); });
+  const camel = (s) => s.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+
+  const defs = {};
+  function def(name) {
+    if (defs[name]) return defs[name];
+    const tpl = document.getElementById('tpl-' + name);
+    const js = document.getElementById('js-' + name);
+    const Cls = new Function('DCLogic', js.textContent + '\nreturn Component;')(DCLogic);
+    return (defs[name] = { tpl, Cls });
+  }
+
+  class Instance {
+    constructor(name, props) {
+      this.name = name;
+      const d = def(name);
+      this.tpl = d.tpl;
+      this.logic = new d.Cls(props || {});
+      this.logic.props = props || {};
+      this.logic.__inst = this;
+      this.children = {};
+      if (this.logic.componentDidMount) setTimeout(() => this.logic.componentDidMount(), 0);
+    }
+    mount(host) { this.host = host; this.update(); }
+    update() {
+      if (!this.host) return;
+      const scope = this.logic.renderVals ? (this.logic.renderVals() || {}) : {};
+      this.importCount = 0;
+      const frag = document.createDocumentFragment();
+      this.renderInto(frag, this.tpl.content, scope);
+      this.host.replaceChildren(frag);
+    }
+    renderInto(out, parent, scope) {
+      for (const node of Array.from(parent.childNodes)) {
+        if (node.nodeType === 3) {
+          out.appendChild(document.createTextNode(node.data.indexOf('{{') >= 0 ? interp(node.data, scope) : node.data));
+        } else if (node.nodeType === 1) {
+          this.renderEl(out, node, scope);
+        }
+      }
+    }
+    renderEl(out, node, scope) {
+      if (node.tagName === 'TEMPLATE') {
+        if (node.hasAttribute('data-sc-for')) {
+          const m = (node.getAttribute('list') || '').match(WHOLE);
+          const list = m ? lookup(m[1], scope) : [];
+          const as = node.getAttribute('as') || 'item';
+          (list || []).forEach((item, i) => {
+            const s = Object.create(scope); s[as] = item; s.$index = i;
+            this.renderInto(out, node.content, s);
+          });
+          return;
+        }
+        if (node.hasAttribute('data-sc-if')) {
+          const m = (node.getAttribute('value') || '').match(WHOLE);
+          if (m && lookup(m[1], scope)) this.renderInto(out, node.content, scope);
+          return;
+        }
+        if (node.hasAttribute('data-dc-import')) {
+          const name = node.getAttribute('name');
+          const props = {};
+          for (const a of Array.from(node.attributes)) {
+            if (a.name === 'name' || a.name === 'data-dc-import' || a.name.indexOf('hint-') === 0) continue;
+            const m = a.value.match(WHOLE);
+            props[camel(a.name)] = m ? lookup(m[1], scope) : interp(a.value, scope);
+          }
+          const key = (this.importCount++) + ':' + name;
+          let child = this.children[key];
+          if (!child) child = this.children[key] = new Instance(name, props);
+          child.logic.props = props;
+          const host = document.createElement('div');
+          host.style.display = 'contents';
+          out.appendChild(host);
+          child.mount(host);
+          return;
+        }
+      }
+      const el = document.importNode(node, false);
+      for (const a of Array.from(node.attributes)) {
+        if (a.value.indexOf('{{') < 0) continue;
+        const m = a.value.match(WHOLE);
+        if (m) {
+          const v = lookup(m[1], scope);
+          if (/^on/.test(a.name) && typeof v === 'function') {
+            el.removeAttribute(a.name);
+            el.addEventListener(a.name.slice(2).toLowerCase(), v);
+          } else if (v === false || v == null) {
+            el.removeAttribute(a.name);
+          } else {
+            el.setAttribute(a.name, v === true ? '' : String(v));
+          }
+        } else {
+          el.setAttribute(a.name, interp(a.value, scope));
+        }
+      }
+      this.renderInto(el, node.tagName === 'TEMPLATE' ? node.content : node, scope);
+      out.appendChild(el);
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const app = document.getElementById('app');
+    new Instance(app.getAttribute('data-page')).mount(app);
+  });
+})();
+
+</script>
+</body>
+</html>

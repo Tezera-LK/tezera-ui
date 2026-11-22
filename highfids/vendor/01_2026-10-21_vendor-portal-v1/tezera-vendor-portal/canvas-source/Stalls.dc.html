@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Stalls</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&amp;family=Instrument+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#050316}a:hover{color:#050316}
+.h{font-family:'Bricolage Grotesque',system-ui,sans-serif;letter-spacing:-.02em;margin:0;line-height:1.1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;box-sizing:border-box;border-radius:14px 14px 3px 14px;border:1.5px solid #70a992;background:#70a992;color:#050316;font:600 15px 'Instrument Sans',system-ui,sans-serif;text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn:hover{filter:brightness(.94)}
+.btn.o{background:transparent;border-color:#050316}
+.tab{min-height:48px;padding:0 22px;border:0;border-radius:18px 18px 0 0;font:600 15px 'Instrument Sans',system-ui,sans-serif;color:#050316;cursor:pointer}
+.tag{display:inline-flex;align-items:center;min-height:24px;padding:0 10px;border-radius:999px;background:#b6c3a7;color:#050316;font:600 12px 'Instrument Sans',system-ui,sans-serif;white-space:nowrap}
+.org{background:#526c80;color:#fff}
+.pri{background:transparent;border:1px dashed #050316;font-weight:500}
+.muted{color:rgba(5,3,22,.72)}
+.box{background:#e9e7e2;border-radius:18px 18px 4px 18px;padding:20px;display:flex;flex-direction:column;gap:12px;box-sizing:border-box}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid #b6c3a7}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #e9e7e2; font-family: 'Instrument Sans', system-ui, sans-serif; color: #050316; font-size: 15px; line-height: 1.5">
+  <dc-import name="Topbar" hint-size="100%,84px"></dc-import>
+  <div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 28px; padding: 24px 28px 56px; max-width: 1440px; margin: 0 auto; box-sizing: border-box">
+    <div style="flex: 0 1 250px; min-width: 220px">
+      <dc-import name="Sidebar" active="stalls" hint-size="100%,960px"></dc-import>
+    </div>
+    <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 20px">
+      <div>
+        <h1 class="h" style="font-size: 40px; font-weight: 800">Stalls</h1>
+        <p class="muted" style="margin: 6px 0 0">Apply for stall slots at events. Only vendors can apply; freelancers can't.</p>
+      </div>
+
+      <div>
+        <div role="tablist" aria-label="Stalls" style="display: flex; gap: 4px; flex-wrap: wrap">
+          <sc-for list="{{tabs}}" as="t" hint-placeholder-count="3">
+            <button class="tab" role="tab" aria-selected="{{t.sel}}" onClick="{{t.pick}}" style="background: {{t.bg}}">{{t.label}}</button>
+          </sc-for>
+        </div>
+        <div style="background: #658095; border-radius: 0 24px 6px 24px; padding: 14px; display: flex; flex-direction: column; gap: 14px">
+
+          <sc-if value="{{isSlots}}" hint-placeholder-val="{{true}}">
+            <div class="box" style="flex-direction: row; flex-wrap: wrap; gap: 8px; align-items: center">
+              <span style="font-weight: 600; font-size: 14px">Stall type</span>
+              <span class="tag" style="background: #70a992">All</span><span class="tag">Food</span><span class="tag">Drinks</span><span class="tag">Merchandise</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px">
+              <sc-for list="{{slots}}" as="s" hint-placeholder-count="4">
+                <div class="box">
+                  <div aria-hidden="true" style="height: 110px; border-radius: 14px 14px 3px 14px; background: #b6c3a7; display: grid; place-items: center; font-size: 13px; font-weight: 600">Event photo</div>
+                  <span class="tag org" style="align-self: flex-start">{{s.org}}</span>
+                  <h2 class="h" style="font-size: 20px; font-weight: 700">{{s.event}}</h2>
+                  <p style="margin: 0">{{s.when}}</p>
+                  <div style="display: flex; gap: 6px; flex-wrap: wrap"><span class="tag">{{s.type}}</span><span class="tag">{{s.fee}}</span></div>
+                  <p class="muted" style="margin: 0; font-size: 14px">Apply by {{s.deadline}} · {{s.left}}</p>
+                  <sc-if value="{{s.open}}" hint-placeholder-val="{{true}}"><button class="btn" onClick="{{s.apply}}">Apply for a stall</button></sc-if>
+                  <sc-if value="{{s.done}}" hint-placeholder-val="{{false}}"><p style="margin: 0; font-weight: 700">Applied. The organiser approves or rejects it.</p></sc-if>
+                  <a href="Event.dc.html" style="font-weight: 600">Event page</a>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{isApps}}" hint-placeholder-val="{{false}}">
+            <div class="box">
+              <h2 class="h" style="font-size: 22px; font-weight: 700">My applications</h2>
+              <div class="row">
+                <span style="flex: 1 1 260px"><strong style="display: block">Colombo Food Fair</strong><span class="muted" style="font-size: 14px">Food stall · Fee LKR 15,000 · Paid in the sandbox</span></span>
+                <span class="tag" style="background: #70a992">Approved · Stall B-12</span>
+                <a class="btn o" href="MyStall.dc.html">Manage stall</a>
+              </div>
+              <div class="row">
+                <span style="flex: 1 1 260px"><strong style="display: block">Kandy Fest</strong><span class="muted" style="font-size: 14px">Food stall · Fee LKR 10,000</span></span>
+                <span class="tag pri">Waiting for organiser</span>
+                <a class="btn o" href="Messages.dc.html">Message</a>
+              </div>
+              <div class="row" style="border-bottom: 0">
+                <span style="flex: 1 1 260px"><strong style="display: block">Negombo Beach Carnival</strong><span class="muted" style="font-size: 14px">Drinks stall</span></span>
+                <span class="tag" style="background: #050316; color: #e9e7e2">Rejected</span>
+                <span class="muted" style="font-size: 14px">Drinks slots filled</span>
+              </div>
+              <p style="margin: 6px 0 0; font-size: 14px">Paid a fee but weren't given a stall? <a href="Booking.dc.html" style="font-weight: 600">Report it</a> and an admin handles the dispute.</p>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{isInv}}" hint-placeholder-val="{{false}}">
+            <div class="box" style="flex-direction: row; flex-wrap: wrap; gap: 20px; align-items: stretch">
+              <div aria-hidden="true" style="flex: 1 1 220px; min-height: 180px; border-radius: 14px 14px 3px 14px; background: #b6c3a7; display: grid; place-items: center; font-size: 13px; font-weight: 600">Event photo</div>
+              <div style="flex: 2 1 320px; display: flex; flex-direction: column; gap: 10px">
+                <span class="tag org" style="align-self: flex-start">Harbour Lights Events invited you</span>
+                <h2 class="h" style="font-size: 26px; font-weight: 800">Galle Face Night Market</h2>
+                <p style="margin: 0">Sun 15 Nov, 5 pm to midnight · Food stall · Fee LKR 12,000</p>
+                <p style="margin: 0" class="muted">"Your kottu stall was a hit at the Food Fair. We'd love you near the main stage."</p>
+                <sc-if value="{{invOpen}}" hint-placeholder-val="{{true}}">
+                  <div style="display: flex; gap: 10px; flex-wrap: wrap">
+                    <button class="btn" onClick="{{acceptInv}}">Accept invitation</button>
+                    <button class="btn o" onClick="{{declineInv}}">Decline</button>
+                  </div>
+                  <p class="muted" style="margin: 0; font-size: 14px">Accepting counts as approval. You get a stall number once the organiser places you.</p>
+                </sc-if>
+                <sc-if value="{{invAccepted}}" hint-placeholder-val="{{false}}">
+                  <p style="margin: 0; font-weight: 700">You're in. Pay the stall fee and set up your listing.</p>
+                  <a class="btn" href="MyStall.dc.html" style="align-self: flex-start">Go to my stall</a>
+                </sc-if>
+                <sc-if value="{{invDeclined}}" hint-placeholder-val="{{false}}">
+                  <p style="margin: 0; font-weight: 700">Declined. The organiser is told.</p>
+                </sc-if>
+              </div>
+            </div>
+          </sc-if>
+
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1300}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { tab: 'slots', applied: {}, inv: 'open' }; }
+  renderVals() {
+    const { tab, applied, inv } = this.state;
+    const data = [
+      { org: 'Kandy Fest Co.', event: 'Kandy Fest', when: 'Sat 5 Dec and Sun 6 Dec', type: 'Food', fee: 'LKR 10,000', deadline: '20 Nov', left: '8 of 30 left' },
+      { org: 'Harbour Lights Events', event: 'Beach Party', when: 'Sun 20 Dec', type: 'Drinks', fee: 'LKR 8,000', deadline: '1 Dec', left: '4 of 12 left' },
+      { org: 'Coastline Collective', event: 'Makers Market', when: 'Sun 22 Nov', type: 'Merchandise', fee: 'LKR 5,000', deadline: '10 Nov', left: '15 of 40 left' },
+      { org: 'Lotus Weddings', event: 'Wedding Fair 2026', when: 'Sun 29 Nov', type: 'Food', fee: 'LKR 20,000', deadline: '15 Nov', left: '2 of 10 left' }
+    ];
+    const defs = [['slots', 'Stall slots'], ['apps', 'My applications'], ['inv', 'Invitations (1)']];
+    return {
+      tabs: defs.map(([k, label]) => ({ label, sel: String(k === tab), bg: k === tab ? '#658095' : '#b6c3a7', pick: () => this.setState({ tab: k }) })),
+      isSlots: tab === 'slots', isApps: tab === 'apps', isInv: tab === 'inv',
+      slots: data.map((s, k) => ({ ...s, open: !applied[k], done: !!applied[k], apply: () => this.setState({ applied: { ...applied, [k]: true } }) })),
+      invOpen: inv === 'open', invAccepted: inv === 'accepted', invDeclined: inv === 'declined',
+      acceptInv: () => this.setState({ inv: 'accepted' }),
+      declineInv: () => this.setState({ inv: 'declined' })
+    };
+  }
+}
+</script>
+</body>
+</html>

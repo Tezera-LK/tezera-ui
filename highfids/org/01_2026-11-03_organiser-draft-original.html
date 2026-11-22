@@ -1,0 +1,2379 @@
+<meta charset="utf-8">
+<title>Tezera Organiser Flow</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<!--
+  tezera: organiser flow (editable source)
+
+  Version 2, 28 October 2026. The organiser web portal screens, rebuilt in the consumer flow's layout
+  (tezera-consumer-flow.html): top bar, sidebar with General and Organiser tools, main column and
+  right-hand column, flow map and click-through. Checked against the organiser mind map
+  (mindmaps/tezera-organiser-map-outline.txt) and PRD version 6. Version 1 (22 October) was a long
+  page of HTML browser windows; this file replaces it.
+
+  How to change it
+  - Each screen is one call: screen('O05', 'Dashboard', s => { ... }). It draws with the helpers
+    above it (button, chip, field, row, card, table, stat ...) at the consumer flow's sizes:
+    1440 px wide, top bar 84 px, sidebar x 32 to 256, main column x 292 to 1036, right column
+    x 1064 to 1404. Screens grow taller when their content does.
+  - Links: give a button, chip, row, tab or table link  to: 'O09'  and it becomes a hotspot in the
+    click-through. to: null with a note shows that note instead.
+  - Colours: PALETTES.light and PALETTES.dark, from the organiser palettes in the brand manual.
+  - Journeys on the flow map: FLOWS. Groups in the click-through list: GROUPS.
+  - The browser console lists any text that was too wide for its space.
+  - Copy SVG puts the screen on the clipboard, ready to paste into Figma.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap">
+<style>
+/* Layout: slim header with view and palette switches; Flow map = journey rows of screens; Click-through = screen list + live screen with hotspots. */
+:root {
+  --bg: #EDF1F5; --panel: #FFFFFF; --ink: #1F2933; --muted: #5B6672; --line: #D3DBE4; --accent: #526C80; --accent-ink: #FFFFFF; --hot: #C2601A; --chip: #EEF2F6;
+  --font-ui: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif; --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #12171F; --panel: #1C232D; --ink: #E6EAEE; --muted: #A2ADB8; --line: #303A46; --accent: #8FA9BB; --accent-ink: #11161D; --hot: #FFAE6B; --chip: #252E39; color-scheme: dark } }
+:root[data-theme="dark"] { --bg: #12171F; --panel: #1C232D; --ink: #E6EAEE; --muted: #A2ADB8; --line: #303A46; --accent: #8FA9BB; --accent-ink: #11161D; --hot: #FFAE6B; --chip: #252E39; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-ui); font-size: 14px; }
+.wrap { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 40px; max-width: 1500px; margin: 0 auto; display: grid; gap: 18px; }
+header { display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: end; justify-content: space-between; }
+h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(30px, 4vw, 44px); line-height: 1; margin: 0; letter-spacing: -0.01em; }
+h1 em { font-style: normal; color: var(--accent); }
+.sub { margin: 6px 0 0; color: var(--muted); max-width: 68ch; line-height: 1.5; }
+.switches { display: flex; flex-wrap: wrap; gap: 10px; }
+.seg { display: inline-flex; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+.seg button { font: 600 13px var(--font-ui); border: 0; background: none; color: var(--muted); padding: 7px 14px; border-radius: 999px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+button:focus-visible, .thumb:focus-visible, .hot:focus-visible, .list button:focus-visible { outline: 2px solid var(--hot); outline-offset: 2px; }
+#map-view { display: grid; gap: 16px; }
+[hidden] { display: none !important; }
+.flow { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px 18px 8px; display: grid; gap: 10px; min-width: 0; }
+.flow h2 { margin: 0; font-size: 17px; font-weight: 700; }
+.flow p { margin: 0; color: var(--muted); max-width: 80ch; line-height: 1.5; }
+.track { display: flex; align-items: center; gap: 0; overflow-x: auto; padding: 8px 2px 14px; }
+.step { flex: 0 0 auto; display: flex; align-items: center; }
+.thumb { width: 220px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--chip); cursor: pointer; padding: 0; text-align: left; color: var(--ink); font: inherit; }
+.thumb img { display: block; width: 100%; aspect-ratio: 1440 / 1024; object-fit: cover; object-position: top; }
+.thumb span { display: block; padding: 8px 10px; font-size: 12px; font-weight: 600; }
+.thumb span b { color: var(--muted); font-weight: 600; margin-right: 6px; font-variant-numeric: tabular-nums; }
+.thumb:hover { border-color: var(--accent); }
+.arrow { flex: 0 0 auto; width: 120px; display: grid; justify-items: center; gap: 4px; color: var(--muted); font-size: 12px; font-weight: 600; text-align: center; padding: 0 6px; }
+.arrow svg { width: 100%; height: 14px; }
+.viewer { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 860px) { .viewer { grid-template-columns: 1fr; } }
+.list { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 12px; display: grid; gap: 12px; position: sticky; top: calc(12px + env(safe-area-inset-top, 0px)); }
+@media (max-width: 860px) { .list { position: static; } }
+.list h3 { margin: 4px 6px 2px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.list div { display: grid; gap: 2px; }
+.list button { text-align: left; font: 500 13px var(--font-ui); background: none; border: 0; color: var(--ink); padding: 7px 8px; border-radius: 8px; cursor: pointer; }
+.list button b { color: var(--muted); font-weight: 600; margin-right: 6px; font-variant-numeric: tabular-nums; }
+.list button[aria-current="page"] { background: var(--chip); font-weight: 700; }
+.stage { display: grid; gap: 12px; min-width: 0; }
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; justify-content: space-between; }
+.crumbs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; color: var(--muted); font-size: 12px; }
+.crumbs button { font: 600 12px var(--font-ui); background: var(--chip); border: 1px solid var(--line); color: var(--ink); border-radius: 999px; padding: 4px 10px; cursor: pointer; }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.tools button, .tools label { font: 600 13px var(--font-ui); background: var(--panel); border: 1px solid var(--line); color: var(--ink); border-radius: 999px; padding: 7px 12px; cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
+.screen { position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background: var(--panel); }
+.screen svg { display: block; width: 100%; height: auto; }
+.hot { position: absolute; border: 0; background: transparent; border-radius: 8px; cursor: pointer; padding: 0; }
+.hot:hover, .show-hot .hot { background: color-mix(in srgb, var(--hot) 16%, transparent); box-shadow: inset 0 0 0 2px var(--hot); }
+.hot.dead { cursor: not-allowed; }
+.out { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; }
+.out h3 { margin: 0 0 8px; font-size: 14px; }
+.out ul { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 6px 18px; }
+.out li { display: flex; gap: 8px; align-items: baseline; font-size: 13px; min-width: 0; }
+.out li button { font: 600 12px var(--font-ui); background: var(--chip); border: 1px solid var(--line); color: var(--ink); border-radius: 999px; padding: 2px 8px; cursor: pointer; white-space: nowrap; }
+.out li span { color: var(--muted); min-width: 0; overflow-wrap: anywhere; }
+.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); max-width: calc(100% - 32px); background: var(--ink); color: var(--bg); padding: 10px 14px; border-radius: 10px; font-weight: 600; }
+.changes { background: var(--panel); border: 1px dashed var(--line); border-radius: 16px; padding: 14px 16px; color: var(--muted); line-height: 1.55; }
+.changes b { color: var(--ink); }
+.changes ul { margin: 6px 0 0; padding-left: 18px; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>tezera <em>organiser flow</em></h1>
+      <p class="sub">Desktop screens for the organiser account, laid out like the consumer flow. Use the flow map to see each journey end to end, or click through the screens: highlighted areas are real links.</p>
+    </div>
+    <div class="switches">
+      <div class="seg" role="group" aria-label="View">
+        <button type="button" id="v-map" aria-pressed="true">Flow map</button>
+        <button type="button" id="v-click" aria-pressed="false">Click-through</button>
+      </div>
+      <div class="seg" role="group" aria-label="Palette">
+        <button type="button" id="p-light" aria-pressed="true">Light · organiser</button>
+        <button type="button" id="p-dark" aria-pressed="false">Dark · organiser</button>
+      </div>
+    </div>
+  </header>
+
+  <section id="map-view" aria-label="Flow map"></section>
+
+  <section id="click-view" class="viewer" hidden aria-label="Click-through">
+    <nav class="list" id="screen-list" aria-label="Screens"></nav>
+    <div class="stage">
+      <div class="bar">
+        <div class="crumbs" id="crumbs" aria-label="Path so far"></div>
+        <div class="tools">
+          <button type="button" id="btn-back">Back</button>
+          <label for="show-hot"><input type="checkbox" id="show-hot"> Show links</label>
+          <button type="button" id="btn-copy">Copy SVG</button>
+        </div>
+      </div>
+      <div class="screen" id="screen"></div>
+      <div class="out" id="out"></div>
+    </div>
+  </section>
+
+  <div class="changes">
+    <b>Version 2 (28 Oct): the consumer flow's layout, checked against the organiser mind map.</b>
+    <ul>
+      <li>Same layout as the consumer flow: top bar, sidebar with General and Organiser tools, a right-hand column, and the shared sign-up and log-in pages.</li>
+      <li>Example data carries on from the consumer flow: you are Agastra Events, running Colombo Music Fest.</li>
+      <li>Added from the mind map: log in, verify code, profile set-up, a provider's own quote, Mark completed, review a provider, leaderboards and a community thread.</li>
+      <li>Should items the consumer flow already shows now have their organiser side: live status, know before you go, age rating, notification settings and language.</li>
+      <li>Not drawn yet: sandbox payments, analytics, track record, instalment tracker, PDF, blank-grid and saved-map starts, the AI map draft, and ticketing.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+/* GENERATOR START */
+const W = 1440;
+const FONT = 'Bricolage Grotesque, Arial, sans-serif';
+const MX = 292, MW = 744, MR = 1036, RX = 1064, RW = 340, FR = 1404, FW = 1112;
+
+// Organiser palettes (brand manual, section 04), mapped onto the consumer flow's screen roles:
+// sidebar = primary, nav pills and cards = secondary, search bar = accent, page = background.
+const PALETTES = {
+  light: {
+    bg: '#F1F4F8', side: '#526C80', sideHead: '#FFFFFF',
+    nav: '#CFE3D8', navText: '#2E4253', navOn: '#FFFFFF', navOnText: '#3B566B',
+    card: '#CFE3D8', row: '#FFFFFF', line: '#C7D1DC', div: '#DCE3EB',
+    text: '#282829', muted: '#56616C', pri: '#526C80', onPri: '#FFFFFF',
+    srch: '#C5D3D1', srchText: '#2C4542', srchIcon: '#FFFFFF', icoSq: '#9DB3B0',
+    hot: '#255A84', hotSoft: '#D8E5F2',
+    thumb: '#B6D2C3', cover: '#D3DAE3', coverLine: '#BAC5D1', av: '#CBD3DC', avHead: '#B3BFCB',
+    amber: '#F6E3B4', amberText: '#7A5200', green: '#D4EBDA', greenText: '#2B6B38',
+    grey: '#E3E8EE', greyText: '#3F4A55', red: '#B3261E', dot: '#E5484D',
+    toggleOff: '#C7D1DC', knob: '#FFFFFF',
+    logo1: '#526C80', logo2: '#70A98D', logoText: '#282829',
+    brand: '#526C80', brandText: '#FFFFFF', brandLogo1: '#70A98D', brandLogo2: '#D7DFEA',
+    scrim: '#1E2833', scrimOpacity: 0.45,
+    plan: '#E8EDF3', grid: '#D7DFE8', wall: '#7D8A97', zone: '#526C80', zoneOpacity: 0.1,
+    sel: '#2F8A63', pinRing: '#FFFFFF', measureBg: '#282829', measureText: '#FFFFFF',
+    pins: { stage: '#526C80', gate: '#255A84', toilets: '#2B6B38', aid: '#B3261E', parking: '#56616C', water: '#2E7FA5', stall: '#7A5200' },
+  },
+  dark: {
+    bg: '#151D28', side: '#2B3D4E', sideHead: '#D6D6D7',
+    nav: '#1E3A33', navText: '#D6D6D7', navOn: '#D6D6D7', navOnText: '#151D28',
+    card: '#1E3A33', row: '#1C2632', line: '#3A4958', div: '#26323F',
+    text: '#D6D6D7', muted: '#9AA6B2', pri: '#7F9AAD', onPri: '#151D28',
+    srch: '#6F908B', srchText: '#0F1A19', srchIcon: '#151D28', icoSq: '#4C6662',
+    hot: '#9CC4E4', hotSoft: '#22364A',
+    thumb: '#2B4A41', cover: '#1F2A36', coverLine: '#33414F', av: '#2C3A48', avHead: '#3D4D5D',
+    amber: '#4A3B12', amberText: '#F0CF73', green: '#1F3A2B', greenText: '#8FD1A8',
+    grey: '#2A3542', greyText: '#C9CED4', red: '#F08A80', dot: '#E5484D',
+    toggleOff: '#3A4958', knob: '#1C2632',
+    logo1: '#7F9AAD', logo2: '#568F76', logoText: '#D6D6D7',
+    brand: '#2B3D4E', brandText: '#D6D6D7', brandLogo1: '#7F9AAD', brandLogo2: '#568F76',
+    scrim: '#05080C', scrimOpacity: 0.6,
+    plan: '#1A2430', grid: '#222E3B', wall: '#5B6A79', zone: '#7F9AAD', zoneOpacity: 0.12,
+    sel: '#8FD1A8', pinRing: '#1C2632', measureBg: '#D6D6D7', measureText: '#151D28',
+    pins: { stage: '#7F9AAD', gate: '#9CC4E4', toilets: '#8FD1A8', aid: '#F08A80', parking: '#9AA6B2', water: '#6EC1E4', stall: '#F0CF73' },
+  },
+};
+
+// Advance widths of Bricolage Grotesque, measured in Chrome at 12 px and 26 px (thousandths of an em).
+const METRICS = {
+  chars: " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~·…✓×▾★☆▲▼›‹–—’‘“”é±⋯↶↷●○−↑↓→←•",
+  w: {
+    400: { 12: '254,262,335,606,626,932,758,187,274,269,412,496,149,343,209,279,656,308,587,605,614,595,642,528,647,638,189,171,471,506,471,437,937,674,659,667,687,589,572,698,703,267,343,658,509,896,734,717,622,734,652,648,589,717,669,971,651,622,588,311,334,291,534,589,283,558,609,550,608,567,389,586,598,250,271,548,250,897,598,602,609,608,400,540,391,589,565,839,542,581,512,328,255,314,510,178,710,749,510,550,833,833,550,550,222,225,513,750,190,189,347,348,567,510,833,833,833,550,550,496,486,488,550,550,243', 26: '248,253,322,600,615,927,744,180,264,259,405,489,147,335,202,268,645,298,578,597,606,587,632,519,639,629,184,169,459,498,459,432,924,666,646,659,675,579,561,688,690,255,332,645,498,875,721,707,611,721,640,635,576,702,660,961,639,610,580,304,332,287,530,592,283,549,598,545,598,560,379,580,585,239,263,538,239,884,585,595,598,598,391,532,381,578,557,828,535,570,501,320,243,308,506,174,688,749,506,550,833,833,550,550,216,218,505,746,184,183,335,336,560,506,857,809,809,550,550,489,480,485,550,550,238' },
+    500: { 12: '247,273,352,613,632,948,758,193,283,279,427,501,165,348,222,284,660,321,595,610,626,601,648,533,651,644,208,188,481,511,481,437,954,687,668,672,692,601,580,706,711,276,352,668,509,912,749,720,630,738,662,653,596,722,676,987,670,639,590,316,342,301,547,578,283,567,620,556,619,574,398,592,610,260,277,563,259,914,610,605,620,619,412,545,398,601,575,857,557,589,518,327,261,317,517,197,733,749,517,550,833,833,550,550,229,231,522,768,198,197,367,368,574,517,833,833,833,550,550,501,492,495,550,550,271', 26: '241,264,341,608,620,942,744,187,272,269,421,493,162,339,215,273,649,311,585,603,617,592,638,524,643,635,203,186,469,502,469,431,941,678,654,664,678,589,567,696,696,265,341,656,499,890,734,709,619,726,650,640,583,705,667,975,657,626,582,309,339,296,542,579,283,558,608,550,608,565,389,584,597,249,269,553,248,900,597,597,608,608,403,536,388,589,567,844,549,578,508,319,249,310,511,193,715,749,511,550,833,833,550,550,224,225,514,763,192,191,356,357,565,511,857,809,809,550,550,493,487,491,550,550,267' },
+    600: { 12: '239,284,369,619,638,963,757,198,291,289,442,505,181,351,233,288,663,334,602,615,636,606,653,537,655,650,226,204,489,516,489,436,971,699,676,676,696,612,587,714,718,285,361,678,509,927,763,722,637,742,671,658,602,727,683,1003,690,654,591,321,349,310,560,566,283,576,630,561,630,581,406,598,621,269,281,577,267,931,621,608,630,630,424,549,404,612,584,875,571,595,524,326,266,319,523,215,756,749,523,550,833,833,550,550,237,237,530,786,205,204,387,388,581,523,917,917,917,550,550,505,497,501,550,550,299', 26: '234,275,359,615,626,956,744,193,281,279,438,498,178,343,229,280,652,325,592,608,628,597,643,530,646,641,222,203,479,508,479,431,959,690,663,668,683,599,574,703,703,274,350,666,500,905,748,711,626,729,659,645,589,710,674,990,676,641,585,314,347,306,553,566,283,567,618,556,618,572,398,589,608,259,273,567,257,916,608,600,618,618,415,541,395,600,575,861,563,584,516,318,255,312,517,213,741,749,517,550,833,833,550,550,232,233,522,780,200,199,377,378,572,517,877,829,829,550,550,498,494,498,550,550,297' },
+    700: { 12: '231,294,387,626,643,978,756,203,300,299,458,509,196,356,245,293,668,348,610,621,647,611,658,542,659,657,244,220,497,521,497,437,989,711,685,681,701,623,595,723,725,295,370,689,510,942,777,725,646,745,680,663,609,731,691,1019,710,670,593,325,357,320,573,555,283,585,640,566,640,587,414,603,633,278,285,592,275,948,633,610,640,640,435,554,410,624,594,894,586,603,532,324,272,321,529,233,780,749,529,550,833,833,550,550,243,245,538,804,212,210,405,407,587,529,917,917,917,550,550,509,503,507,550,550,328', 26: '227,287,378,622,631,971,745,199,290,289,454,501,193,348,242,285,656,339,600,614,639,602,647,535,650,647,241,220,488,512,488,431,977,702,671,672,687,608,581,710,710,284,359,676,501,920,762,714,634,732,668,650,595,714,681,1004,695,656,587,319,355,315,565,553,283,577,628,561,628,578,407,594,620,268,278,582,267,932,620,603,628,628,427,546,402,612,584,877,578,591,523,317,262,314,522,232,768,749,522,550,833,833,550,550,239,240,530,797,208,207,397,399,578,522,877,829,829,550,550,501,500,505,550,550,326' },
+    800: { 12: '223,304,404,633,649,993,755,209,308,308,473,513,212,360,258,298,672,361,617,626,658,616,664,547,662,664,262,237,506,526,506,437,1006,724,694,686,705,634,603,731,732,304,378,699,510,958,792,727,653,750,690,669,615,736,697,1035,730,687,595,330,365,330,586,543,283,594,650,572,651,594,423,608,645,287,289,607,284,965,645,613,650,651,447,559,417,636,604,912,601,610,538,323,278,323,535,252,803,749,535,550,833,833,550,550,251,251,546,822,220,218,425,427,594,535,917,917,917,550,550,513,509,513,550,550,356', 26: '220,298,395,630,637,985,745,205,298,298,470,505,209,352,255,290,659,352,607,619,650,607,652,540,654,654,260,237,497,517,497,431,994,714,680,677,691,618,587,717,716,294,368,686,502,935,776,716,642,735,677,655,601,718,688,1018,713,671,589,324,362,324,577,540,283,585,638,566,638,584,415,598,631,278,283,596,276,947,631,605,637,638,439,551,408,623,593,894,592,598,531,316,268,316,527,251,794,749,527,550,833,833,550,550,247,247,538,814,216,214,418,420,584,527,877,829,829,550,550,505,507,512,550,550,355' },
+  },
+  words: { 'සිංහල': 3.4518, 'தமிழ்': 3.1354 },
+};
+const CHAR_AT = new Map([...METRICS.chars].map((c, i) => [c, i]));
+const EM = {};
+for (const wt of Object.keys(METRICS.w)) {
+  EM[wt] = {};
+  for (const z of Object.keys(METRICS.w[wt])) EM[wt][z] = METRICS.w[wt][z].split(',').map(n => n / 1000);
+}
+function textWidth(str, size = 14, weight = 400) {
+  str = String(str);
+  if (METRICS.words[str]) return METRICS.words[str] * size;
+  const t = EM[weight] || EM[400];
+  const k = Math.min(1, Math.max(0, (size - 12) / 14));
+  let em = 0;
+  for (const ch of str) {
+    const i = CHAR_AT.get(ch);
+    em += i === undefined ? 0.6 : t[12][i] * (1 - k) + t[26][i] * k;
+  }
+  return em * size;
+}
+function wrapText(str, width, size, weight) {
+  const lines = [];
+  let line = '';
+  for (const word of String(str).split(' ')) {
+    const test = line ? `${line} ${word}` : word;
+    if (!line || textWidth(test, size, weight) <= width) line = test;
+    else { lines.push(line); line = word; }
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+function clipText(str, width, size, weight) {
+  let s = String(str);
+  while (s.length > 1 && textWidth(s + '…', size, weight) > width) s = s.slice(0, -1);
+  return s.trimEnd() + '…';
+}
+const f = n => +(+n).toFixed(1);
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const slug = s => String(s).replace(/&/g, 'and').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
+// One screen being drawn, in one palette. Shapes go into parts; hotspots into spots.
+class Screen {
+  constructor(id, name, palName) {
+    this.id = id; this.name = name; this.palName = palName; this.p = PALETTES[palName];
+    this.parts = []; this.spots = []; this.used = new Map(); this.lazies = [];
+    this.bottom = 0; this.quiet = 0; this.noReach = 0; this.warnings = [];
+  }
+  uid(name) {
+    const base = slug(name) || 'Group';
+    const n = (this.used.get(base) || 0) + 1;
+    this.used.set(base, n);
+    return n === 1 ? base : `${base}-${n}`;
+  }
+  reach(y) { if (!this.noReach) this.bottom = Math.max(this.bottom, y); }
+  g(name, fn) { this.parts.push(`<g id="${this.uid(name)}">`); const r = fn(); this.parts.push('</g>'); return r; }
+  rectStr(x, y, w, h, fill, o = {}) {
+    let a = `<rect x="${f(x)}" y="${f(y)}" width="${f(w)}" height="${f(h)}"`;
+    if (o.r) a += ` rx="${f(o.r)}"`;
+    a += ` fill="${fill || 'none'}"`;
+    if (o.opacity != null) a += ` fill-opacity="${o.opacity}"`;
+    if (o.stroke) a += ` stroke="${o.stroke}" stroke-width="${o.sw || 1}"`;
+    if (o.dash) a += ` stroke-dasharray="${o.dash}"`;
+    return a + '/>';
+  }
+  rect(x, y, w, h, fill, o = {}) { this.parts.push(this.rectStr(x, y, w, h, fill, o)); this.reach(y + h); }
+  circle(cx, cy, r, fill, o = {}) {
+    let a = `<circle cx="${f(cx)}" cy="${f(cy)}" r="${f(r)}" fill="${fill || 'none'}"`;
+    if (o.stroke) a += ` stroke="${o.stroke}" stroke-width="${o.sw || 1}"`;
+    this.parts.push(a + '/>');
+    this.reach(cy + r);
+  }
+  line(x1, y1, x2, y2, stroke, o = {}) {
+    let a = `<line x1="${f(x1)}" y1="${f(y1)}" x2="${f(x2)}" y2="${f(y2)}" stroke="${stroke}" stroke-width="${o.sw || 1}"`;
+    if (o.dash) a += ` stroke-dasharray="${o.dash}"`;
+    this.parts.push(a + '/>');
+    this.reach(Math.max(y1, y2));
+  }
+  path(d, fill, o = {}) {
+    let a = `<path d="${d}" fill="${fill || 'none'}"`;
+    if (o.stroke) a += ` stroke="${o.stroke}" stroke-width="${o.sw || 1}" stroke-linecap="round" stroke-linejoin="round"`;
+    this.parts.push(a + '/>');
+  }
+  text(x, y, str, o = {}) {
+    const size = o.size || 14, weight = o.weight || 400;
+    let s = String(str);
+    let w = textWidth(s, size, weight);
+    if (o.max != null && w > o.max + 0.5) {
+      this.warn(`"${s}" is ${Math.round(w)} px wide, room for ${Math.round(o.max)} px`);
+      s = clipText(s, o.max, size, weight);
+      w = textWidth(s, size, weight);
+    }
+    let a = `<text x="${f(x)}" y="${f(y)}" font-family="${FONT}" font-size="${size}" font-weight="${weight}" fill="${o.fill || this.p.text}"`;
+    if (o.anchor && o.anchor !== 'start') a += ` text-anchor="${o.anchor}"`;
+    this.parts.push(`${a}>${esc(s)}</text>`);
+    this.reach(y + size * 0.3);
+    return w;
+  }
+  // Wrapped text; returns the baseline of the last line.
+  para(x, y, str, width, o = {}) {
+    const size = o.size || 14, lh = o.lh || Math.round(size * 1.5);
+    const lines = wrapText(str, width, size, o.weight || 400);
+    lines.forEach((ln, i) => this.text(x, y + i * lh, ln, { ...o, max: width }));
+    return y + (lines.length - 1) * lh;
+  }
+  spot(x, y, w, h, label, to, kind = 'button', note) {
+    if (this.quiet) return;
+    const sp = { x: f(x), y: f(y), w: f(w), h: f(h), label, to: to || null, kind };
+    if (note) sp.note = note;
+    this.spots.push(sp);
+  }
+  warn(msg) { if (!this.quiet) this.warnings.push(`${this.id} ${this.name}: ${msg}`); }
+  slot() { this.parts.push(''); return this.parts.length - 1; }
+  // Drawn after the content, once the screen height is known (sidebar, auth panel).
+  lazy(fn) { this.lazies.push({ at: this.slot(), fn, quiet: this.quiet }); }
+  render() {
+    const H = Math.max(1024, Math.ceil(this.bottom + 48));
+    for (const L of this.lazies) {
+      const saved = this.parts, q = this.quiet;
+      this.parts = []; this.quiet = L.quiet; this.noReach++;
+      L.fn(H);
+      const out = this.parts.join('');
+      this.parts = saved; this.quiet = q; this.noReach--;
+      this.parts[L.at] = out;
+    }
+    const tag = this.palName === 'dark' ? 'Dark' : 'Light';
+    const svg = `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><g id="${this.id}-${slug(this.name)}-Desktop-${tag}"><clipPath id="c-${this.id}-desktop"><rect width="${W}" height="${H}"/></clipPath><g clip-path="url(#c-${this.id}-desktop)"><rect x="0" y="0" width="${W}" height="${H}" fill="${this.p.bg}"/>${this.parts.join('')}</g></g></svg>\n`;
+    return { H, svg };
+  }
+}
+
+/* ---------- Components (sizes from the consumer flow) ---------- */
+
+function btnW(label, size, h) { const pad = h >= 44 ? 24 : h >= 36 ? 20 : 14; return Math.ceil(textWidth(label, size, 600) + pad * 2); }
+
+// kind: 'sec' (outlined), 'pri' (filled), 'link' (text in the link colour), 'danger' (red text)
+function button(s, x, y, label, o = {}) {
+  const p = s.p, h = o.h || 36, size = o.size || (h >= 40 ? 14 : 13), kind = o.kind || 'sec';
+  const textOnly = kind === 'link' || kind === 'danger';
+  const w = o.w || (textOnly ? Math.ceil(textWidth(label, size, 600)) : btnW(label, size, h));
+  if (o.to !== undefined || o.note) s.spot(textOnly ? x - 6 : x, y, textOnly ? w + 12 : w, h, o.spot || label, o.to, 'button', o.note);
+  s.g('Button-' + label, () => {
+    if (kind === 'pri') s.rect(x, y, w, h, p.pri, { r: h / 2 });
+    else if (kind === 'sec') s.rect(x, y, w, h, o.fill || p.row, { r: h / 2, stroke: p.line });
+    const fill = kind === 'pri' ? p.onPri : kind === 'link' ? p.hot : kind === 'danger' ? p.red : p.text;
+    s.text(textOnly ? x : x + w / 2, y + h / 2 + size * 0.36, label, { size, weight: 600, fill, anchor: textOnly ? 'start' : 'middle', max: textOnly ? undefined : w - 16 });
+  });
+  return w;
+}
+// Buttons that end at x = right; returns the left edge of the group.
+function buttonsRight(s, right, y, specs, o = {}) {
+  const gap = o.gap || 10;
+  let x = right;
+  for (const b of specs.slice().reverse()) {
+    const h = b.h || o.h || 40, size = b.size || o.size || (h >= 40 ? 14 : 13);
+    const w = b.w || btnW(b.label, size, h);
+    x -= w;
+    button(s, x, y, b.label, { ...b, h, size, w });
+    x -= gap;
+  }
+  return x + gap;
+}
+function chipW(label, h = 28, size = 12) { return Math.ceil(textWidth(label, size, 600) + (h >= 30 ? 28 : h >= 26 ? 24 : 20)); }
+// tone: on, off, dashed, wait, info, amber, green, grey
+function chip(s, x, y, label, o = {}) {
+  const p = s.p, h = o.h || 28, size = o.size || 12, w = o.w || chipW(label, h, size);
+  const T = {
+    on: [p.pri, p.onPri], off: [p.row, p.text, p.line], dashed: [p.row, p.text, p.line, '4 3'],
+    wait: ['none', p.muted, p.muted, '4 3'], info: [p.hotSoft, p.hot],
+    amber: [p.amber, p.amberText], green: [p.green, p.greenText], grey: [p.grey, p.greyText],
+  }[o.tone || 'off'];
+  if (o.to !== undefined) s.spot(x, y, w, h, o.spot || label, o.to, 'chip', o.note);
+  s.g('Chip-' + label, () => {
+    s.rect(x, y, w, h, T[0], { r: h / 2, stroke: T[2], dash: T[3] });
+    s.text(x + w / 2, y + h / 2 + size * 0.36, label, { size, weight: 600, fill: T[1], anchor: 'middle' });
+  });
+  return w;
+}
+function chipsRow(s, x, y, items, o = {}) {
+  const gap = o.gap || 8;
+  let cx = x;
+  for (const it of items) {
+    const [label, tone, to, note] = Array.isArray(it) ? it : [it];
+    cx += chip(s, cx, y, label, { ...o, tone: tone || o.tone, to, note }) + gap;
+  }
+  return cx - gap;
+}
+// A labelled input. y is the label's baseline; returns the bottom of the box.
+function field(s, x, y, w, label, value, o = {}) {
+  const p = s.p, h = o.h || 46;
+  s.g('Field-' + (label || value || 'Input'), () => {
+    let by = y;
+    if (label) {
+      s.text(x, y, label, { size: 13, weight: 600, max: w });
+      if (o.opt) s.text(x + textWidth(label, 13, 600) + 6, y, o.opt, { size: 12, fill: p.muted });
+      by = y + 8;
+    }
+    s.rect(x, by, w, h, p.row, { r: 12, stroke: o.focus ? p.pri : p.line, sw: o.focus ? 2 : 1 });
+    const fill = o.ph ? p.muted : p.text;
+    const room = w - 28 - (o.select ? 18 : 0) - (o.suffix ? textWidth(o.suffix, 14) + 8 : 0);
+    if (value) {
+      if (o.area) s.para(x + 14, by + 26, value, w - 28, { size: 14, fill, lh: 21 });
+      else s.text(x + 14, by + h / 2 + 5, value, { size: 14, fill, max: room });
+    }
+    if (o.select) s.text(x + w - 16, by + h / 2 + 5, '▾', { size: 13, fill: p.muted, anchor: 'end' });
+    if (o.suffix) s.text(x + w - 14, by + h / 2 + 5, o.suffix, { size: 14, fill: p.muted, anchor: 'end' });
+  });
+  return (label ? y + 8 : y) + h;
+}
+function linkText(s, x, y, str, to) {
+  const w = s.text(x, y, str, { size: 13 });
+  s.spot(x, y - 16, w, 21, str, to, 'text');
+}
+function divider(s, x, y, w) {
+  const p = s.p, half = (w - 52) / 2;
+  s.g('Divider', () => {
+    s.line(x, y, x + half, y, p.div);
+    s.text(x + w / 2, y + 4, 'or', { size: 12, fill: p.muted, anchor: 'middle' });
+    s.line(x + w - half, y, x + w, y, p.div);
+  });
+}
+// Section heading on the page (15 px bold), with an optional link, note or live dot at the right.
+function label(s, x, y, str, o = {}) {
+  const p = s.p, right = o.right || MR;
+  s.g('Label-' + str, () => {
+    s.text(x, y, str, { size: 15, weight: 700 });
+    if (o.link) {
+      const lw = s.text(right, y, o.link.label, { size: 13, weight: 600, fill: p.hot, anchor: 'end' });
+      s.spot(right - lw - 6, y - 16, lw + 12, 22, o.link.label, o.link.to, 'link');
+    }
+    if (o.note) {
+      const nw = s.text(right, y, o.note, { size: 12, fill: p.muted, anchor: 'end' });
+      if (o.live) s.circle(right - nw - 10, y - 4, 4.5, p.greenText);
+    }
+    if (o.count) chip(s, x + textWidth(str, 15, 700) + 8, y - 16, o.count, { h: 22, tone: 'info' });
+  });
+}
+// Coloured card (right-hand column style). body(x, y, width) draws the inside and returns its bottom.
+function card(s, x, y, w, title, body, o = {}) {
+  const p = s.p, pad = o.pad || 16;
+  return s.g('Card-' + (title || o.name || 'Card'), () => {
+    const bg = s.slot();
+    let top = y + pad;
+    if (title) {
+      const linkW = o.link ? textWidth(o.link.label, 13, 600) : 0;
+      s.text(x + pad, y + 31, title, { size: 16, weight: 700, max: w - pad * 2 - (linkW ? linkW + 12 : 0) });
+      if (o.link) {
+        s.text(x + w - pad, y + 31, o.link.label, { size: 13, weight: 600, fill: p.hot, anchor: 'end' });
+        s.spot(x + w - pad - linkW - 6, y + 15, linkW + 12, 22, o.link.label, o.link.to, 'link');
+      }
+      top = y + 50;
+    }
+    const end = body(x + pad, top, w - pad * 2);
+    const h = Math.max(o.minH || 0, end + pad - y);
+    s.parts[bg] = s.rectStr(x, y, w, h, o.fill || p.card, { r: 18, stroke: o.stroke, sw: o.sw });
+    s.reach(y + h);
+    return y + h;
+  });
+}
+// White panel holding a form section, with its heading above. Returns the panel's bottom.
+function section(s, x, y, w, title, body, o = {}) {
+  const p = s.p, top = y + 19;
+  return s.g('Section-' + title, () => {
+    label(s, x, y, title, o);
+    const bg = s.slot();
+    const end = body(x + 20, top + 20, w - 40);
+    const h = end + 20 - top;
+    s.parts[bg] = s.rectStr(x, top, w, h, p.row, { r: 14 });
+    s.reach(top + h);
+    return top + h;
+  });
+}
+function avatar(s, cx, cy, r = 20) {
+  const p = s.p, k = r / 20;
+  s.g('Avatar', () => {
+    s.circle(cx, cy, r, p.av);
+    s.circle(cx, cy - 3.6 * k, 7.2 * k, p.avHead);
+    s.path(`M${f(cx - 12.4 * k)},${f(cy + 14 * k)} a${f(12.4 * k)},${f(10 * k)} 0 0 1 ${f(24.8 * k)},0`, p.avHead);
+  });
+}
+function cover(s, x, y, w, h, r = 12, name = 'Cover') {
+  const p = s.p;
+  s.g(name, () => {
+    s.rect(x, y, w, h, p.cover, { r });
+    s.line(x + 8, y + 8, x + w - 8, y + h - 8, p.coverLine);
+    s.line(x + w - 8, y + 8, x + 8, y + h - 8, p.coverLine);
+  });
+}
+// List row: lead (av, sq, thumb, dot, rank), up to three lines, chips, and something at the right.
+function row(s, x, y, w, h, o = {}) {
+  const p = s.p;
+  if (o.to !== undefined) s.spot(x, y, w, h, o.spot || o.title, o.to, 'row', o.note);
+  return s.g('Row-' + (o.name || o.title || 'Item'), () => {
+    if (o.fill !== false) s.rect(x, y, w, h, o.fill || p.row, { r: o.r || 14, stroke: o.stroke, sw: o.sw });
+    let tx = x + 16;
+    if (o.lead === 'av') { const r = o.ar || 20; avatar(s, x + 14 + r, y + h / 2, r); tx = x + 14 + r * 2 + 12; }
+    else if (o.lead === 'sq') { const z = o.z || 36; s.rect(x + 10, y + (h - z) / 2, z, z, o.leadFill || p.thumb, { r: z >= 56 ? 12 : 10 }); tx = x + 10 + z + 14; }
+    else if (o.lead === 'thumb') { const tw = o.tw || 96; s.rect(x + 10, y + 10, tw, h - 20, p.thumb, { r: 10 }); tx = x + 10 + tw + 14; }
+    else if (o.lead === 'dot') { s.circle(x + 18, y + h / 2, 5, o.dot || p.muted); tx = x + 34; }
+    else if (o.lead === 'check') {
+      const done = o.done;
+      s.circle(x + 24, y + h / 2, 10, done ? p.greenText : p.row, done ? {} : { stroke: p.line, sw: 1.5 });
+      if (done) s.path(`M${f(x + 19)},${f(y + h / 2)} l3.5,3.5 l6,-7`, 'none', { stroke: p.row, sw: 2.2 });
+      tx = x + 44;
+    }
+    let right = x + w - 12;
+    if (o.right) right = rightPart(s, o.right, x + w - 12, y, h) - 12;
+    const lines = [];
+    if (o.title) lines.push([o.title, o.ts || 14, 700, o.titleFill || p.text]);
+    if (o.sub) lines.push([o.sub, 12, 400, p.muted]);
+    if (o.meta) lines.push([o.meta, 12, 600, o.metaFill || p.hot]);
+    const n = lines.length + (o.chips ? 1 : 0);
+    let by = y + h / 2 - 9.5 * (n - 1) + 5;
+    for (const [t, size, weight, fill] of lines) { s.text(tx, by, t, { size, weight, fill, max: right - tx }); by += 19; }
+    if (o.chips) {
+      let cx = tx;
+      const cy = by - 16;
+      for (const [lbl, tone] of o.chips) cx += chip(s, cx, cy, lbl, { h: 22, tone }) + 6;
+      if (o.chipsText) s.text(cx + 4, cy + 15.5, o.chipsText, { size: 12, weight: 600, fill: o.chipsTextFill || p.hot, max: right - cx - 4 });
+    }
+    return { tx, right };
+  });
+}
+function rightPart(s, r, xr, y, h) {
+  const p = s.p;
+  if (r.buttons) return buttonsRight(s, xr, y + (h - (r.h || 34)) / 2, r.buttons, { h: r.h || 34, gap: 8 });
+  if (r.chip) { const w = chipW(r.chip[0], 22); chip(s, xr - w, y + (h - 22) / 2, r.chip[0], { h: 22, tone: r.chip[1] }); return xr - w; }
+  if (r.text) { const w = s.text(xr, y + h / 2 + (r.size || 12) * 0.36, r.text, { size: r.size || 12, weight: r.weight || 400, fill: r.fill || p.muted, anchor: 'end' }); return xr - w; }
+  if (r.toggle != null) { toggle(s, xr - 46, y + (h - 24) / 2, r.toggle); return xr - 46; }
+  return xr;
+}
+function table(s, x, y, w, cols, rows, o = {}) {
+  const p = s.p, pad = o.pad || 20, rh = o.rowH || 52, head = 40, inner = w - pad * 2;
+  const total = cols.reduce((a, c) => a + c.w, 0);
+  const ws = cols.map(c => c.w / total * inner), xs = [];
+  let acc = x + pad;
+  for (const cw of ws) { xs.push(acc); acc += cw; }
+  // 12 px gap between columns: left-aligned cells start 12 px in, right-aligned ones end 12 px early.
+  const box = cols.map((c, i) => {
+    const l = c.align !== 'right' && i > 0 ? 12 : 0, r = c.align === 'right' && i < cols.length - 1 ? 12 : 0;
+    return [xs[i] + l, ws[i] - l - r];
+  });
+  const h = head + rows.length * rh;
+  return s.g(o.name || 'Table', () => {
+    s.rect(x, y, w, h, p.row, { r: 14 });
+    cols.forEach((c, i) => {
+      const [bx, bw] = box[i];
+      if (c.label) s.text(c.align === 'right' ? bx + bw : bx, y + 25, c.label, { size: 12, weight: 600, fill: p.muted, anchor: c.align === 'right' ? 'end' : 'start', max: bw - 4 });
+    });
+    s.line(x + pad, y + head, x + w - pad, y + head, p.div);
+    rows.forEach((r, ri) => {
+      const ry = y + head + ri * rh;
+      if (ri) s.line(x + pad, ry, x + w - pad, ry, p.div);
+      r.forEach((c, ci) => cell(s, c, box[ci][0], ry, box[ci][1], rh, cols[ci].align));
+    });
+    return y + h;
+  });
+}
+function cell(s, c, x, y, w, h, align) {
+  if (c == null || c === '') return;
+  if (typeof c !== 'object') c = { t: String(c) };
+  const p = s.p, mid = y + h / 2, right = align === 'right';
+  if (c.who) {
+    const o = c.who;
+    let tx = x;
+    if (o.lead === 'av') { avatar(s, x + 16, mid, 16); tx = x + 42; }
+    else if (o.lead === 'sq') { s.rect(x, mid - 16, 32, 32, p.thumb, { r: 9 }); tx = x + 44; }
+    if (c.to !== undefined) s.spot(x - 6, y + 4, w, h - 8, o.title, c.to, 'row');
+    if (o.sub) {
+      s.text(tx, mid - 3, o.title, { size: 14, weight: 700, max: x + w - tx - 8 });
+      s.text(tx, mid + 15, o.sub, { size: 12, fill: p.muted, max: x + w - tx - 8 });
+    } else s.text(tx, mid + 5, o.title, { size: 14, weight: 700, max: x + w - tx - 8 });
+  } else if (c.chip) {
+    const cw = chipW(c.chip[0], 22);
+    if (cw > w + 0.5) s.warn(`chip "${c.chip[0]}" is ${Math.round(cw)} px wide, room for ${Math.round(w)} px`);
+    chip(s, right ? x + w - cw : x, mid - 11, c.chip[0], { h: 22, tone: c.chip[1] });
+  } else if (c.link) {
+    const lbl = `${c.link} ›`, lw = textWidth(lbl, 13, 600);
+    if (lw > w + 0.5) s.warn(`link "${lbl}" is ${Math.round(lw)} px wide, room for ${Math.round(w)} px`);
+    s.text(right ? x + w : x, mid + 5, lbl, { size: 13, weight: 600, fill: p.hot, anchor: right ? 'end' : 'start' });
+    s.spot(right ? x + w - lw - 6 : x - 6, mid - 14, lw + 12, 28, c.spot || c.link, c.to, 'link', c.note);
+  } else if (c.buttons) {
+    const left = buttonsRight(s, x + w, mid - 15, c.buttons, { h: 30, size: 12, gap: 6 });
+    if (left < x - 0.5) s.warn(`buttons need ${Math.round(x + w - left)} px, room for ${Math.round(w)} px`);
+  } else if (c.box !== undefined) {
+    s.rect(x, mid - 17, 72, 34, p.row, { r: 9, stroke: p.line });
+    s.text(x + 12, mid + 5, c.box || 'Add', { size: 13, weight: c.box ? 600 : 400, fill: c.box ? p.text : p.muted });
+  } else if (c.check !== undefined) {
+    checkbox(s, x, mid - 11, c.check, c.t);
+  } else {
+    s.text(right ? x + w : x, mid + 5, c.t, { size: c.size || 14, weight: c.weight || 400, fill: c.muted ? p.muted : c.fill || p.text, anchor: right ? 'end' : 'start', max: w - 8 });
+  }
+}
+function stat(s, x, y, w, h, value, lbl, o = {}) {
+  const p = s.p;
+  if (o.to !== undefined) s.spot(x, y, w, h, lbl, o.to, 'stat');
+  s.g('Stat-' + lbl, () => {
+    s.rect(x, y, w, h, o.fill || p.row, { r: 14 });
+    s.text(x + 16, y + h / 2 + 2, value, { size: o.vs || 28, weight: 800, max: w - 32 });
+    s.text(x + 16, y + h / 2 + 24, lbl, { size: 12, fill: p.muted, max: w - 32 });
+    if (o.live) s.circle(x + w - 22, y + 22, 4.5, p.greenText);
+  });
+}
+function banner(s, x, y, w, o) {
+  const p = s.p, bg = o.tone === 'green' ? p.green : p.amber, fg = o.tone === 'green' ? p.greenText : p.amberText;
+  s.g('Live-status-banner', () => {
+    s.rect(x, y, w, 64, bg, { r: 14 });
+    s.circle(x + 24, y + 32, 5, fg);
+    let room = w - 60;
+    if (o.link) {
+      const lw = s.text(x + w - 18, y + 37, o.link.label, { size: 13, weight: 700, fill: p.hot, anchor: 'end' });
+      s.spot(x + w - 18 - lw - 8, y + 20, lw + 16, 26, o.link.label, o.link.to, 'link');
+      room -= lw + 16;
+    }
+    s.text(x + 40, y + 27, o.title, { size: 14, weight: 700, max: room });
+    s.text(x + 40, y + 47, o.sub, { size: 13, weight: 600, fill: fg, max: room });
+  });
+}
+// Underlined tabs. y is the labels' baseline; the rule sits 15 px below.
+function tabs(s, x, y, items, lineW) {
+  const p = s.p;
+  s.g('Tabs', () => {
+    s.line(x, y + 15, x + lineW, y + 15, p.div, { sw: 1.5 });
+    let cx = x + 8;
+    for (const it of items) {
+      const w = textWidth(it.label, 14, it.on ? 700 : 500) + 16;
+      s.g('Tab-' + it.label, () => {
+        s.text(cx + w / 2, y, it.label, { size: 14, weight: it.on ? 700 : 500, fill: it.on ? p.text : p.muted, anchor: 'middle' });
+        if (it.on) s.rect(cx, y + 12, w, 3.5, p.pri, { r: 2 });
+      });
+      if (it.to !== undefined) s.spot(cx - 4, y - 20, w + 8, 36, `Tab · ${it.label}`, it.to, 'tab', it.note);
+      cx += w + 24;
+    }
+  });
+  return y + 16;
+}
+function toggle(s, x, y, on) {
+  const p = s.p;
+  s.rect(x, y, 46, 24, on ? p.pri : p.toggleOff, { r: 12 });
+  s.circle(on ? x + 34 : x + 12, y + 12, 9, p.knob);
+}
+function checkbox(s, x, y, on, lbl) {
+  const p = s.p;
+  s.g('Checkbox-' + (lbl || 'Tick'), () => {
+    s.rect(x, y, 22, 22, on ? p.pri : p.row, { r: 6, stroke: on ? p.pri : p.line, sw: 1.5 });
+    if (on) s.path(`M${f(x + 5.5)},${f(y + 11.5)} l4,4 l7,-8`, 'none', { stroke: p.onPri, sw: 2.4 });
+    if (lbl) s.text(x + 32, y + 16, lbl, { size: 14, weight: 600 });
+  });
+}
+function radio(s, cx, cy, on) {
+  const p = s.p;
+  s.circle(cx, cy, 8, on ? p.pri : p.row, on ? {} : { stroke: p.line, sw: 1.5 });
+  if (on) s.circle(cx, cy, 3.2, p.row);
+}
+// Option card with a radio (role picker, entry type, postpone or cancel).
+function option(s, x, y, w, h, title, sub, on, o = {}) {
+  const p = s.p;
+  if (o.to !== undefined) s.spot(x, y, w, h, title, o.to, 'option', o.note);
+  s.g((o.prefix || 'Option-') + title, () => {
+    s.rect(x, y, w, h, on ? p.card : p.row, { r: 14, stroke: on ? p.pri : p.line, sw: on ? 2 : 1 });
+    s.text(x + 16, y + 30, title, { size: 15, weight: 700, max: w - 56 });
+    if (sub) s.text(x + 16, y + 52, sub, { size: 12, fill: p.muted, max: w - 32 });
+    radio(s, x + w - 22, y + 22, on);
+  });
+}
+// One choice in a stacked list (live status).
+function radioRow(s, x, y, w, h, lbl, on, o = {}) {
+  const p = s.p;
+  if (o.to !== undefined) s.spot(x, y, w, h, lbl, o.to, 'option', o.note);
+  s.g('Option-' + lbl, () => {
+    s.rect(x, y, w, h, p.row, { r: 12, stroke: on ? p.pri : p.line, sw: on ? 2 : 1 });
+    radio(s, x + 22, y + 22, on);
+    s.text(x + 40, y + 27, lbl, { size: 14, weight: 600 });
+  });
+}
+function slider(s, x, y, w, lbl, val, max, extra) {
+  const p = s.p, fw = w * val / max;
+  s.g('Slider-' + lbl, () => {
+    s.text(x, y, lbl, { size: 14, weight: 600 });
+    s.text(x + w, y, `${val} / ${max}${extra ? ' · ' + extra : ''}`, { size: 13, weight: 600, fill: p.muted, anchor: 'end' });
+    s.rect(x, y + 14, w, 8, p.row, { r: 4 });
+    s.rect(x, y + 14, fw, 8, p.pri, { r: 4 });
+    s.circle(x + fw, y + 18, 11, p.row, { stroke: p.pri, sw: 3 });
+  });
+}
+// Key and value rows (what was agreed, brief). Returns the bottom.
+function pairs(s, x, y, w, items, o = {}) {
+  const p = s.p, kw = o.kw || 180, gap = o.gap || 34;
+  let by = y;
+  for (const [k, v] of items) {
+    s.text(x, by, k, { size: 13, fill: p.muted, max: kw - 12 });
+    by = s.para(x + kw, by, v, w - kw, { size: 14, weight: 600, lh: 20 }) + gap;
+  }
+  return by - gap + 6;
+}
+function note(s, x, y, w, str, o = {}) {
+  return card(s, x, y, w, null, (cx, cy, cw) => s.para(cx, cy + 15, str, cw, { size: 13, lh: 20, fill: o.fill }) + 6, { pad: o.pad || 18, fill: o.bg, name: 'Note' });
+}
+// Leaderboard row: rank, picture, name, rating and tier.
+function rankRow(s, x, y, w, n, name, rating, tier, sq, o = {}) {
+  const p = s.p;
+  if (o.to !== undefined) s.spot(x, y, w, 52, name, o.to, 'row');
+  s.g('Rank-' + n, () => {
+    s.rect(x, y, w, 52, o.fill || p.row, { r: 12 });
+    s.text(x + 18, y + 32, n, { size: 16, weight: 800, fill: p.muted, anchor: 'middle' });
+    if (sq) s.rect(x + 36, y + 10, 32, 32, p.thumb, { r: 9 }); else avatar(s, x + 52, y + 26, 16);
+    s.text(x + 80, y + 23, name, { size: 13, weight: 700, max: w - 90 });
+    const rw = s.text(x + 80, y + 41, rating, { size: 12, fill: p.muted });
+    chip(s, x + 80 + rw + 8, y + 28, tier, { h: 18, size: 11, tone: 'info' });
+  });
+}
+function mapPin(s, cx, cy, color, lbl, o = {}) {
+  const p = s.p;
+  s.g('Pin-' + lbl, () => {
+    s.circle(cx, cy, 13, color, { stroke: p.pinRing, sw: 3 });
+    const lw = textWidth(lbl, 12, 600) + 16;
+    const lx = o.left ? cx - 18 - lw : cx + 18;
+    s.rect(lx, cy - 12, lw, 24, p.row, { r: 12 });
+    s.text(lx + 8, cy + 4, lbl, { size: 12, weight: 600 });
+  });
+}
+
+/* ---------- Shared screen parts ---------- */
+
+const NAV_GENERAL = [
+  ['Home', 'O05'],
+  ['Explore events', null, 'Explore events is the consumer page (screen C06 in the consumer flow). It isn’t drawn for organisers.'],
+  ['Messages', 'O23'], ['Community', 'O24'], ['Leaderboards', 'O31'], ['Reviews', 'O29'], ['Profile', 'O27'], ['Settings', 'O32'],
+];
+const NAV_TOOLS = [['My events', 'O07'], ['Hiring', 'O17'], ['Feed and promotion', 'O26']];
+
+function topBar(s) {
+  const p = s.p;
+  s.g('Top-bar', () => {
+    s.rect(0, 0, W, 84, p.bg);
+    s.g('Logo', () => {
+      s.circle(38, 44, 10, p.logo1); s.circle(50, 44, 10, p.logo2); s.circle(38, 44, 10, p.logo1);
+      s.text(68, 51, 'tezera', { size: 22, weight: 700, fill: p.logoText });
+    });
+    s.spot(20, 24, 130, 40, 'Top bar · Logo', 'O05', 'top');
+    s.g('Search-bar', () => {
+      s.rect(470, 26, 500, 36, p.srch, { r: 18 });
+      s.rect(486, 36, 16, 16, p.srchIcon, { r: 4 });
+      s.text(512, 49, 'Search providers and events…', { size: 13, fill: p.srchText });
+    });
+    s.spot(470, 26, 500, 36, 'Top bar · Search', 'O17', 'top');
+    s.g('Messages', () => { s.circle(1162, 44, 18, p.srch); s.rect(1154.4, 36.4, 15.1, 15.1, p.icoSq, { r: 3 }); });
+    s.spot(1144, 26, 36, 36, 'Top bar · Messages', 'O23', 'top');
+    s.g('Notifications', () => { s.circle(1208, 44, 18, p.srch); s.rect(1200.4, 36.4, 15.1, 15.1, p.icoSq, { r: 3 }); s.circle(1220.6, 30.5, 4.5, p.dot); });
+    s.spot(1190, 26, 36, 36, 'Top bar · Notifications', 'O06', 'top');
+    s.g('Role-chip', () => {
+      s.rect(1240, 32, 104, 26, p.pri, { r: 13 });
+      s.text(1292, 49, 'Organiser', { size: 12, weight: 700, fill: p.onPri, anchor: 'middle' });
+    });
+    s.circle(1390, 44, 18, p.av);
+    s.spot(1372, 26, 36, 36, 'Top bar · Avatar', 'O27', 'top');
+    s.line(0, 84, W, 84, p.div);
+  });
+}
+function navItem(s, y, lbl, to, nt, on) {
+  const p = s.p;
+  s.g('Nav-' + lbl, () => {
+    s.rect(52, y, 184, 34, on ? p.navOn : p.nav, { r: 9 });
+    s.text(66, y + 22, lbl, { size: 13, weight: on ? 700 : 500, fill: on ? p.navOnText : p.navText, max: 160 });
+  });
+  s.spot(52, y, 184, 34, `Sidebar · ${lbl}`, to, 'nav', nt);
+}
+function sidebar(s, active) {
+  s.lazy(H => {
+    const p = s.p;
+    s.g('Sidebar', () => {
+      s.rect(32, 112, 224, H - 112 + 40, p.side, { r: 26 });
+      s.text(144, 158, 'General', { size: 17, weight: 700, fill: p.sideHead, anchor: 'middle' });
+      NAV_GENERAL.forEach(([lbl, to, nt], i) => navItem(s, 176 + 43 * i, lbl, to, nt, lbl === active));
+      s.text(144, 550, 'Organiser tools', { size: 17, weight: 700, fill: p.sideHead, anchor: 'middle' });
+      NAV_TOOLS.forEach(([lbl, to], i) => navItem(s, 568 + 43 * i, lbl, to, null, lbl === active));
+    });
+  });
+}
+function shell(s, active) { topBar(s); sidebar(s, active); }
+// Page title, subtitle and buttons ending at o.right (main column by default).
+function pageTitle(s, title, sub, o = {}) {
+  const p = s.p, right = o.right || MR;
+  s.g('Page-title', () => {
+    const left = o.buttons ? buttonsRight(s, right, 116, o.buttons) : right;
+    const room = left - MX - 20;
+    const tw = s.text(MX, 138, title, { size: 26, weight: 700, max: room - (o.chip ? chipW(o.chip[0], 26) + 12 : 0) });
+    if (o.chip) chip(s, MX + tw + 12, 116, o.chip[0], { h: 26, tone: o.chip[1] });
+    if (sub) s.text(MX, 162, sub, { size: 14, fill: p.muted, max: room });
+  });
+}
+const EVENTS = {
+  cmf: { name: 'Colombo Music Fest', meta: 'Sat 12 Dec · 6:00 PM – 11:30 PM · Viharamahadevi Park, Colombo', chips: [['Published', 'green'], ['Running late · 6:45 PM', 'amber'], ['All ages', 'grey']], map: 'O12' },
+  jazz: { name: 'Jazz on the Green', meta: 'Sun 13 Dec · 4:00 PM – 9:00 PM · Race Course Grounds, Colombo', chips: [['Published', 'green'], ['All ages', 'grey']], map: 'O11' },
+};
+// Event header with its six tabs, used by every event page.
+function eventHeader(s, ev, tab) {
+  const p = s.p;
+  s.g('Event-header', () => {
+    cover(s, MX, 112, 120, 84, 12, 'Event-cover');
+    const left = buttonsRight(s, FR, 116, [
+      { label: 'View event page', to: null, note: 'Consumers see the public event page: screen C07 in the consumer flow.' },
+      { label: 'Edit event', to: 'O08' },
+      { label: 'Postpone or cancel', to: 'O10' },
+    ]);
+    const room = left - (MX + 136) - 16;
+    s.text(MX + 136, 138, ev.name, { size: 26, weight: 700, max: room });
+    s.text(MX + 136, 162, ev.meta, { size: 14, fill: p.muted, max: room });
+    chipsRow(s, MX + 136, 176, ev.chips, { h: 22 });
+  });
+  tabs(s, MX, 236, [
+    { label: 'Overview', on: tab === 'overview', to: 'O09' },
+    { label: 'Map', on: tab === 'map', to: ev.map },
+    { label: 'Stalls', on: tab === 'stalls', to: 'O13' },
+    { label: 'Hiring', on: tab === 'hiring', to: 'O14' },
+    { label: 'Q&A', on: tab === 'qa', to: 'O15' },
+    { label: 'Board', on: tab === 'board', to: 'O16' },
+  ], FW);
+}
+// Sign-up and log-in pages: brand panel on the left (shared with the consumer flow).
+function authShell(s) {
+  s.lazy(H => {
+    const p = s.p;
+    s.g('Brand-panel', () => {
+      s.rect(24, 24, 592, H - 48, p.brand, { r: 32 });
+      s.g('Logo', () => {
+        s.circle(84, 92, 12, p.brandLogo1); s.circle(98.4, 92, 12, p.brandLogo2); s.circle(84, 92, 12, p.brandLogo1);
+        s.text(120, 100.4, 'tezera', { size: 26.4, weight: 700, fill: p.brandText });
+      });
+      s.text(72, 210, 'Every event in Sri Lanka,', { size: 34, weight: 700, fill: p.brandText });
+      s.text(72, 252, 'in one place.', { size: 34, weight: 700, fill: p.brandText });
+      s.text(72, 296, 'Find events, plan with friends and follow live updates on the day.', { size: 15, fill: p.brandText, max: 520 });
+    });
+  });
+}
+function authTitle(s, x, title, sub) {
+  s.g('Page-title', () => {
+    s.text(x, 136, title, { size: 26, weight: 700 });
+    s.text(x, 160, sub, { size: 14, fill: s.p.muted, max: 620 });
+  });
+}
+
+/* ---------- Screens ---------- */
+
+const DEFS = [];
+function screen(id, name, draw) { DEFS.push({ id, name, draw }); }
+
+// O01 to O04: get started
+screen('O01', 'Sign up', s => {
+  const p = s.p;
+  authShell(s);
+  authTitle(s, 810, 'Create your account', 'One account, one role. You can browse events without one.');
+  s.text(810, 201, 'I am joining as', { size: 15, weight: 700 });
+  s.g('Grid', () => {
+    option(s, 810, 224, 224, 74, 'Consumer', 'I go to events', false, { prefix: 'Role-' });
+    option(s, 1046, 224, 224, 74, 'Organiser', 'I run events', true, { prefix: 'Role-' });
+    option(s, 810, 310, 224, 74, 'Vendor', 'My business provides services', false, { prefix: 'Role-' });
+    option(s, 1046, 310, 224, 74, 'Freelancer', 'I work events on my own', false, { prefix: 'Role-' });
+  });
+  button(s, 810, 402, 'Continue with Google', { h: 44, w: 460, to: 'O04' });
+  divider(s, 810, 474, 460);
+  field(s, 810, 516, 460, 'Email', 'agastra@example.com');
+  field(s, 810, 602, 224, 'Password', '••••••••••');
+  field(s, 1046, 602, 224, 'Confirm password', '••••••••••');
+  s.text(810, 690, 'By creating an account you agree to the Terms and Privacy Policy.', { size: 12, fill: p.muted });
+  button(s, 810, 715, 'Create account', { h: 48, w: 460, kind: 'pri', to: 'O03' });
+  linkText(s, 810, 797, 'Already have an account? Log in', 'O02');
+});
+
+screen('O02', 'Log in', s => {
+  const p = s.p;
+  authShell(s);
+  authTitle(s, 810, 'Welcome back', 'Log in with your email or phone number.');
+  button(s, 810, 186, 'Continue with Google', { h: 44, w: 460, to: 'O05' });
+  divider(s, 810, 258, 460);
+  field(s, 810, 300, 460, 'Email', 'agastra@example.com');
+  field(s, 810, 386, 460, 'Password', '••••••••••');
+  s.text(810, 458, 'Forgot password?', { size: 12, fill: p.muted });
+  button(s, 810, 482, 'Log in', { h: 48, w: 460, kind: 'pri', to: 'O05' });
+  linkText(s, 810, 564, 'New to Tezera? Create an account', 'O01');
+  card(s, 810, 589, 460, 'Forgot password', (cx, cy, cw) => {
+    s.text(cx, cy + 16, 'Enter your email or phone and we will send a reset code.', { size: 13, fill: p.muted, max: cw });
+    field(s, cx, cy + 49, cw, 'Email or phone number', '+94 71 234 5678', { ph: true });
+    button(s, cx, cy + 115, 'Send reset code', { h: 40, kind: 'pri', to: 'O03' });
+    return cy + 155;
+  }, { pad: 20 });
+});
+
+screen('O03', 'Verify code', s => {
+  const p = s.p;
+  authShell(s);
+  authTitle(s, 810, 'Check your phone', 'We sent a 6-digit code to +94 71 234 5678.');
+  s.g('Code-boxes', () => {
+    ['4', '2', '9', '6', '', ''].forEach((d, i) => {
+      const x = 810 + i * 66;
+      s.rect(x, 188, 56, 60, p.row, { r: 12, stroke: i === 4 ? p.pri : p.line, sw: i === 4 ? 2 : 1 });
+      if (d) s.text(x + 28, 227, d, { size: 24, weight: 700, anchor: 'middle' });
+    });
+  });
+  s.text(810, 284, 'Resend code in 0:24 · Change number', { size: 13, fill: p.muted });
+  button(s, 810, 311, 'Verify', { h: 48, w: 460, kind: 'pri', to: 'O04' });
+  note(s, 810, 379, 460, 'Wrong code? The boxes turn red and show how many tries are left.', { bg: p.amber, pad: 20 });
+});
+
+screen('O04', 'Set up your profile', s => {
+  const p = s.p, X = 730, FWD = 620;
+  authShell(s);
+  authTitle(s, X, 'Set up your organiser profile', 'Step 1 of 2 · People see this on your profile and on your events.');
+  s.g('Stepper', () => chipsRow(s, X, 186, [['Step 1 · Your profile', 'on'], ['Step 2 · Get verified', 'off']], { h: 30 }));
+  field(s, X, 252, FWD, 'Organiser name', 'Agastra Events');
+  s.g('Logo-upload', () => {
+    s.text(X, 338, 'Logo', { size: 13, weight: 600 });
+    s.rect(X, 346, 64, 64, p.thumb, { r: 16 });
+    const bw = button(s, X + 80, 361, 'Upload logo', { h: 34 });
+    s.text(X + 80 + bw + 14, 383, 'PNG or JPG. A square image works best.', { size: 12, fill: p.muted });
+  });
+  field(s, X, 442, FWD, 'Description', 'Concerts and music festivals in Colombo. We run Colombo Music Fest and Jazz on the Green.', { area: true, h: 96 });
+  field(s, X, 578, 305, 'Contact phone', '+94 71 234 5678');
+  field(s, X + 315, 578, 305, 'Contact email', 'agastra@example.com');
+  note(s, X, 652, FWD, 'Next, get verified. An admin checks your documents. Until then you can’t open stall slots, post jobs or send booking requests.', { pad: 20 });
+  button(s, X, 760, 'Skip for now', { h: 48, w: 305, to: 'O05' });
+  button(s, X + 315, 760, 'Continue', { h: 48, w: 305, kind: 'pri', to: 'O28' });
+});
+
+// O05 and O06: home
+screen('O05', 'Dashboard', s => {
+  const p = s.p;
+  shell(s, 'Home');
+  pageTitle(s, 'Dashboard', 'Agastra Events · 4 upcoming events', { buttons: [{ label: 'Post a job', to: 'O20' }, { label: 'Create event', kind: 'pri', to: 'O08' }] });
+  banner(s, MX, 188, MW, { title: 'Colombo Music Fest · tonight', sub: 'Running late · now starts 6:45 PM', link: { label: 'Update status ›', to: 'O09' } });
+  card(s, MX, 272, MW, null, () => {
+    cover(s, MX + 10, 282, 220, 180);
+    const tx = MX + 250;
+    s.text(tx, 306, 'Next event', { size: 12, weight: 600, fill: p.muted });
+    s.text(tx, 334, 'Colombo Music Fest', { size: 20, weight: 700 });
+    s.text(tx, 358, 'Sat 12 Dec · 6:00 PM – 11:30 PM', { size: 13, fill: p.muted });
+    s.text(tx, 378, 'Viharamahadevi Park, Colombo 07', { size: 13, fill: p.muted });
+    chipsRow(s, tx, 394, [['Published', 'green'], ['Running late · 6:45 PM', 'amber']], { h: 22 });
+    s.text(830, 330, '1,284', { size: 28, weight: 800 });
+    s.text(830, 350, 'Going', { size: 12, fill: p.muted });
+    s.text(930, 330, '3,402', { size: 28, weight: 800 });
+    s.text(930, 350, 'Interested', { size: 12, fill: p.muted });
+    button(s, 830, 410, 'Manage event', { h: 36, to: 'O09' });
+    return 462;
+  }, { pad: 10, name: 'Next-event' });
+  s.spot(MX + 10, 282, 220, 180, 'Next event · Colombo Music Fest', 'O09', 'event');
+  label(s, MX, 510, 'Interest per event', { note: 'Updates as people respond', live: true });
+  table(s, MX, 528, MW, [
+    { label: 'Event', w: 300 }, { label: 'Status', w: 150 }, { label: 'Going', w: 100, align: 'right' }, { label: 'Interested', w: 110, align: 'right' }, { label: '', w: 70, align: 'right' },
+  ], [
+    [{ who: { title: 'Colombo Music Fest', sub: 'Sat 12 Dec', lead: 'sq' } }, { chip: ['Published', 'green'] }, { t: '1,284', weight: 700 }, { t: '3,402', weight: 700 }, { link: 'Open', to: 'O09' }],
+    [{ who: { title: 'Jazz on the Green', sub: 'Sun 13 Dec', lead: 'sq' } }, { chip: ['Published', 'green'] }, { t: '642', weight: 700 }, { t: '1,880', weight: 700 }, { link: 'Open', to: 'O11', spot: 'Open · Jazz on the Green' }],
+    [{ who: { title: 'Indie Night Vol. 4', sub: 'Fri 8 Jan', lead: 'sq' } }, { chip: ['Postponed', 'grey'] }, { t: '210', weight: 700 }, { t: '955', weight: 700 }, { link: 'Open', to: 'O09', spot: 'Open · Indie Night Vol. 4' }],
+    [{ who: { title: 'Rooftop Sessions Vol. 2', sub: 'Draft', lead: 'sq' } }, { chip: ['Draft', 'wait'] }, { t: '–', muted: true }, { t: '–', muted: true }, { link: 'Edit', to: 'O08' }],
+  ], { rowH: 60, name: 'Table-Interest' });
+  label(s, MX, 830, 'Hiring and stalls');
+  table(s, MX, 848, MW, [
+    { label: 'Event', w: 200 }, { label: 'Requests sent', w: 110, align: 'right' }, { label: 'Quotes', w: 80, align: 'right' }, { label: 'Bookings', w: 90, align: 'right' }, { label: 'Stall applications', w: 130, align: 'right' }, { label: 'Stalls approved', w: 120, align: 'right' },
+  ], [
+    [{ t: 'Colombo Music Fest', weight: 600 }, '6', '4', '3', '20', '16'].map((c, i) => i ? { t: c, weight: 600 } : c),
+    [{ t: 'Jazz on the Green', weight: 600 }, '3', '2', '2', '8', '6'].map((c, i) => i ? { t: c, weight: 600 } : c),
+    [{ t: 'Indie Night Vol. 4', weight: 600 }, '2', '1', '1', '0', '0'].map((c, i) => i ? { t: c, weight: 600 } : c),
+  ], { name: 'Table-Hiring-and-stalls' });
+  s.spot(MX, 888, MW, 52, 'Colombo Music Fest · hiring', 'O14', 'row');
+  let y = card(s, RX, 272, RW, 'Needs your attention', (cx, cy, cw) => {
+    const items = [
+      ['3 questions to answer', 'Colombo Music Fest · Q&A', 'O15'],
+      ['4 stall applications', 'Colombo Music Fest · Stalls', 'O13'],
+      ['4 new quotes', '2 photographers, 12 Dec, Colombo', 'O21'],
+      ['Dilshan Perera sent a quote', 'DJ set · LKR 45,000', 'O14'],
+      ['Review Pulse Sound & Light', 'Rooftop Sessions Vol. 1', 'O30'],
+    ];
+    let ry = cy;
+    for (const [t, sub, to] of items) { row(s, cx, ry, cw, 56, { lead: 'sq', title: t, sub, to }); ry += 64; }
+    button(s, cx, ry + 4, 'See all notifications', { h: 40, w: cw, to: 'O06' });
+    return ry + 44;
+  });
+  y = card(s, RX, y + 16, RW, 'Recent messages', (cx, cy, cw) => {
+    row(s, cx, cy, cw, 56, { lead: 'av', title: 'Tharindu Jayawardena', sub: 'Booked! See you at Gate 1 at 5.', to: 'O23' });
+    row(s, cx, cy + 64, cw, 56, { lead: 'sq', title: 'Spice Route Catering', sub: 'Our menu for stall B-14 is up', to: 'O23' });
+    row(s, cx, cy + 128, cw, 56, { lead: 'av', title: 'Sanduni Fernando', sub: 'Is the show still on tonight?', to: 'O23' });
+    return cy + 184;
+  });
+  card(s, RX, y + 16, RW, 'Your rank', (cx, cy, cw) => {
+    s.text(cx, cy + 22, 'Top Rated · #4 of organisers', { size: 18, weight: 700, max: cw });
+    s.text(cx, cy + 44, '★ 4.6 from 214 reviews', { size: 13, fill: p.muted });
+    button(s, cx, cy + 62, 'See leaderboards', { h: 36, to: 'O31' });
+    return cy + 98;
+  }, { link: { label: 'Reviews', to: 'O29' } });
+});
+
+screen('O06', 'Notifications', s => {
+  const p = s.p;
+  shell(s, 'Home');
+  pageTitle(s, 'Notifications', null, { right: FR, buttons: [{ label: 'Mark all read' }, { label: 'Settings', to: 'O32' }] });
+  chipsRow(s, MX, 160, [['All', 'on'], ['Bookings and quotes'], ['Stalls'], ['Messages'], ['Account']]);
+  const N = (y, o) => row(s, MX, y, FW, 90, { lead: 'dot', dot: o.c, title: o.title, sub: o.sub, meta: o.meta, metaFill: o.c, to: o.to, right: { buttons: [{ label: o.btn, to: o.to }] } });
+  label(s, MX, 217, 'Today');
+  N(236, { c: p.greenText, title: 'Tharindu Jayawardena accepted your booking request', sub: 'Photography · Colombo Music Fest · the booking is confirmed', meta: 'Booking · 4:12 PM', btn: 'Open', to: 'O22' });
+  N(336, { c: p.hot, title: '4 new quotes on 2 photographers, 12 Dec, Colombo', sub: 'Job post for Colombo Music Fest · quotes close Fri 4 Dec', meta: 'Quotes · 11:30 AM', btn: 'Compare', to: 'O21' });
+  N(436, { c: p.amberText, title: 'Kottu Corner applied for a food stall', sub: 'Colombo Music Fest · 4 applications waiting', meta: 'Stalls · 9:05 AM', btn: 'Review', to: 'O13' });
+  label(s, MX, 555, 'Earlier');
+  N(574, { c: p.hot, title: 'Dilshan Perera sent their own quote', sub: 'DJ set · LKR 45,000 · Colombo Music Fest', meta: 'Booking · Mon', btn: 'View', to: 'O14' });
+  N(674, { c: p.muted, title: 'New message from Sanduni Fernando', sub: 'Is the show still on tonight?', meta: 'Message · Sun', btn: 'Reply', to: 'O23' });
+  N(774, { c: p.greenText, title: 'Your verification was approved', sub: 'You can now open stall slots, post jobs and send booking requests', meta: 'Account · 2 Oct', btn: 'View', to: 'O28' });
+  s.text(MX, 896, 'You also get these as push notifications and by email.', { size: 13, fill: p.muted });
+});
+
+// O07 to O16: my events and the event pages
+screen('O07', 'My events', s => {
+  const p = s.p;
+  shell(s, 'My events');
+  pageTitle(s, 'My events', 'Drafts, upcoming events and past events', { buttons: [{ label: 'Create event', kind: 'pri', to: 'O08' }] });
+  tabs(s, MX, 211, [{ label: 'Upcoming (4)', on: true }, { label: 'Drafts (1)' }, { label: 'Past (12)' }], MW);
+  const E = (y, o) => row(s, MX, y, MW, 96, { lead: 'thumb', title: o.title, sub: o.sub, chips: o.chips, chipsText: o.text, chipsTextFill: o.fill, to: o.to, spot: o.spot, right: o.btn ? { buttons: [{ label: o.btn, to: o.to, spot: o.spot }] } : undefined });
+  E(244, { title: 'Colombo Music Fest', sub: 'Sat 12 Dec · 6:00 PM · Viharamahadevi Park', chips: [['Published', 'green'], ['Running late · 6:45 PM', 'amber']], text: '1,284 going · 3,402 interested', btn: 'Manage', to: 'O09' });
+  E(350, { title: 'Jazz on the Green', sub: 'Sun 13 Dec · 4:00 PM · Race Course Grounds', chips: [['Published', 'green']], text: '642 going · 1,880 interested', btn: 'Manage', to: 'O11', spot: 'Manage · Jazz on the Green (no map yet)' });
+  E(456, { title: 'Indie Night Vol. 4', sub: 'New date: Fri 8 Jan · 7:30 PM · Barefoot Garden', chips: [['Postponed', 'grey']], text: '210 going · 955 interested', btn: 'Manage', to: 'O09', spot: 'Manage · Indie Night Vol. 4' });
+  E(562, { title: 'New Year’s Eve Countdown', sub: 'Thu 31 Dec · 9:00 PM · Galle Face Green', chips: [['Unpublished by an admin', 'grey']], text: 'Reported as fake: its stall applications and job posts are closed', fill: p.muted });
+  let y = card(s, RX, 112, RW, 'Tonight', (cx, cy, cw) => {
+    banner(s, cx, cy, cw, { title: 'Colombo Music Fest', sub: 'Running late · 6:45 PM' });
+    const bw = (cw - 10) / 2;
+    button(s, cx, cy + 76, 'Update status', { h: 44, w: bw, to: 'O09' });
+    button(s, cx + bw + 10, cy + 76, 'Venue map', { h: 44, w: bw, to: 'O12' });
+    button(s, cx, cy + 130, 'Q&A', { h: 44, w: bw, to: 'O15' });
+    button(s, cx + bw + 10, cy + 130, 'Board', { h: 44, w: bw, to: 'O16' });
+    return cy + 174;
+  });
+  y = card(s, RX, y + 16, RW, 'Draft', (cx, cy, cw) => {
+    row(s, cx, cy, cw, 84, { lead: 'sq', z: 64, title: 'Rooftop Sessions Vol. 2', sub: 'Edited Tue · not published', to: 'O08' });
+    return cy + 84;
+  });
+  card(s, RX, y + 16, RW, 'Reviews to write', (cx, cy, cw) => {
+    row(s, cx, cy, cw, 76, { lead: 'sq', title: 'Pulse Sound & Light', sub: 'Rooftop Sessions Vol. 1 · Sat 24 Oct', meta: 'Write a review', to: 'O30' });
+    return cy + 76;
+  });
+});
+
+screen('O08', 'Create event', s => {
+  const p = s.p;
+  shell(s, 'My events');
+  pageTitle(s, 'Create event', 'Save a draft at any time. People can see it once you publish.', { buttons: [{ label: 'Save draft', to: 'O07' }, { label: 'Publish', kind: 'pri', to: 'O09' }] });
+  const c3 = (MW - 40 - 32) / 3, c2 = (MW - 40 - 16) / 2;
+  let y = section(s, MX, 213, MW, 'Basics', (x, top, w) => {
+    let b = field(s, x, top + 12, w, 'Title', 'Colombo Music Fest');
+    field(s, x, b + 32, c2, 'Category', 'Music · concert', { select: true });
+    b = field(s, x + c2 + 16, b + 32, c2, 'Age rating', 'All ages', { select: true });
+    b = field(s, x, b + 32, c3, 'Date', 'Sat 12 Dec');
+    field(s, x + c3 + 16, b - 54, c3, 'Start time', '6:00 PM');
+    field(s, x + 2 * (c3 + 16), b - 54, c3, 'End time', '11:30 PM');
+    return s.para(x, b + 26, 'Age rating: ID is checked at the gate for 18+ and 21+ events.', w, { size: 12, fill: p.muted }) + 5;
+  });
+  y = section(s, MX, y + 31, MW, 'Venue', (x, top, w) => {
+    const b = field(s, x, top + 12, w, 'Venue name', 'Viharamahadevi Park');
+    return field(s, x, b + 32, w, 'Address', 'Viharamahadevi Park, Colombo 07');
+  });
+  y = section(s, MX, y + 31, MW, 'About', (x, top, w) => {
+    const b = field(s, x, top + 12, w, 'Description', 'A night of Sri Lankan bands and DJs under the stars, with food and drink stalls around the park.', { area: true, h: 96 });
+    s.text(x, b + 32, 'Cover image', { size: 13, weight: 600 });
+    cover(s, x, b + 40, 280, 158);
+    button(s, x + 296, b + 40, 'Replace', { h: 34 });
+    button(s, x + 296, b + 84, 'Remove', { h: 34, kind: 'link' });
+    return b + 198;
+  });
+  y = section(s, MX, y + 31, MW, 'Line-up or schedule', (x, top, w) => {
+    s.text(x, top + 12, 'Add each act or item with its time.', { size: 13, fill: p.muted });
+    let ry = top + 28;
+    for (const [t, a] of [['6:00 PM', 'Opening DJ set · Dilshan Perera'], ['7:30 PM', 'Midnight Monsoon'], ['9:00 PM', 'Headline set · Lanka Sound Collective']]) {
+      field(s, x, ry, 140, '', t);
+      field(s, x + 156, ry, w - 156 - 52, '', a);
+      s.g('Remove-row', () => { s.rect(x + w - 40, ry + 6, 34, 34, p.row, { r: 17, stroke: p.line }); s.text(x + w - 23, ry + 28, '×', { size: 16, weight: 600, fill: p.muted, anchor: 'middle' }); });
+      ry += 56;
+    }
+    button(s, x, ry + 6, '+ Add a row', { h: 34 });
+    return ry + 40;
+  });
+  y = section(s, MX, y + 31, MW, 'Entry', (x, top, w) => {
+    option(s, x, top, c2, 74, 'Free entry', 'No entry price', false);
+    option(s, x + c2 + 16, top, c2, 74, 'Paid entry', 'LKR 3,500', true);
+    return s.text(x, top + 102, 'Shown on the event page. Tickets are not sold on Tezera yet.', { size: 12, fill: p.muted }) && top + 107;
+  });
+  y = section(s, MX, y + 31, MW, 'Know before you go', (x, top, w) => {
+    let b = s.para(x, top + 12, 'Only the fields you fill in show on the event page. People who marked Going are told when you change them.', w, { size: 13, fill: p.muted, lh: 19 });
+    b = field(s, x, b + 36, c2, 'Dress code', 'Casual · comfortable shoes');
+    field(s, x + c2 + 16, b - 54, c2, 'What to bring', 'NIC, power bank, rain jacket');
+    b = field(s, x, b + 32, w, 'Parking and transport', 'Paid parking at Town Hall · PickMe drop-off at Gate 2');
+    b = field(s, x, b + 32, w, 'Rules', '18+ after 9 PM · no re-entry · no outside drinks');
+    b = field(s, x, b + 32, c2, 'Food and drink price range', 'LKR 500 – 2,000');
+    field(s, x + c2 + 16, b - 54, c2, 'If it rains', 'Covered stage; event goes ahead');
+    return b;
+  });
+  const bw = (MW - 10) / 2;
+  button(s, MX, y + 24, 'Save draft', { h: 48, w: bw, to: 'O07' });
+  button(s, MX + bw + 10, y + 24, 'Publish', { h: 48, w: bw, kind: 'pri', to: 'O09' });
+  y = card(s, RX, 188, RW, 'Checklist', (cx, cy, cw) => {
+    let ry = cy;
+    for (const [t, done, r] of [['Basics', true], ['Venue', true], ['About', true], ['Line-up or schedule', true], ['Entry', true], ['Know before you go', false, 'Optional']]) {
+      row(s, cx, ry, cw, 44, { lead: 'check', done, title: t, right: r ? { text: r } : undefined });
+      ry += 50;
+    }
+    return ry - 6;
+  });
+  card(s, RX, y + 16, RW, 'How it looks', (cx, cy, cw) => {
+    cover(s, cx, cy, cw, 150);
+    s.text(cx, cy + 176, 'Colombo Music Fest', { size: 16, weight: 700 });
+    s.text(cx, cy + 197, 'Sat 12 Dec · Viharamahadevi Park', { size: 12, fill: p.muted });
+    s.text(cx, cy + 221, '✓ Agastra Events', { size: 12, weight: 600 });
+    s.text(cx + cw, cy + 221, 'LKR 3,500', { size: 13, weight: 700, anchor: 'end' });
+    button(s, cx, cy + 238, 'Preview event page', { h: 40, w: cw, to: null, note: 'The public event page is screen C07 in the consumer flow.' });
+    return cy + 278;
+  });
+});
+
+function drawO09(s) {
+  const p = s.p;
+  shell(s, 'My events');
+  eventHeader(s, EVENTS.cmf, 'overview');
+  stat(s, MX, 272, 366, 96, '1,284', 'Going', { live: true });
+  stat(s, MX + 378, 272, 366, 96, '3,402', 'Interested', { live: true });
+  label(s, MX, 398, 'Hiring and stalls');
+  const t5 = (MW - 48) / 5;
+  [['6', 'Requests sent', 'O14'], ['4', 'Quotes received', 'O14'], ['3', 'Bookings', 'O14'], ['20', 'Stall applications', 'O13'], ['16', 'Stalls approved', 'O13']]
+    .forEach(([v, l, to], i) => stat(s, MX + i * (t5 + 12), 414, t5, 88, v, l, { to }));
+  s.g('Panel-Venue-map', () => {
+    s.rect(MX, 526, 366, 150, p.row, { r: 14 });
+    s.text(MX + 20, 557, 'Venue map', { size: 16, weight: 700 });
+    chip(s, MX + 346 - chipW('Published', 22), 541, 'Published', { h: 22, tone: 'green' });
+    s.text(MX + 20, 583, 'Version 3 · published 2 hours ago', { size: 13, fill: p.muted });
+    button(s, MX + 20, 610, 'Open map builder', { h: 40, to: 'O12' });
+  });
+  s.g('Panel-Questions-and-board', () => {
+    const x = MX + 378;
+    s.rect(x, 526, 366, 150, p.row, { r: 14 });
+    s.text(x + 20, 557, 'Questions and board', { size: 16, weight: 700 });
+    row(s, x + 8, 574, 350, 40, { fill: false, title: '3 questions waiting for your answer', right: { text: '›', size: 16 }, to: 'O15', spot: 'Stall applications' === '' ? '' : '3 questions waiting' });
+    s.line(x + 20, 619, x + 346, 619, p.div);
+    row(s, x + 8, 624, 350, 40, { fill: false, title: '12 threads on the discussion board', right: { text: '›', size: 16 }, to: 'O16' });
+  });
+  label(s, MX, 712, 'Sent announcements');
+  row(s, MX, 730, MW, 64, { lead: 'dot', dot: p.amberText, title: 'Bring your NIC: 18+ after 9 PM', sub: 'Today · 11:00 AM · to Going, Interested and followers' });
+  row(s, MX, 804, MW, 64, { lead: 'dot', dot: p.hot, title: 'The line-up is on the feed', sub: 'Mon · 6:00 PM · to Going, Interested and followers' });
+  const y = card(s, RX, 272, RW, 'Live status', (cx, cy, cw) => {
+    s.para(cx, cy + 4, 'Shown on the event page and pushed to everyone who marked Going or Interested.', cw, { size: 12, fill: p.muted, lh: 17 });
+    let ry = cy + 36;
+    radioRow(s, cx, ry, cw, 44, 'On time', false); ry += 50;
+    s.g('Option-Running-late', () => {
+      s.rect(cx, ry, cw, 96, p.row, { r: 12, stroke: p.pri, sw: 2 });
+      radio(s, cx + 22, ry + 22, true);
+      s.text(cx + 40, ry + 27, 'Running late', { size: 14, weight: 600 });
+      field(s, cx + 40, ry + 52, cw - 56, '', 'New start time · 6:45 PM', { h: 34 });
+    });
+    ry += 102;
+    radioRow(s, cx, ry, cw, 44, 'Postponed', false, { to: 'O10' }); ry += 50;
+    radioRow(s, cx, ry, cw, 44, 'Cancelled', false, { to: 'O10' }); ry += 56;
+    button(s, cx, ry, 'Update status', { h: 40, w: cw, kind: 'pri' });
+    return ry + 40;
+  });
+  card(s, RX, y + 16, RW, 'Send an announcement', (cx, cy, cw) => {
+    const b = field(s, cx, cy, cw, '', 'Gates now open at 5:30 PM. Bring your NIC: 18+ after 9 PM.', { area: true, h: 88 });
+    const t = s.para(cx, b + 22, 'Goes to 1,284 Going, 3,402 Interested and 1.2k followers, in the app and by push.', cw, { size: 12, fill: p.muted, lh: 17 });
+    button(s, cx, t + 16, 'Send announcement', { h: 40, w: cw, kind: 'pri' });
+    return t + 56;
+  });
+}
+screen('O09', 'Event overview', drawO09);
+
+screen('O10', 'Postpone or cancel', s => {
+  const p = s.p;
+  s.quiet++;
+  drawO09(s);
+  s.quiet--;
+  s.lazy(H => s.rect(0, 0, W, H, p.scrim, { opacity: p.scrimOpacity }));
+  const X = 400, Y = 170, DW = 640, cx = X + 32, cw = DW - 64;
+  s.g('Dialog-Postpone-or-cancel', () => {
+    const bg = s.slot();
+    s.text(cx, Y + 44, 'Postpone or cancel', { size: 24, weight: 700 });
+    s.text(cx, Y + 70, 'Colombo Music Fest · Sat 12 Dec · 6:00 PM', { size: 14, fill: p.muted });
+    s.g('Close', () => { s.rect(X + DW - 66, Y + 24, 34, 34, p.row, { r: 17, stroke: p.line }); s.text(X + DW - 49, Y + 46, '×', { size: 18, weight: 600, fill: p.muted, anchor: 'middle' }); });
+    s.spot(X + DW - 66, Y + 24, 34, 34, 'Close', 'O09', 'button');
+    s.g('Option-Postpone', () => {
+      s.rect(cx, Y + 94, cw, 156, p.card, { r: 14, stroke: p.pri, sw: 2 });
+      s.text(cx + 16, Y + 124, 'Postpone', { size: 15, weight: 700 });
+      s.text(cx + 16, Y + 146, 'Move the event to a new date and time.', { size: 12, fill: p.muted });
+      radio(s, cx + cw - 22, Y + 116, true);
+      const half = (cw - 48) / 2;
+      field(s, cx + 16, Y + 180, half, 'New date', 'Sat 19 Dec');
+      field(s, cx + 32 + half, Y + 180, half, 'New time', '6:00 PM');
+    });
+    option(s, cx, Y + 262, cw, 74, 'Cancel the event', 'The event will not go ahead.', false);
+    note(s, cx, Y + 352, cw, '1,284 people who marked Going and 3,402 who marked Interested will be told. Changing the date, time or venue in Edit event tells them too.', { pad: 16 });
+    buttonsRight(s, cx + cw, Y + 454, [{ label: 'Keep the event as it is', to: 'O09' }, { label: 'Postpone event', kind: 'pri', to: 'O07' }], { h: 44 });
+    s.parts[bg] = s.rectStr(X, Y, DW, 530, p.row, { r: 22 });
+  });
+});
+
+screen('O11', 'Start a venue map', s => {
+  const p = s.p;
+  shell(s, 'My events');
+  eventHeader(s, EVENTS.jazz, 'map');
+  s.g('Empty-state', () => {
+    const bg = s.slot(), x = MX + 40, w = MW - 80;
+    s.g('Tile-mark', () => {
+      const cols = [[p.pri, p.logo2, p.srch], [p.srch, null, p.pri]];
+      cols.forEach((r, ri) => r.forEach((c, ci) => {
+        const tx = x + ri * 21 + ci * 42, ty = 312 + ri * 39;
+        if (c) s.rect(tx, ty, 36, 33, c, { r: 9 });
+        else s.rect(tx, ty, 36, 33, 'none', { r: 9, stroke: p.line, sw: 2, dash: '4 3' });
+      }));
+    });
+    s.text(x, 420, 'Add your venue map', { size: 22, weight: 700 });
+    s.para(x, 446, 'Upload a floor plan of the venue. It becomes the background you draw zones, stalls and pins on.', w, { size: 14, fill: p.muted });
+    s.g('Drop-zone', () => {
+      s.rect(x, 474, w, 180, p.bg, { r: 16, stroke: p.line, sw: 2, dash: '6 5' });
+      s.rect(x + w / 2 - 16, 500, 32, 32, p.thumb, { r: 8 });
+      s.text(x + w / 2, 556, 'Drag a floor plan here', { size: 14, weight: 600, anchor: 'middle' });
+      s.text(x + w / 2, 576, 'PNG or JPG', { size: 12, fill: p.muted, anchor: 'middle' });
+      const bw = btnW('Choose file', 14, 40);
+      button(s, x + w / 2 - bw / 2, 594, 'Choose file', { h: 40, kind: 'pri', to: 'O12' });
+    });
+    const cw = (w - 32) / 3;
+    [['Zones', 'Named areas of the venue, drawn as boxes.'], ['Stalls', 'Each in a zone, with its stall number.'], ['Pins', 'Stages, entrances, toilets, first aid, parking and more.']].forEach(([t, d], i) => {
+      const cx = x + i * (cw + 16);
+      s.rect(cx, 682, 34, 34, p.thumb, { r: 10 });
+      s.text(cx, 740, t, { size: 15, weight: 700 });
+      s.para(cx, 760, d, cw, { size: 12, fill: p.muted, lh: 17 });
+    });
+    s.parts[bg] = s.rectStr(MX, 272, MW, 532, p.row, { r: 14 });
+  });
+  card(s, RX, 272, RW, 'What people see', (cx, cy, cw) => {
+    cover(s, cx, cy, cw, 150, 12, 'Map-preview');
+    s.circle(cx + 92, cy + 60, 7, p.pins.stage); s.circle(cx + 185, cy + 45, 7, p.pins.gate); s.circle(cx + 139, cy + 105, 7, p.pins.toilets); s.circle(cx + 231, cy + 98, 7, p.pins.stall);
+    return s.para(cx, cy + 176, 'People see the published map on the event page: zones, stall numbers and pins. They can search for an item and find its stall on the map.', cw, { size: 13, fill: p.muted, lh: 20 }) + 6;
+  });
+});
+
+screen('O12', 'Map builder', s => {
+  const p = s.p;
+  shell(s, 'My events');
+  eventHeader(s, EVENTS.cmf, 'map');
+  s.g('Builder-head', () => {
+    s.text(MX, 291, 'Map builder', { size: 15, weight: 700 });
+    s.text(MX, 311, 'Draft based on version 3. People keep seeing the published version until you publish.', { size: 12, fill: p.muted });
+    const left = buttonsRight(s, FR, 272, [{ label: 'Publish map', kind: 'pri' }]);
+    const cw2 = chipW('Unpublished changes', 28);
+    chip(s, left - 10 - cw2, 278, 'Unpublished changes', { tone: 'wait' });
+  });
+  s.g('Toolbar', () => {
+    s.rect(MX, 328, MW, 48, p.row, { r: 14 });
+    const tool = (x, t, on) => chip(s, x, 338, t, { h: 28, size: 12, tone: on ? 'on' : 'off' });
+    let tx = MX + 10, rx = MR - 10;
+    ['Select', 'Zone', 'Stall', 'Row of stalls', 'Pin ▾', 'Set scale'].forEach((t, i) => { tx += tool(tx, t, i === 0) + 5; });
+    ['Delete', 'Duplicate', 'Redo', 'Undo'].forEach(t => { rx -= chipW(t, 28, 12); tool(rx, t, false); rx -= 5; });
+    if (tx + 8 > rx) s.warn('map builder tools overlap');
+    s.line((tx + rx) / 2, 342, (tx + rx) / 2, 362, p.div);
+  });
+  s.g('Map-canvas', () => {
+    const cx0 = MX, cy0 = 388, cw = MW, ch = 540;
+    s.rect(cx0, cy0, cw, ch, p.plan, { r: 18 });
+    s.g('Grid', () => {
+      for (let gx = cx0 + 24; gx < cx0 + cw - 12; gx += 24) s.line(gx, cy0 + 14, gx, cy0 + ch - 14, p.grid);
+      for (let gy = cy0 + 24; gy < cy0 + ch - 12; gy += 24) s.line(cx0 + 14, gy, cx0 + cw - 14, gy, p.grid);
+    });
+    s.rect(316, 412, 600, 480, 'none', { r: 6, stroke: p.wall, sw: 3 });
+    const zone = (x, y, w, h, t) => s.g('Zone-' + t, () => {
+      s.rect(x, y, w, h, p.zone, { r: 12, opacity: p.zoneOpacity, stroke: p.zone, sw: 2 });
+      const lw = textWidth(t, 12, 600) + 16;
+      s.rect(x + 10, y + 10, lw, 22, p.row, { r: 6 });
+      s.text(x + 18, y + 25, t, { size: 12, weight: 600 });
+    });
+    const stall = (x, y, t, sel) => s.g('Stall-' + t, () => {
+      s.rect(x, y, 46, 40, p.row, { r: 6, stroke: p.zone, sw: 1.5 });
+      s.text(x + 23, y + 24, t, { size: 11, weight: 600, fill: p.muted, anchor: 'middle' });
+      if (sel) {
+        s.rect(x - 4, y - 4, 54, 48, 'none', { r: 8, stroke: p.sel, sw: 2.5 });
+        [[x - 9, y - 9], [x + 45, y - 9], [x - 9, y + 35], [x + 45, y + 35]].forEach(([hx, hy]) => s.rect(hx, hy, 10, 10, p.row, { r: 2, stroke: p.sel, sw: 2 }));
+      }
+    });
+    zone(340, 436, 300, 160, 'Main stage area');
+    zone(340, 620, 420, 112, 'Food court');
+    s.line(340, 684, 760, 684, p.sel, { sw: 1.5, dash: '5 4' });
+    ['B-10', 'B-11', 'B-12', 'B-13', 'B-14', 'B-15', 'B-16'].forEach((t, i) => stall(356 + 54 * i, 664, t, t === 'B-14'));
+    s.g('Measure', () => { s.rect(540, 744, 112, 26, p.measureBg, { r: 7 }); s.text(596, 761, '3 m × 3 m', { size: 12, weight: 600, fill: p.measureText, anchor: 'middle' }); });
+    zone(780, 620, 124, 132, 'Drinks');
+    ['C-01', 'C-02', 'C-03', 'C-04'].forEach((t, i) => stall(796 + 54 * (i % 2), 660 + 46 * Math.floor(i / 2), t, false));
+    mapPin(s, 490, 530, p.pins.stage, 'Stage');
+    mapPin(s, 916, 470, p.pins.gate, 'Gate 1', { left: true });
+    mapPin(s, 620, 892, p.pins.gate, 'Gate 2');
+    mapPin(s, 860, 520, p.pins.toilets, 'Toilets', { left: true });
+    mapPin(s, 700, 470, p.pins.aid, 'First aid');
+    mapPin(s, 420, 800, p.pins.water, 'Water');
+    mapPin(s, 1000, 860, p.pins.parking, 'Parking', { left: true });
+    s.g('Scale-bar', () => {
+      s.path(`M316,906 v8 h96 v-8`, 'none', { stroke: p.text, sw: 2 });
+      s.text(420, 914, '10 m', { size: 12, weight: 600 });
+    });
+    s.g('Zoom', () => {
+      s.rect(940, 400, 84, 32, p.row, { r: 10, stroke: p.line });
+      s.text(954, 422, '−', { size: 16, weight: 600, anchor: 'middle' });
+      s.text(982, 421, '100%', { size: 11, weight: 600, anchor: 'middle' });
+      s.text(1010, 422, '+', { size: 16, weight: 600, anchor: 'middle' });
+    });
+  });
+  s.g('Canvas-settings', () => {
+    toggle(s, MX, 944, true); s.text(MX + 56, 961, 'Snap to grid', { size: 13, weight: 600 });
+    toggle(s, MX + 170, 944, true); s.text(MX + 226, 961, 'Alignment guides', { size: 13, weight: 600 });
+    s.text(MR, 961, 'Floor plan: Viharamahadevi-Park.png', { size: 12, fill: p.muted, anchor: 'end' });
+  });
+  label(s, MX, 1010, 'Versions');
+  table(s, MX, 1028, MW, [{ label: 'Version', w: 200 }, { label: 'Published', w: 260 }, { label: '', w: 240, align: 'right' }], [
+    [{ t: 'Version 3', weight: 700 }, '2 hours ago', { chip: ['Live', 'green'] }],
+    [{ t: 'Version 2', weight: 700 }, 'Mon 7 Dec', { buttons: [{ label: 'Restore' }] }],
+    [{ t: 'Version 1', weight: 700 }, 'Wed 2 Dec', { buttons: [{ label: 'Restore' }] }],
+  ], { name: 'Table-Versions' });
+  const y = card(s, RX, 328, RW, 'Selected: stall B-14', (cx, cy, cw) => {
+    let b = field(s, cx, cy + 14, cw, 'Stall number', 'B-14', { h: 40 });
+    b = field(s, cx, b + 26, cw, 'Zone', 'Food court', { h: 40, select: true });
+    const half = (cw - 12) / 2;
+    field(s, cx, b + 26, half, 'Width', '3', { h: 40, suffix: 'm' });
+    b = field(s, cx + half + 12, b + 26, half, 'Depth', '3', { h: 40, suffix: 'm' });
+    s.text(cx, b + 32, 'Vendor', { size: 12, weight: 600, fill: p.muted });
+    row(s, cx, b + 42, cw, 56, { lead: 'sq', title: 'Spice Route Catering', sub: 'Approved for this stall' });
+    s.text(cx, b + 126, 'Listing · 8 items with prices', { size: 12, weight: 600, fill: p.muted });
+    button(s, cx, b + 138, 'View listing', { h: 34, to: 'O13' });
+    button(s, cx + btnW('View listing', 13, 34) + 8, b + 138, 'Hide listing', { h: 34 });
+    button(s, cx, b + 186, 'Delete stall', { h: 22, kind: 'danger' });
+    return b + 210;
+  });
+  card(s, RX, y + 16, RW, 'On this map', (cx, cy, cw) => {
+    let ry = cy;
+    for (const [t, sub] of [['Main stage area', 'Zone · stage pin'], ['Food court', 'Zone · 7 stalls'], ['Drinks', 'Zone · 4 stalls']]) {
+      row(s, cx, ry, cw, 52, { lead: 'sq', z: 30, title: t, sub });
+      ry += 58;
+    }
+    s.text(cx, ry + 14, 'Pins', { size: 12, weight: 600, fill: p.muted });
+    let px = cx, py = ry + 26;
+    for (const t of ['Stage', 'Gate 1', 'Gate 2', 'Toilets', 'First aid', 'Water', 'Parking']) {
+      const w = chipW(t, 26);
+      if (px + w > cx + cw) { px = cx; py += 34; }
+      chip(s, px, py, t, { h: 26, tone: 'off' });
+      px += w + 6;
+    }
+    return s.para(cx, py + 46, 'More pin types: exit, registration or ticket counter, seating, food and drink, and custom pins.', cw, { size: 12, fill: p.muted, lh: 17 }) + 5;
+  });
+});
+
+screen('O13', 'Stalls', s => {
+  const p = s.p;
+  shell(s, 'My events');
+  eventHeader(s, EVENTS.cmf, 'stalls');
+  s.g('Stalls-head', () => {
+    s.text(MX, 299, 'Stall slots', { size: 15, weight: 700 });
+    buttonsRight(s, MR, 278, [{ label: 'Invite a vendor' }, { label: 'Open stall slots', kind: 'pri' }], { h: 36 });
+  });
+  table(s, MX, 330, MW, [
+    { label: 'Stall type', w: 150 }, { label: 'Slots', w: 70, align: 'right' }, { label: 'Fee', w: 120, align: 'right' }, { label: 'Apply by', w: 130 }, { label: 'Applied', w: 80, align: 'right' }, { label: 'Approved', w: 90, align: 'right' }, { label: '', w: 70, align: 'right' },
+  ], [
+    [{ t: 'Food', weight: 700 }, '10', 'LKR 15,000', 'Fri 27 Nov', '12', '9', { buttons: [{ label: 'Edit' }] }],
+    [{ t: 'Drinks', weight: 700 }, '5', 'LKR 12,000', 'Fri 27 Nov', '5', '5', { buttons: [{ label: 'Edit' }] }],
+    [{ t: 'Merchandise', weight: 700 }, '6', 'LKR 8,000', 'Fri 27 Nov', '3', '2', { buttons: [{ label: 'Edit' }] }],
+  ], { name: 'Table-Stall-slots' });
+  label(s, MX, 560, 'Applications and invitations', { count: '4' });
+  table(s, MX, 578, MW, [
+    { label: 'Vendor', w: 220 }, { label: 'Stall type', w: 110 }, { label: 'Received', w: 100 }, { label: 'Status', w: 100 }, { label: '', w: 170, align: 'right' },
+  ], [
+    [{ who: { title: 'Kottu Corner', sub: '★ 4.4 · Verified', lead: 'sq' } }, 'Food', 'Mon 23 Nov', { chip: ['Applied', 'wait'] }, { buttons: [{ label: 'Reject' }, { label: 'Approve', kind: 'pri' }] }],
+    [{ who: { title: 'Island Ice Cream', sub: '★ 4.6 · Verified', lead: 'sq' } }, 'Food', 'Tue 24 Nov', { chip: ['Applied', 'wait'] }, { buttons: [{ label: 'Reject' }, { label: 'Approve', kind: 'pri' }] }],
+    [{ who: { title: 'Lanka Threads', sub: '★ 4.2', lead: 'sq' } }, 'Merchandise', 'Wed 25 Nov', { chip: ['Applied', 'wait'] }, { buttons: [{ label: 'Reject' }, { label: 'Approve', kind: 'pri' }] }],
+    [{ who: { title: 'Thambili Bar', sub: '★ 4.5 · Verified', lead: 'sq' } }, 'Drinks', 'Thu 26 Nov', { chip: ['Invited', 'info'] }, { t: 'Waiting for the vendor', muted: true, size: 13 }],
+  ], { rowH: 64, name: 'Table-Applications' });
+  label(s, MX, 918, 'Approved vendors', { note: 'Stall numbers show on the venue map' });
+  table(s, MX, 936, MW, [
+    { label: 'Stall no.', w: 80 }, { label: 'Vendor', w: 180 }, { label: 'Type', w: 110 }, { label: 'Listing', w: 150 }, { label: '', w: 180, align: 'right' },
+  ], [
+    [{ box: 'B-14' }, { t: 'Spice Route Catering', weight: 700 }, 'Food', '8 items with prices', { buttons: [{ label: 'View' }, { label: 'Hide listing' }] }],
+    [{ box: 'C-02' }, { t: 'Brew Bros', weight: 700 }, 'Drinks', '6 items with prices', { buttons: [{ label: 'View' }, { label: 'Hide listing' }] }],
+    [{ box: 'B-11' }, { t: 'Hoppers & Co', weight: 700 }, 'Food', { chip: ['Hidden by you', 'grey'] }, { buttons: [{ label: 'View' }, { label: 'Show listing' }] }],
+    [{ box: '' }, { t: 'Batik Lane', weight: 700 }, 'Merchandise', { t: 'No listing yet', muted: true }, ''],
+  ], { rowH: 56, name: 'Table-Approved-vendors' });
+  const y = card(s, RX, 330, RW, 'Stall fees', (cx, cy, cw) => s.para(cx, cy + 4, 'Vendors pay stall fees to you outside Tezera. Each slot shows its fee in the app.', cw, { size: 13, lh: 20 }) + 6);
+  card(s, RX, y + 16, RW, 'On the venue map', (cx, cy, cw) => {
+    cover(s, cx, cy, cw, 150, 12, 'Map-preview');
+    s.circle(cx + 92, cy + 60, 7, p.pins.stage); s.circle(cx + 200, cy + 100, 7, p.pins.stall); s.circle(cx + 230, cy + 100, 7, p.pins.stall);
+    const t = s.para(cx, cy + 176, 'Approved stalls get their number on the map and on the event page.', cw, { size: 13, fill: p.muted, lh: 20 });
+    button(s, cx, t + 16, 'Open map builder', { h: 40, w: cw, to: 'O12' });
+    return t + 56;
+  });
+});
+
+screen('O14', 'Event hiring', s => {
+  const p = s.p;
+  shell(s, 'My events');
+  eventHeader(s, EVENTS.cmf, 'hiring');
+  s.g('Hiring-head', () => {
+    s.text(MX, 299, 'Hiring for this event', { size: 15, weight: 700 });
+    buttonsRight(s, MR, 278, [{ label: 'Post a job', to: 'O20' }, { label: 'Find providers', kind: 'pri', to: 'O17' }], { h: 36 });
+  });
+  const t3 = (MW - 24) / 3;
+  [['6', 'Requests sent'], ['4', 'Quotes received'], ['3', 'Confirmed bookings']].forEach(([v, l], i) => stat(s, MX + i * (t3 + 12), 330, t3, 88, v, l));
+  label(s, MX, 456, 'Booking requests');
+  table(s, MX, 474, MW, [
+    { label: 'Provider', w: 230 }, { label: 'Service', w: 120 }, { label: 'Status', w: 190 }, { label: '', w: 160, align: 'right' },
+  ], [
+    [{ who: { title: 'Malsha Gunasekara', sub: 'Freelancer · sent Mon 23 Nov', lead: 'av' } }, 'Photography', { chip: ['Waiting for a reply', 'wait'] }, ''],
+    [{ who: { title: 'Dilshan Perera', sub: 'Freelancer · sent Sun 22 Nov', lead: 'av' } }, 'DJ set', { chip: ['Own quote · LKR 45,000', 'amber'] }, { buttons: [{ label: 'Decline' }, { label: 'Accept', kind: 'pri', to: 'O22', spot: 'Accept Dilshan’s quote' }] }],
+    [{ who: { title: 'Tharindu Jayawardena', sub: 'Freelancer · sent Fri 20 Nov', lead: 'av' } }, 'Photography', { chip: ['Accepted', 'green'] }, { link: 'Open booking', to: 'O22' }],
+    [{ who: { title: 'Lumen Stage Co.', sub: 'Vendor · sent Thu 19 Nov', lead: 'sq' } }, 'Staging', { chip: ['Declined', 'grey'] }, { link: 'Find another', to: 'O17' }],
+  ], { rowH: 64, name: 'Table-Booking-requests' });
+  label(s, MX, 812, 'Job posts');
+  table(s, MX, 830, MW, [
+    { label: 'Job', w: 280 }, { label: 'Quotes', w: 80, align: 'right' }, { label: 'Quotes close', w: 130 }, { label: 'Status', w: 90 }, { label: '', w: 150, align: 'right' },
+  ], [
+    [{ t: '2 photographers, 12 Dec, Colombo', weight: 700 }, '4', 'Fri 4 Dec', { chip: ['Open', 'info'] }, { link: 'Compare quotes', to: 'O21' }],
+    [{ t: 'Sound and lighting', weight: 700 }, '3', 'Mon 16 Nov', { chip: ['Closed', 'grey'] }, { link: 'View quotes', to: 'O21' }],
+  ], { name: 'Table-Job-posts' });
+  label(s, MX, 1004, 'Confirmed bookings');
+  table(s, MX, 1022, MW, [
+    { label: 'Provider', w: 230 }, { label: 'Service', w: 160 }, { label: 'Date', w: 110 }, { label: 'Price', w: 110, align: 'right' }, { label: '', w: 90, align: 'right' },
+  ], [
+    [{ who: { title: 'Pulse Sound & Light', sub: 'Vendor', lead: 'sq' } }, 'Sound and lighting', 'Sat 12 Dec', { t: 'LKR 180,000', weight: 600 }, { link: 'Open', to: 'O22', spot: 'Open · Pulse Sound & Light' }],
+    [{ who: { title: 'Tharindu Jayawardena', sub: 'Freelancer', lead: 'av' } }, 'Photography', 'Sat 12 Dec', { t: 'LKR 35,000', weight: 600 }, { link: 'Open', to: 'O22', spot: 'Open · Tharindu Jayawardena' }],
+    [{ who: { title: 'Ruwan Silva', sub: 'Freelancer', lead: 'av' } }, 'MC', 'Sat 12 Dec', { t: 'LKR 25,000', weight: 600 }, { link: 'Open', to: 'O22', spot: 'Open · Ruwan Silva' }],
+  ], { rowH: 64, name: 'Table-Confirmed-bookings' });
+  const y = card(s, RX, 330, RW, 'Quotes closing soon', (cx, cy, cw) => {
+    row(s, cx, cy, cw, 56, { lead: 'sq', title: '2 photographers, 12 Dec', sub: '4 quotes · close Fri 4 Dec' });
+    button(s, cx, cy + 68, 'Compare quotes', { h: 40, w: cw, kind: 'pri', to: 'O21' });
+    return cy + 108;
+  });
+  card(s, RX, y + 16, RW, 'Messages with providers', (cx, cy, cw) => {
+    row(s, cx, cy, cw, 56, { lead: 'av', title: 'Dilshan Perera', sub: 'Can we start at 5:45?', to: 'O23' });
+    row(s, cx, cy + 64, cw, 56, { lead: 'sq', title: 'Pulse Sound & Light', sub: 'Rigging starts at 2 PM', to: 'O23' });
+    return cy + 120;
+  });
+});
+
+screen('O15', 'Event Q&A', s => {
+  const p = s.p;
+  shell(s, 'My events');
+  eventHeader(s, EVENTS.cmf, 'qa');
+  s.g('QA-head', () => {
+    s.text(MX, 291, 'Questions and answers', { size: 15, weight: 700 });
+    s.text(MX, 311, 'Questions and your answers are public on the event page.', { size: 12, fill: p.muted });
+    const w2 = chipW('Answered (12)');
+    chip(s, MR - w2, 280, 'Answered (12)', { tone: 'off' });
+    chip(s, MR - w2 - 8 - chipW('Waiting (3)'), 280, 'Waiting (3)', { tone: 'on' });
+  });
+  s.g('Question-gates', () => {
+    s.rect(MX, 328, MW, 248, p.row, { r: 14 });
+    avatar(s, MX + 34, 362);
+    s.text(MX + 66, 357, 'What time do gates open?', { size: 15, weight: 700 });
+    s.text(MX + 66, 377, 'Sanduni Fernando · Consumer · Today', { size: 12, fill: p.muted });
+    s.g('More', () => { s.rect(MR - 50, 342, 34, 34, p.row, { r: 17, stroke: p.line }); s.text(MR - 33, 364, '⋯', { size: 16, weight: 700, fill: p.muted, anchor: 'middle' }); });
+    field(s, MX + 66, 398, MW - 86, '', 'Gates open at 5:30 PM tonight because we’re running a little late. Bring your NIC.', { area: true, h: 96, focus: true });
+    buttonsRight(s, MR - 20, 510, [{ label: 'Cancel', kind: 'sec' }, { label: 'Post answer', kind: 'pri' }], { h: 36 });
+  });
+  const Q = (y, q, who) => row(s, MX, y, MW, 82, { lead: 'av', title: q, sub: who, right: { buttons: [{ label: 'Answer' }, { label: '⋯' }] } });
+  Q(592, 'Is there parking for motorbikes?', 'Ravindu Jayasuriya · Consumer · Yesterday');
+  Q(684, 'Can I bring my own water bottle?', 'Ayesha Rahman · Consumer · Mon');
+  card(s, RX, 328, RW, 'Answered recently', (cx, cy, cw) => {
+    row(s, cx, cy, cw, 62, { lead: 'dot', dot: p.greenText, title: 'Is there a coat check?', sub: 'Yes, at Gate 1, LKR 200.' });
+    row(s, cx, cy + 70, cw, 62, { lead: 'dot', dot: p.greenText, title: 'Can I bring a camera?', sub: 'Phone and compact cameras only.' });
+    return cy + 132;
+  });
+});
+
+screen('O16', 'Event board', s => {
+  const p = s.p;
+  shell(s, 'My events');
+  eventHeader(s, EVENTS.cmf, 'board');
+  s.g('Board-head', () => {
+    s.text(MX, 291, 'Discussion board', { size: 15, weight: 700 });
+    s.text(MX, 311, 'Where people going to the event talk and make plans.', { size: 12, fill: p.muted });
+    const left = buttonsRight(s, MR, 276, [{ label: 'New thread', kind: 'pri', to: 'O25', spot: 'New thread' }], { h: 36 });
+    const w2 = chipW('Most upvoted');
+    chip(s, left - 12 - w2, 280, 'Most upvoted');
+    chip(s, left - 20 - w2 - chipW('Newest'), 280, 'Newest', { tone: 'on' });
+  });
+  const T = (y, o) => row(s, MX, y, MW, 82, { lead: 'av', title: o.t, sub: o.by, meta: o.v, to: 'O25', spot: o.t, right: { buttons: [{ label: 'Reply', to: 'O25', spot: 'Reply · ' + o.t }] } });
+  T(332, { t: 'Set times are up: see the Line-up tab', by: 'Agastra Events · Organiser · Verified · 12 replies', v: '▲ 64 · pinned' });
+  T(424, { t: 'Who’s going? Meet at Gate 2 at 5:30', by: 'Sanduni · Consumer · 34 replies', v: '▲ 52' });
+  T(516, { t: 'Carpool from Nugegoda, 2 seats left', by: 'Ravindu · Consumer · 8 replies', v: '▲ 17' });
+  T(608, { t: 'Which stalls are worth it?', by: 'Spice Route Catering · Vendor · 21 replies', v: '▲ 30' });
+  card(s, RX, 332, RW, 'Your badge', (cx, cy, cw) => {
+    row(s, cx, cy, cw, 56, { lead: 'sq', title: 'Agastra Events', chips: [['Organiser', 'info'], ['Verified', 'green']], h: 56 });
+    return s.para(cx, cy + 82, 'Your threads and replies show these badges on every board and community.', cw, { size: 13, fill: p.muted, lh: 20 }) + 6;
+  });
+});
+
+// O17 to O22: hiring
+screen('O17', 'Find providers', s => {
+  const p = s.p;
+  shell(s, 'Hiring');
+  pageTitle(s, 'Hiring', 'Find vendors and freelancers, post jobs and keep track of bookings.', { buttons: [{ label: 'Post a job', to: 'O20' }] });
+  field(s, MX, 200, MW, 'Search', 'photographer  ×');
+  chipsRow(s, MX, 272, [['Category: Photography ▾', 'on'], ['District: Colombo ▾'], ['Rating: 4+ ▾'], ['Verified only', 'on'], ['Sort: Rank ▾']]);
+  s.text(MX, 330, '18 providers, ordered by rank', { size: 12, fill: p.muted });
+  const P = (y, o) => {
+    const r = row(s, MX, y, MW, 102, { lead: o.sq ? 'sq' : 'av', z: 56, ar: 26, title: o.name, sub: o.sub, meta: o.meta, metaFill: p.text, to: 'O18', spot: o.name, right: { buttons: [{ label: 'Message', to: 'O23', spot: 'Message · ' + o.name }, { label: 'View profile', to: 'O18', spot: 'View profile · ' + o.name }] } });
+    chipsRow(s, r.tx + textWidth(o.name, 14, 700) + 10, y + 14, o.chips, { h: 22 });
+  };
+  P(344, { name: 'Tharindu Jayawardena', sub: 'Freelancer · Photographer · Serves Colombo, Gampaha', meta: '★ 4.8 · 126 reviews · 210 jobs · from LKR 30,000', chips: [['Verified', 'green'], ['Top Rated', 'info']] });
+  P(456, { name: 'Frame & Focus Studio', sq: true, sub: 'Vendor · Photography and video · Serves Colombo, Kandy, Galle', meta: '★ 4.7 · 98 reviews · 164 jobs · from LKR 45,000', chips: [['Verified', 'green'], ['Top Rated', 'info']] });
+  P(568, { name: 'Malsha Gunasekara', sub: 'Freelancer · Photographer · Serves Colombo, Gampaha', meta: '★ 4.6 · 41 reviews · 58 jobs · from LKR 25,000', chips: [['Verified', 'green'], ['Rising', 'info']] });
+  P(680, { name: 'Chamath Rodrigo', sub: 'Freelancer · Photographer · Serves Colombo', meta: '★ 4.3 · 6 reviews · 9 jobs · from LKR 18,000', chips: [['New', 'info']] });
+  row(s, MX, 798, MW, 63, { title: 'Not finding the right person?', sub: 'Post a job and let providers send you quotes.', right: { buttons: [{ label: 'Post a job', to: 'O20', spot: 'Post a job (hint)' }] } });
+  const y = card(s, RX, 112, RW, 'Leaderboard', (cx, cy, cw) => {
+    s.text(cx, cy + 2, 'Top photographers in Colombo, by rank', { size: 12, fill: p.muted });
+    let ry = cy + 14;
+    [['1', 'Frame & Focus Studio', '★ 4.7', 'Top Rated', true], ['2', 'Tharindu Jayawardena', '★ 4.8', 'Top Rated'], ['3', 'Malsha Gunasekara', '★ 4.6', 'Rising'], ['4', 'Nadeesha Perera', '★ 4.6', 'Rising'], ['5', 'Chamath Rodrigo', '★ 4.3', 'New']].forEach(([n, name, rt, tier, sq]) => {
+      rankRow(s, cx, ry, cw, n, name, rt, tier, sq, { to: n === '2' ? 'O18' : undefined });
+      ry += 58;
+    });
+    button(s, cx, ry + 2, 'See all leaderboards', { h: 36, kind: 'link', to: 'O31' });
+    return ry + 30;
+  });
+  card(s, RX, y + 16, RW, 'Your bookings', (cx, cy, cw) => {
+    row(s, cx, cy, cw, 56, { lead: 'sq', title: '3 confirmed', sub: 'Colombo Music Fest', to: 'O14', spot: '3 confirmed bookings' });
+    row(s, cx, cy + 64, cw, 56, { lead: 'sq', title: '1 quote to answer', sub: 'Dilshan Perera · DJ set', to: 'O14', spot: '1 quote to answer' });
+    return cy + 120;
+  });
+});
+
+screen('O18', 'Provider profile', s => {
+  const p = s.p;
+  shell(s, 'Hiring');
+  card(s, MX, 112, MW, null, (cx) => {
+    avatar(s, 356, 176, 44);
+    s.text(420, 168, 'Tharindu Jayawardena', { size: 22, weight: 700 });
+    s.text(420, 190, 'Freelancer · Photographer · Serves Colombo, Gampaha', { size: 13, fill: p.muted });
+    chipsRow(s, 420, 202, [['Verified', 'green'], ['Top Rated', 'info']], { h: 22 });
+    buttonsRight(s, MR - 20, 124, [{ label: 'Message', to: 'O23' }, { label: 'Send booking request', kind: 'pri', to: 'O19' }]);
+    s.para(cx + 4, 258, 'Event and concert photographer. Fast edits, and calm on a busy stage.', MW - 48, { size: 14 });
+    [['★ 4.8', 'rating'], ['126', 'reviews'], ['210', 'completed jobs'], ['#2', 'in Photography, Colombo']].forEach(([v, k], i) => {
+      s.text(312 + i * 176, 300, v, { size: 20, weight: 700 });
+      s.text(312 + i * 176, 320, k, { size: 12, fill: p.muted });
+    });
+    return 332;
+  }, { pad: 20, name: 'Profile' });
+  label(s, MX, 384, 'Services and prices');
+  table(s, MX, 402, MW, [{ label: 'Service', w: 480 }, { label: 'Indicative price', w: 220, align: 'right' }], [
+    [{ who: { title: 'Event coverage, 6 hours', sub: '300 edited photos within 7 days' } }, { t: 'From LKR 35,000', weight: 700 }],
+    [{ who: { title: 'Half-day coverage, 3 hours', sub: '120 edited photos within 5 days' } }, { t: 'From LKR 20,000', weight: 700 }],
+    [{ who: { title: 'Photo booth with prints', sub: 'Unlimited prints for 3 hours' } }, { t: 'From LKR 45,000', weight: 700 }],
+  ], { rowH: 64, name: 'Table-Services' });
+  label(s, MX, 664, 'Portfolio', { note: 'Photos and videos of past work' });
+  const tw6 = (MW - 50) / 6;
+  for (let i = 0; i < 6; i++) {
+    const x = MX + i * (tw6 + 10);
+    cover(s, x, 682, tw6, tw6, 12, i === 1 || i === 4 ? 'Video' : 'Photo');
+    if (i === 1 || i === 4) { s.circle(x + tw6 / 2, 682 + tw6 / 2, 18, p.row); s.path(`M${f(x + tw6 / 2 - 5)},${f(682 + tw6 / 2 - 8)} v16 l13,-8z`, p.text); }
+  }
+  label(s, MX, 848, 'Reviews');
+  s.g('Reviews', () => {
+    s.rect(MX, 866, MW, 238, p.row, { r: 14 });
+    s.text(MX + 20, 918, '4.8', { size: 40, weight: 800 });
+    s.text(MX + 20, 940, 'from 126 reviews', { size: 12, fill: p.muted });
+    [['Quality', '4.9'], ['Punctuality', '4.8'], ['Communication', '4.7'], ['Value for money', '4.6']].forEach(([k, v], i) => {
+      const y = 972 + i * 30;
+      s.text(MX + 20, y, k, { size: 13 });
+      s.text(MX + 220, y, '★ ' + v, { size: 13, weight: 700, anchor: 'end' });
+    });
+    const rx = MX + 260, rw = MW - 280;
+    s.text(rx, 900, 'Hill Events · Organiser · Kandy Food Carnival · Nov', { size: 12, fill: p.muted, max: rw });
+    s.text(rx, 922, '★★★★★', { size: 14, fill: p.amberText });
+    let b = s.para(rx, 944, 'Great shots of the food stalls, delivered in four days. We will book again.', rw, { size: 14, lh: 21 });
+    s.line(rx, b + 18, rx + rw, b + 18, p.div);
+    s.text(rx, b + 44, 'Punchline LK · Organiser · Laugh Out Loud Comedy · Oct', { size: 12, fill: p.muted, max: rw });
+    s.text(rx, b + 66, '★★★★☆', { size: 14, fill: p.amberText });
+    s.para(rx, b + 88, 'Good photos. Arrived 20 minutes late but caught every set.', rw, { size: 14, lh: 21 });
+  });
+  let y = card(s, RX, 112, RW, 'Districts served', (cx, cy) => { chipsRow(s, cx, cy, [['Colombo', 'info'], ['Gampaha', 'info']]); return cy + 28; });
+  y = card(s, RX, y + 16, RW, 'Leaderboard', (cx, cy, cw) => {
+    s.text(cx, cy + 22, '#2 in Photography, Colombo', { size: 18, weight: 700, max: cw });
+    button(s, cx, cy + 38, 'See leaderboards', { h: 36, to: 'O31' });
+    return cy + 74;
+  });
+  card(s, RX, y + 16, RW, 'How booking works', (cx, cy, cw) => s.para(cx, cy + 4, 'Send a request with your event, times, budget, brief and terms. Tharindu can accept, decline or send their own quote.', cw, { size: 13, fill: p.muted, lh: 20 }) + 6);
+});
+
+screen('O19', 'Booking request', s => {
+  const p = s.p;
+  shell(s, 'Hiring');
+  pageTitle(s, 'Send a booking request', 'To Tharindu Jayawardena. They can accept, decline or send their own quote.');
+  const c3 = (MW - 40 - 32) / 3, c2 = (MW - 40 - 16) / 2;
+  let y = section(s, MX, 213, MW, 'Event and time', (x, top, w) => {
+    let b = field(s, x, top + 12, w, 'Event', 'Colombo Music Fest', { select: true });
+    b = field(s, x, b + 32, c3, 'Date', 'Sat 12 Dec');
+    field(s, x + c3 + 16, b - 54, c3, 'Start time', '5:00 PM');
+    field(s, x + 2 * (c3 + 16), b - 54, c3, 'End time', '11:30 PM');
+    s.text(x, b + 32, 'Location', { size: 13, weight: 600 });
+    s.text(x, b + 56, 'Viharamahadevi Park, Colombo 07', { size: 14 });
+    s.text(x, b + 76, 'Taken from the event', { size: 12, fill: p.muted });
+    return field(s, x, b + 112, c3, 'Budget', 'LKR 35,000');
+  });
+  y = section(s, MX, y + 31, MW, 'Brief', (x, top, w) => {
+    s.text(x, top + 12, 'Fill in what you know. Tharindu only sees the fields you fill in.', { size: 13, fill: p.muted });
+    let b = field(s, x, top + 48, c2, 'Service', 'Event photography');
+    field(s, x + c2 + 16, top + 48, c2, 'Duration', '6.5 hours');
+    b = field(s, x, b + 32, c3, 'Expected audience', '3,000', { suffix: 'people' });
+    b = field(s, x, b + 32, w, 'Deliverables', '300 edited photos within 7 days');
+    b = field(s, x, b + 32, w, 'Run-of-show timings', 'Gates 5:30 PM · headline set 9:00 PM · finish 11:30 PM');
+    return field(s, x, b + 32, w, 'Equipment provided', 'What you provide at the venue', { ph: true });
+  });
+  y = section(s, MX, y + 31, MW, 'Payment terms', (x, top, w) => {
+    s.text(x, top + 12, 'Payments happen outside Tezera. The booking keeps a record of what you agreed.', { size: 13, fill: p.muted });
+    const aw = 250, dw = 230;
+    s.text(x, top + 46, 'Payment', { size: 12, weight: 600, fill: p.muted });
+    s.text(x + 150, top + 46, 'Amount', { size: 12, weight: 600, fill: p.muted });
+    s.text(x + 150 + aw + 16, top + 46, 'Due', { size: 12, weight: 600, fill: p.muted });
+    let ry = top + 58;
+    [['Deposit', 'LKR 10,000', 'Mon 30 Nov', false], ['Instalment 1', 'LKR 15,000', 'Fri 11 Dec', true], ['Instalment 2', 'LKR 10,000', 'Mon 14 Dec', true]].forEach(([k, a, d, rm]) => {
+      s.text(x, ry + 28, k, { size: 14, weight: 600 });
+      field(s, x + 150, ry, aw, '', a);
+      field(s, x + 150 + aw + 16, ry, dw, '', d);
+      if (rm) s.g('Remove-instalment', () => { s.rect(x + w - 34, ry + 6, 34, 34, p.row, { r: 17, stroke: p.line }); s.text(x + w - 17, ry + 28, '×', { size: 16, weight: 600, fill: p.muted, anchor: 'middle' }); });
+      ry += 56;
+    });
+    button(s, x, ry + 6, '+ Add an instalment', { h: 34 });
+    return ry + 40;
+  });
+  y = section(s, MX, y + 31, MW, 'Cancellation terms', (x, top, w) => {
+    const b = field(s, x, top + 12, w, 'If you cancel', 'Tharindu keeps the deposit if you cancel within 7 days of the event.');
+    return field(s, x, b + 32, w, 'If Tharindu cancels', 'You get back everything you paid.');
+  });
+  const bw = (MW - 10) / 2;
+  button(s, MX, y + 24, 'Discard', { h: 48, w: bw, to: 'O18' });
+  button(s, MX + bw + 10, y + 24, 'Send request', { h: 48, w: bw, kind: 'pri', to: 'O14' });
+  const yy = card(s, RX, 188, RW, null, (cx, cy, cw) => {
+    avatar(s, cx + 28, cy + 30, 28);
+    s.text(cx + 70, cy + 22, 'Tharindu Jayawardena', { size: 16, weight: 700, max: cw - 70 });
+    chipsRow(s, cx + 70, cy + 32, [['Verified', 'green'], ['Top Rated', 'info']], { h: 22 });
+    s.text(cx + 70, cy + 74, '★ 4.8 · 126 reviews · Photographer', { size: 12, fill: p.muted });
+    return cy + 82;
+  }, { pad: 18, name: 'Provider' });
+  note(s, RX, yy + 16, RW, 'Tharindu sees these terms before accepting. Once the booking is confirmed, changing them needs their agreement.', { bg: p.amber });
+});
+
+screen('O20', 'Post a job', s => {
+  const p = s.p;
+  shell(s, 'Hiring');
+  pageTitle(s, 'Post a job', 'Providers who match send you quotes. You can accept one or more.');
+  const c3 = (MW - 40 - 32) / 3, c2 = (MW - 40 - 16) / 2;
+  let y = section(s, MX, 213, MW, 'The job', (x, top, w) => {
+    let b = field(s, x, top + 12, w, 'Title', '2 photographers, 12 Dec, Colombo');
+    field(s, x, b + 32, c2, 'Event', 'Colombo Music Fest', { select: true });
+    b = field(s, x + c2 + 16, b + 32, c2, 'Provider category', 'Photography', { select: true });
+    b = field(s, x, b + 32, c3, 'Date', 'Sat 12 Dec');
+    field(s, x + c3 + 16, b - 54, c3, 'Start time', '5:00 PM');
+    field(s, x + 2 * (c3 + 16), b - 54, c3, 'End time', '11:30 PM');
+    return field(s, x, b + 32, c2, 'District', 'Colombo', { select: true });
+  });
+  y = section(s, MX, y + 31, MW, 'Requirements', (x, top, w) => {
+    s.text(x, top + 12, 'The same brief as a booking request. Providers only see the fields you fill in.', { size: 13, fill: p.muted });
+    let b = field(s, x, top + 48, c2, 'Service', 'Event photography, 2 people');
+    field(s, x + c2 + 16, top + 48, c2, 'Duration', '6.5 hours');
+    b = field(s, x, b + 32, c3, 'Expected audience', '3,000', { suffix: 'people' });
+    b = field(s, x, b + 32, w, 'Deliverables', '300 edited photos each within 7 days');
+    return field(s, x, b + 32, w, 'Run-of-show timings', 'Gates 5:30 PM · headline set 9:00 PM · finish 11:30 PM');
+  });
+  y = section(s, MX, y + 31, MW, 'Budget and deadline', (x, top, w) => {
+    s.text(x, top + 12, 'Budget range, per photographer', { size: 13, weight: 600 });
+    field(s, x, top + 20, c3, '', 'LKR 25,000');
+    s.text(x + c3 + 16, top + 48, 'to', { size: 14, fill: p.muted });
+    const b = field(s, x + c3 + 42, top + 20, c3, '', 'LKR 40,000');
+    field(s, x, b + 32, c2, 'Quotes close on', 'Fri 4 Dec');
+    return field(s, x + c2 + 16, b + 32, c2, 'At', '6:00 PM');
+  });
+  const bw = (MW - 10) / 2;
+  button(s, MX, y + 24, 'Discard', { h: 48, w: bw, to: 'O14' });
+  button(s, MX + bw + 10, y + 24, 'Post job', { h: 48, w: bw, kind: 'pri', to: 'O21' });
+  const yy = card(s, RX, 188, RW, 'Who sees this', (cx, cy, cw) => s.para(cx, cy + 4, 'Photographers who serve Colombo see this post and can send you a quote with a message.', cw, { size: 13, lh: 20 }) + 6);
+  note(s, RX, yy + 16, RW, 'When quotes close, compare them side by side and accept one or more. Each one you accept becomes a booking.', { bg: p.amber });
+});
+
+screen('O21', 'Compare quotes', s => {
+  const p = s.p;
+  shell(s, 'Hiring');
+  pageTitle(s, '2 photographers, 12 Dec, Colombo', 'Colombo Music Fest · Sat 12 Dec · Budget LKR 25,000 to LKR 40,000 each · Quotes close Fri 4 Dec', { right: FR, chip: ['Open', 'info'] });
+  const X = MX, Y = 188, x0 = X + 20, lw = 160, cw = (FW - 40 - lw) / 3;
+  const Q = [
+    { name: 'Malsha Gunasekara', chips: [['Verified', 'green'], ['Rising', 'info']], price: 'LKR 32,000', rating: '★ 4.6 · 41 reviews', jobs: '58', dist: 'Colombo, Gampaha', msg: 'Happy to shoot alongside a second photographer. Edits within 5 days.', on: true },
+    { name: 'Chamath Rodrigo', chips: [['New', 'info']], price: 'LKR 28,000', rating: '★ 4.3 · 6 reviews', jobs: '9', dist: 'Colombo', msg: 'New on Tezera, but I have shot three outdoor festivals this year.', on: false },
+    { name: 'Frame & Focus Studio', sq: true, chips: [['Verified', 'green'], ['Top Rated', 'info']], price: 'LKR 38,000', rating: '★ 4.7 · 98 reviews', jobs: '164', dist: 'Colombo, Kandy, Galle', msg: 'One of our two shooters can cover this. Edits within 4 days.', on: true },
+  ];
+  const rowsY = [Y + 20, Y + 160, Y + 216, Y + 272, Y + 328, Y + 384, Y + 474, Y + 530];
+  s.g('Comparison', () => {
+    s.rect(X, Y, FW, 550, p.row, { r: 14 });
+    Q.forEach((q, i) => { if (q.on) s.rect(x0 + lw + i * cw, Y + 10, cw - 8, 530, p.card, { r: 12 }); });
+    ['Provider', 'Price', 'Rating', 'Completed jobs', 'Districts served', 'Message', 'Accept'].forEach((k, i) => {
+      const top = rowsY[i], bottom = rowsY[i + 1];
+      if (i) s.line(x0, top, X + FW - 20, top, p.div);
+      s.text(x0, top + (i === 0 ? 36 : 34), k, { size: 12, weight: 600, fill: p.muted });
+      Q.forEach((q, j) => {
+        const cx = x0 + lw + j * cw + 16, room = cw - 40;
+        if (i === 0) {
+          if (q.sq) s.rect(cx, top + 6, 56, 56, p.thumb, { r: 14 }); else avatar(s, cx + 28, top + 34, 28);
+          s.text(cx, top + 88, q.name, { size: 15, weight: 700, max: room });
+          chipsRow(s, cx, top + 98, q.chips, { h: 22 });
+          button(s, cx, top + 126, 'View profile', { h: 16, size: 12, kind: 'link', to: 'O18', spot: 'View profile · ' + q.name });
+        } else if (i === 1) s.text(cx, top + 37, q.price, { size: 22, weight: 800 });
+        else if (i === 2) s.text(cx, top + 34, q.rating, { size: 14, weight: 600 });
+        else if (i === 3) s.text(cx, top + 34, q.jobs, { size: 14, weight: 600 });
+        else if (i === 4) s.text(cx, top + 34, q.dist, { size: 14, max: room });
+        else if (i === 5) s.para(cx, top + 30, q.msg, room, { size: 13, lh: 20 });
+        else checkbox(s, cx, top + 17, q.on, 'Accept this quote');
+        if (i === 6) s.spot(cx - 6, top + 10, room, 36, `Accept · ${q.name}`, null, 'option', 'Ticks are drawn in their chosen state.');
+      });
+      void bottom;
+    });
+  });
+  s.g('Action-bar', () => {
+    s.rect(X, Y + 566, FW, 76, p.row, { r: 14, stroke: p.pri, sw: 1.5 });
+    s.text(X + 20, Y + 600, '2 quotes selected.', { size: 15, weight: 700 });
+    s.text(X + 20, Y + 622, 'A booking is created for each quote you accept.', { size: 13, fill: p.muted });
+    buttonsRight(s, X + FW - 16, Y + 582, [{ label: 'Accept and create bookings', kind: 'pri', to: 'O22' }], { h: 44 });
+  });
+});
+
+screen('O22', 'Booking', s => {
+  const p = s.p;
+  shell(s, 'Hiring');
+  pageTitle(s, 'Tharindu Jayawardena', 'Photography · Colombo Music Fest · Sat 12 Dec', { chip: ['Confirmed', 'green'], buttons: [{ label: 'Message', to: 'O23' }, { label: 'Change terms' }] });
+  let y = section(s, MX, 213, MW, 'What was agreed', (x, top, w) => pairs(s, x, top + 14, w, [
+    ['Event', 'Colombo Music Fest'], ['Date', 'Sat 12 Dec'], ['Time', '5:00 PM to 11:30 PM'], ['Location', 'Viharamahadevi Park, Colombo 07'], ['Service', 'Event photography'], ['Price', 'LKR 35,000'],
+  ]));
+  label(s, MX, y + 31, 'Payment terms', { note: 'Paid outside Tezera' });
+  y = table(s, MX, y + 50, MW, [{ label: 'Payment', w: 260 }, { label: 'Amount', w: 200, align: 'right' }, { label: 'Due', w: 240 }], [
+    [{ t: 'Deposit', weight: 700 }, 'LKR 10,000', 'Mon 30 Nov'],
+    [{ t: 'Instalment 1', weight: 700 }, 'LKR 15,000', 'Fri 11 Dec'],
+    [{ t: 'Instalment 2', weight: 700 }, 'LKR 10,000', 'Mon 14 Dec'],
+  ], { name: 'Table-Payment-terms' });
+  y = section(s, MX, y + 31, MW, 'Cancellation terms', (x, top, w) => pairs(s, x, top + 14, w, [
+    ['If you cancel', 'Tharindu keeps the deposit if you cancel within 7 days of the event.'], ['If Tharindu cancels', 'You get back everything you paid.'],
+  ]));
+  section(s, MX, y + 31, MW, 'Brief', (x, top, w) => pairs(s, x, top + 14, w, [
+    ['Service', 'Event photography'], ['Duration', '6.5 hours'], ['Expected audience', '3,000 people'], ['Deliverables', '300 edited photos within 7 days'], ['Run-of-show timings', 'Gates 5:30 PM · headline set 9:00 PM · finish 11:30 PM'],
+  ]));
+  let r = card(s, RX, 188, RW, null, (cx, cy, cw) => {
+    avatar(s, cx + 24, cy + 26, 24);
+    s.text(cx + 62, cy + 20, 'Tharindu Jayawardena', { size: 15, weight: 700, max: cw - 62 });
+    chipsRow(s, cx + 62, cy + 30, [['Verified', 'green'], ['Top Rated', 'info']], { h: 22 });
+    button(s, cx + 62, cy + 62, 'View profile', { h: 18, size: 13, kind: 'link', to: 'O18' });
+    return cy + 82;
+  }, { pad: 18, name: 'Provider' });
+  r = note(s, RX, r + 16, RW, 'Changing the price, payments or cancellation terms needs Tharindu to accept the change.', { bg: p.amber });
+  r = card(s, RX, r + 16, RW, 'History', (cx, cy, cw) => {
+    s.g('Timeline', () => {
+      s.line(cx + 6, cy + 10, cx + 6, cy + 52, p.div, { sw: 2 });
+      [['Request sent', 'Fri 20 Nov · 10:12 AM'], ['Accepted by Tharindu', 'Fri 20 Nov · 2:40 PM']].forEach(([t, d], i) => {
+        const ty = cy + i * 48;
+        s.circle(cx + 6, ty + 6, 6, p.pri);
+        s.text(cx + 24, ty + 11, t, { size: 14, weight: 600 });
+        s.text(cx + 24, ty + 30, d, { size: 12, fill: p.muted });
+      });
+    });
+    return cy + 82;
+  });
+  r = card(s, RX, r + 16, RW, 'After the event', (cx, cy, cw) => {
+    const t = s.para(cx, cy + 4, 'Mark the booking completed to open reviews for both of you.', cw, { size: 13, fill: p.muted, lh: 20 });
+    button(s, cx, t + 16, 'Mark completed', { h: 40, w: cw, kind: 'pri', to: 'O30' });
+    return t + 56;
+  });
+  card(s, RX, r + 16, RW, 'Something wrong?', (cx, cy, cw) => {
+    button(s, cx, cy, 'Report a problem', { h: 36 });
+    let t = s.para(cx, cy + 58, 'For example a no-show. An admin looks at it with this booking’s history.', cw, { size: 12, fill: p.muted, lh: 17 });
+    s.line(cx, t + 16, cx + cw, t + 16, p.div);
+    button(s, cx, t + 30, 'Cancel booking', { h: 20, size: 13, kind: 'danger' });
+    t = s.para(cx, t + 70, 'You’ll be asked for a reason. The cancellation terms apply.', cw, { size: 12, fill: p.muted, lh: 17 });
+    return t + 6;
+  });
+});
+
+// O23 to O25: people
+screen('O23', 'Messages', s => {
+  const p = s.p;
+  shell(s, 'Messages');
+  pageTitle(s, 'Messages', 'Providers, vendors and people going to your events');
+  chipsRow(s, MX, 186, [['All', 'on'], ['Providers'], ['Consumers']]);
+  const LW = 437;
+  const C = (y, o) => row(s, MX, y, LW, 76, { lead: o.sq ? 'sq' : 'av', z: 56, title: o.t, sub: o.sub, meta: o.role, right: { text: o.time }, stroke: o.on ? p.pri : undefined, sw: 2 });
+  C(226, { t: 'Tharindu Jayawardena', sub: 'Booked! See you at Gate 1 at 5.', role: 'Freelancer', time: '5:02 PM', on: true });
+  C(310, { t: 'Spice Route Catering', sq: true, sub: 'Our menu for stall B-14 is up', role: 'Vendor', time: 'Mon' });
+  C(394, { t: 'Sanduni Fernando', sub: 'Is the show still on tonight?', role: 'Consumer', time: 'Sun' });
+  C(478, { t: 'Dilshan Perera', sub: 'Can we start at 5:45?', role: 'Freelancer', time: 'Sat' });
+  const X = 749, CW = 655, cx = X + 20, cr = X + CW - 20;
+  s.g('Card-Chat', () => {
+    const bg = s.slot();
+    s.text(cx, 217, 'Tharindu Jayawardena', { size: 16, weight: 700 });
+    s.text(cx, 237, 'Freelancer · Photographer · Verified', { size: 12, fill: p.muted });
+    let lx = cr;
+    for (const [t, to, kind] of [['Report', null, 'muted'], ['Block', null, 'muted'], ['View profile', 'O18', 'hot']]) {
+      const w = s.text(lx, 217, t, { size: 13, weight: 600, fill: kind === 'hot' ? p.hot : p.muted, anchor: 'end' });
+      if (to) s.spot(lx - w - 6, 201, w + 12, 22, t, to, 'link');
+      lx -= w + 18;
+    }
+    const day = (y, t) => { const w = textWidth(t, 12, 600) + 20; s.rect(X + CW / 2 - w / 2, y, w, 22, p.row, { r: 11 }); s.text(X + CW / 2, y + 15, t, { size: 12, weight: 600, fill: p.muted, anchor: 'middle' }); };
+    const file = (x, y, name, kind) => { s.rect(x, y, 230, 44, p.bg, { r: 10, stroke: p.line }); s.rect(x + 10, y + 10, 24, 24, p.thumb, { r: 6 }); s.text(x + 44, y + 20, name, { size: 13, weight: 600 }); s.text(x + 44, y + 36, kind, { size: 12, fill: p.muted }); };
+    day(254, 'Fri 20 Nov');
+    s.g('Bubble-Quote', () => { s.rect(cx, 288, 300, 104, p.row, { r: 16 }); s.text(cx + 14, 308, 'Tharindu', { size: 12, weight: 700, fill: p.hot }); s.text(cx + 14, 328, 'Hi! Here’s my quote for the 12th.', { size: 14 }); file(cx + 14, 338, 'Quote.pdf', 'Quote'); });
+    s.g('Bubble-Brief', () => { s.rect(cr - 320, 404, 320, 84, p.pri, { r: 16 }); s.text(cr - 306, 426, 'Thanks. Here’s the brief and run-of-show.', { size: 14, fill: p.onPri }); file(cr - 306, 434, 'Brief.pdf', 'Brief'); });
+    s.g('Bubble-Photo', () => { s.rect(cx, 500, 280, 176, p.row, { r: 16 }); s.text(cx + 14, 520, 'Tharindu', { size: 12, weight: 700, fill: p.hot }); cover(s, cx + 14, 530, 252, 110, 10, 'Photo'); s.text(cx + 14, 662, 'From last year’s fest', { size: 14 }); });
+    day(690, 'Today');
+    s.g('Bubble-Booked', () => { s.rect(cr - 250, 724, 250, 40, p.pri, { r: 16 }); s.text(cr - 236, 749, 'Booked! See you at Gate 1 at 5.', { size: 14, fill: p.onPri }); });
+    s.g('Composer', () => {
+      s.rect(cx, 782, CW - 40, 50, p.row, { r: 25, stroke: p.line });
+      s.rect(cx + 16, 795, 24, 24, p.thumb, { r: 6 }); s.rect(cx + 48, 795, 24, 24, p.thumb, { r: 6 });
+      s.text(cx + 86, 813, 'Write a message…', { size: 14, fill: p.muted });
+      s.circle(cr - 26, 807, 17, p.pri);
+    });
+    s.parts[bg] = s.rectStr(X, 186, CW, 666, p.card, { r: 18 });
+  });
+});
+
+screen('O24', 'Community', s => {
+  const p = s.p;
+  shell(s, 'Community');
+  pageTitle(s, 'Community', 'Your events’ boards and communities about topics and cities', { buttons: [{ label: 'New thread', kind: 'pri', to: 'O25', spot: 'New thread' }] });
+  tabs(s, MX, 211, [{ label: 'Event boards', on: true }, { label: 'Communities' }], MW);
+  label(s, MX, 259, 'Colombo Music Fest · board', { link: { label: 'Open board', to: 'O16' } });
+  const T = (y, t, by, v) => row(s, MX, y, MW, 82, { lead: 'av', title: t, sub: by, meta: v, to: 'O25', spot: t, right: { buttons: [{ label: 'Reply', to: 'O25', spot: 'Reply · ' + t }] } });
+  T(280, 'Who’s going? Meet at Gate 2 at 5:30', 'Sanduni · Consumer · 34 replies', '▲ 52');
+  T(372, 'Carpool from Nugegoda, 2 seats left', 'Ravindu · Consumer · 8 replies', '▲ 17');
+  T(464, 'Which stalls are worth it?', 'Spice Route Catering · Vendor · 21 replies', '▲ 30');
+  label(s, MX, 577, 'Your communities');
+  const cw = (MW - 24) / 3;
+  [['Colombo Music Scene', '4.2k members · 12 new posts', 'O25'], ['Event Organisers LK', '640 members · 3 new posts'], ['Food Festivals LK', '2.8k members · 4 new posts']].forEach(([t, sub, to], i) => {
+    const x = MX + (i % 3) * (cw + 12), y = 598 + Math.floor(i / 3) * 189;
+    s.g('Card-' + t, () => {
+      s.rect(x, y, cw, 177, p.row, { r: 18 });
+      s.rect(x + 16, y + 16, 44, 44, p.thumb, { r: 12 });
+      s.text(x + 16, y + 83, t, { size: 15, weight: 700, max: cw - 32 });
+      s.text(x + 16, y + 112, sub, { size: 12, fill: p.muted, max: cw - 32 });
+      button(s, x + 16, y + 127, 'Open', { h: 34, to: to || null, note: to ? undefined : 'Only Colombo Music Scene is drawn.', spot: 'Open · ' + t });
+    });
+  });
+  const y = card(s, RX, 280, RW, 'Your event boards', (cx, cy, cw2) => {
+    row(s, cx, cy, cw2, 56, { lead: 'sq', title: 'Colombo Music Fest', sub: '12 new posts', to: 'O16' });
+    row(s, cx, cy + 64, cw2, 56, { lead: 'sq', title: 'Jazz on the Green', sub: '3 new posts' });
+    return cy + 120;
+  });
+  card(s, RX, y + 16, RW, 'Find communities', (cx, cy, cw2) => {
+    row(s, cx, cy, cw2, 58, { lead: 'sq', title: 'Live Music Sri Lanka', sub: '6.1k members', right: { buttons: [{ label: 'Join', kind: 'pri' }] } });
+    row(s, cx, cy + 66, cw2, 58, { lead: 'sq', title: 'Galle Events', sub: '1.1k members', right: { buttons: [{ label: 'Join', kind: 'pri' }] } });
+    return cy + 124;
+  });
+});
+
+screen('O25', 'Thread', s => {
+  const p = s.p;
+  shell(s, 'Community');
+  pageTitle(s, 'Colombo Music Scene', '4.2k members · live music in Colombo', { chip: ['Joined', 'green'], buttons: [{ label: 'New thread', kind: 'pri' }] });
+  const X = MX + 20, VX = MX + 40, TX = MX + 76, TW = MW - 96;
+  const votes = (x, y, n, on) => s.g('Votes', () => {
+    s.text(x, y, '▲', { size: 14, fill: on ? p.hot : p.muted, anchor: 'middle' });
+    s.text(x, y + 20, n, { size: 14, weight: 700, anchor: 'middle' });
+    s.text(x, y + 40, '▼', { size: 14, fill: p.muted, anchor: 'middle' });
+  });
+  s.g('Thread', () => {
+    const bg = s.slot();
+    votes(VX, 224, '48', true);
+    s.text(TX, 216, 'Nethmi Silva · Consumer · Mon', { size: 12, fill: p.muted });
+    s.text(TX, 244, 'Best open-air gigs this December?', { size: 18, weight: 700 });
+    s.para(TX, 270, 'Looking for outdoor shows in Colombo with good food stalls. What is everyone going to?', TW, { size: 14, lh: 21 });
+    cover(s, TX, 292, TW, 200, 14, 'Image');
+    s.g('Link-card', () => {
+      s.rect(TX, 504, TW, 60, p.row, { r: 12, stroke: p.line });
+      s.rect(TX + 8, 512, 88, 44, p.thumb, { r: 8 });
+      s.text(TX + 108, 530, 'Colombo Music Fest · Sat 12 Dec', { size: 14, weight: 600 });
+      s.text(TX + 108, 549, 'Short link to the event page', { size: 12, fill: p.muted });
+    });
+    s.spot(TX, 504, TW, 60, 'Colombo Music Fest link', 'O09', 'link');
+    button(s, TX, 576, 'Reply', { h: 30, size: 12 });
+    button(s, TX + 74, 576, 'Report', { h: 30, size: 12 });
+    s.line(X, 626, MX + MW - 20, 626, p.div);
+    s.text(X, 656, '18 replies', { size: 14, weight: 700 });
+    const w2 = chipW('Most upvoted');
+    chip(s, MR - 20 - w2, 638, 'Most upvoted');
+    chip(s, MR - 28 - w2 - chipW('Newest'), 638, 'Newest', { tone: 'on' });
+    votes(VX, 698, '12', false);
+    s.text(TX, 690, 'Agastra Events · Organiser · Mon', { size: 12, fill: p.muted });
+    chip(s, TX + textWidth('Agastra Events · Organiser · Mon', 12) + 8, 676, 'Verified', { h: 20, size: 11, tone: 'green' });
+    s.para(TX, 712, 'Come to ours! The line-up and the stall list are on the event page.', TW, { size: 14, lh: 21 });
+    button(s, TX, 724, 'Reply', { h: 26, size: 12, kind: 'link' });
+    s.line(TX + 6, 760, TX + 6, 832, p.div, { sw: 2 });
+    votes(TX + 36, 774, '5', false);
+    s.text(TX + 64, 766, 'Brew Bros · Vendor · Mon', { size: 12, fill: p.muted });
+    s.text(TX + 64, 788, 'We’ll be at stall C-02 with cold brew.', { size: 14 });
+    button(s, TX + 64, 800, 'Reply', { h: 26, size: 12, kind: 'link' });
+    votes(VX, 862, '3', false);
+    s.text(TX, 854, 'Ravindu Jayasuriya · Consumer · Tue', { size: 12, fill: p.muted });
+    s.text(TX, 876, 'Jazz on the Green looks good too.', { size: 14 });
+    button(s, TX, 888, 'Reply', { h: 26, size: 12, kind: 'link' });
+    field(s, X, 936, MW - 40 - 98, '', 'Write a reply', { ph: true });
+    button(s, MX + MW - 20 - 88, 940, 'Reply', { h: 38, w: 88, kind: 'pri' });
+    s.parts[bg] = s.rectStr(MX, 188, MW, 818, p.row, { r: 14 });
+  });
+  const y = card(s, RX, 188, RW, 'About this community', (cx, cy, cw) => {
+    const t = s.para(cx, cy + 4, 'Live music in Colombo: gigs, line-ups and venues.', cw, { size: 13, lh: 20 });
+    s.text(cx, t + 24, '4.2k members · 12 new posts today', { size: 12, fill: p.muted });
+    button(s, cx, t + 40, 'Leave', { h: 34 });
+    return t + 74;
+  });
+  card(s, RX, y + 16, RW, 'Your badges', (cx, cy, cw) => {
+    chipsRow(s, cx, cy, [['Organiser', 'info'], ['Verified', 'green']], { h: 26 });
+    return s.para(cx, cy + 50, 'Your replies show your role and the Verified badge.', cw, { size: 13, fill: p.muted, lh: 20 }) + 6;
+  });
+});
+
+// O26: feed and promotion
+screen('O26', 'Feed and promotion', s => {
+  const p = s.p;
+  shell(s, 'Feed and promotion');
+  pageTitle(s, 'Feed and promotion', 'Only organisers post to the feed. Your followers see your posts in their feed.');
+  card(s, MX, 188, MW, 'New post', (cx, cy, cw) => {
+    const segR = cx + cw;
+    const w2 = chipW('Reel');
+    chip(s, segR - w2, 200, 'Reel');
+    chip(s, segR - w2 - 8 - chipW('Image or poster'), 200, 'Image or poster', { tone: 'on' });
+    s.g('Drop-zone', () => {
+      s.rect(cx, cy, 300, 236, p.row, { r: 16, stroke: p.line, sw: 2, dash: '6 5' });
+      s.rect(cx + 134, cy + 62, 32, 32, p.thumb, { r: 8 });
+      s.text(cx + 150, cy + 120, 'Add an image or poster', { size: 14, weight: 600, anchor: 'middle' });
+      s.text(cx + 150, cy + 140, 'Drag a file here or choose one', { size: 12, fill: p.muted, anchor: 'middle' });
+      button(s, cx + 150 - btnW('Choose file', 13, 34) / 2, cy + 158, 'Choose file', { h: 34 });
+    });
+    const fx = cx + 320, fw = cw - 320;
+    const b = field(s, fx, cy + 12, fw, 'Caption', 'Line-up reveal! Who are you most excited to see?', { area: true, h: 80 });
+    const b2 = field(s, fx, b + 32, fw, 'Link to an event', 'Colombo Music Fest', { select: true });
+    s.text(fx, b2 + 22, 'The post links to the event page.', { size: 12, fill: p.muted });
+    buttonsRight(s, segR, b2 + 40, [{ label: 'Post', kind: 'pri' }], { h: 40 });
+    return Math.max(cy + 236, b2 + 80);
+  }, { pad: 20 });
+  label(s, MX, 565, 'Your posts');
+  chipsRow(s, MR - 210, 547, [['All', 'on'], ['Images'], ['Reels']]);
+  const PW = (MW - 16) / 2;
+  const post = (x, y, o) => s.g('Post-' + o.title, () => {
+    s.rect(x, y, PW, 352, p.card, { r: 18 });
+    cover(s, x + 10, y + 10, PW - 20, 179, 12);
+    chip(s, x + 20, y + 20, o.kind, { h: 24 });
+    if (o.kind === 'Reel') { s.circle(x + PW / 2, y + 99, 22, p.row); s.path(`M${f(x + PW / 2 - 6)},${f(y + 89)} v20 l17,-10z`, p.text); }
+    chip(s, x + 18, y + 202, o.ev, { h: 24, tone: 'info' });
+    s.text(x + 18, y + 252, o.title, { size: 15, weight: 700, max: PW - 36 });
+    s.text(x + 18, y + 274, o.stats, { size: 12, fill: p.muted });
+    button(s, x + 18, y + 296, 'Share', { h: 36, fill: o.open ? p.hotSoft : undefined });
+    button(s, x + 18 + btnW('Share', 13, 36) + 8, y + 296, 'Comments', { h: 36 });
+  });
+  post(MX, 584, { kind: 'Reel', ev: 'Colombo Music Fest', title: 'Line-up reveal · Music Fest', stats: '1.2k likes · 86 comments · Mon', open: true });
+  post(MX + PW + 16, 584, { kind: 'Poster', ev: 'Colombo Music Fest', title: 'Gates, parking and what to bring', stats: '640 likes · 31 comments · Sun' });
+  post(MX, 952, { kind: 'Image', ev: 'Jazz on the Green', title: 'Jazz on the Green is on', stats: '410 likes · 22 comments · Fri' });
+  post(MX + PW + 16, 952, { kind: 'Reel', ev: 'Colombo Music Fest', title: 'Behind the scenes: the stage build', stats: '2.3k likes · 140 comments · Thu' });
+  s.spot(MX + 18, 786, 150, 24, 'Colombo Music Fest (event link)', 'O09', 'chip');
+  s.g('Share-menu', () => {
+    const x = MX + 18, y = 930, w = 330;
+    s.rect(x, y, w, 178, p.row, { r: 16, stroke: p.line });
+    s.text(x + 16, y + 26, 'Share', { size: 12, weight: 600, fill: p.muted });
+    s.rect(x + 12, y + 38, w - 24, 44, p.bg, { r: 10 });
+    s.text(x + 24, y + 65, 'Short link', { size: 14, weight: 600 });
+    button(s, x + w - 24 - btnW('Copy link', 12, 30), y + 45, 'Copy link', { h: 30, size: 12 });
+    s.rect(x + 16, y + 96, 24, 24, p.thumb, { r: 6 });
+    s.text(x + 52, y + 106, 'Share to story', { size: 14, weight: 600 });
+    s.text(x + 52, y + 124, 'An image sized for Instagram stories', { size: 12, fill: p.muted });
+    s.para(x + 16, y + 152, 'The link shows a preview image on WhatsApp and Instagram.', w - 32, { size: 12, fill: p.muted, lh: 16 });
+  });
+  const y = card(s, RX, 188, RW, 'Followers', (cx, cy, cw) => {
+    s.text(cx, cy + 28, '1.2k', { size: 30, weight: 800 });
+    s.text(cx, cy + 48, 'followers', { size: 12, fill: p.muted });
+    return s.para(cx, cy + 76, 'They see your posts in their feed and hear about your new events.', cw, { size: 13, fill: p.muted, lh: 20 }) + 6;
+  });
+  card(s, RX, y + 16, RW, 'Posts by event', (cx, cy, cw) => {
+    row(s, cx, cy, cw, 56, { lead: 'sq', title: 'Colombo Music Fest', sub: '3 posts · 4.1k likes', to: 'O09' });
+    row(s, cx, cy + 64, cw, 56, { lead: 'sq', title: 'Jazz on the Green', sub: '1 post · 410 likes', to: 'O11', spot: 'Jazz on the Green (posts)' });
+    return cy + 120;
+  });
+});
+
+// O27 to O32: you
+screen('O27', 'Profile', s => {
+  const p = s.p;
+  shell(s, 'Profile');
+  card(s, MX, 112, MW, null, () => {
+    s.rect(312, 132, 88, 88, p.thumb, { r: 22 });
+    s.text(420, 160, 'Agastra Events', { size: 22, weight: 700 });
+    chipsRow(s, 420, 172, [['Verified', 'green'], ['Top Rated', 'info']], { h: 22 });
+    s.text(420, 216, 'Concerts and festivals · Colombo · this is how others see your profile', { size: 13, fill: p.muted, max: 460 });
+    buttonsRight(s, MR - 20, 150, [{ label: 'Edit profile', kind: 'pri', to: 'O32' }]);
+    s.para(312, 258, 'Concerts and music festivals in Colombo. We run Colombo Music Fest and Jazz on the Green.', MW - 40, { size: 14 });
+    [['★ 4.6', '214 reviews'], ['#4', 'among organisers'], ['1.2k', 'followers'], ['38', 'events run']].forEach(([v, k], i) => {
+      s.text(312 + i * 176, 300, v, { size: 20, weight: 700 });
+      s.text(312 + i * 176, 320, k, { size: 12, fill: p.muted });
+    });
+    s.g('Short-link', () => {
+      chip(s, 312, 340, 'Short link', { h: 30, tone: 'info' });
+      button(s, 312 + chipW('Short link', 30) + 8, 340, 'Copy link', { h: 30, size: 12 });
+      button(s, 312 + chipW('Short link', 30) + 16 + btnW('Copy link', 12, 30), 340, 'Share', { h: 30, size: 12 });
+    });
+    return 370;
+  }, { pad: 20, name: 'Profile' });
+  tabs(s, MX, 432, [{ label: 'Upcoming', on: true }, { label: 'Past events' }, { label: 'Reviews', to: 'O29' }], MW);
+  const E = (y, t, sub, meta, to, sp) => row(s, MX, y, MW, 84, { lead: 'thumb', tw: 96, title: t, sub, meta, metaFill: p.muted, to, spot: sp });
+  E(466, 'Colombo Music Fest', 'Sat 12 Dec · Viharamahadevi Park', '1,284 going', 'O09');
+  E(560, 'Jazz on the Green', 'Sun 13 Dec · Race Course Grounds', '642 going', 'O11', 'Jazz on the Green (profile)');
+  E(654, 'Indie Night Vol. 4', 'Postponed to Fri 8 Jan · Barefoot Garden', '210 going', 'O09', 'Indie Night Vol. 4 (profile)');
+  let y = card(s, RX, 112, RW, 'Verification', (cx, cy, cw) => {
+    chip(s, cx, cy, 'Verified', { h: 26, tone: 'green' });
+    const t = s.para(cx, cy + 48, 'Approved 2 Oct. The badge shows on your profile, events and posts.', cw, { size: 13, fill: p.muted, lh: 20 });
+    button(s, cx, t + 14, 'See verification', { h: 22, size: 13, kind: 'link', to: 'O28' });
+    return t + 36;
+  });
+  y = card(s, RX, y + 16, RW, 'Contact', (cx, cy, cw) => {
+    row(s, cx, cy, cw, 44, { lead: 'sq', z: 24, title: '+94 71 234 5678' });
+    row(s, cx, cy + 50, cw, 44, { lead: 'sq', z: 24, title: 'agastra@example.com' });
+    return cy + 94;
+  });
+  card(s, RX, y + 16, RW, 'Reviews', (cx, cy, cw) => {
+    s.text(cx, cy + 32, '4.6', { size: 34, weight: 800 });
+    s.text(cx + 70, cy + 32, 'from 214 reviews', { size: 13, fill: p.muted });
+    button(s, cx, cy + 52, 'See all reviews ›', { h: 22, size: 13, kind: 'link', to: 'O29' });
+    return cy + 74;
+  });
+});
+
+screen('O28', 'Verification', s => {
+  const p = s.p;
+  shell(s, 'Profile');
+  pageTitle(s, 'Verification', 'An admin checks your documents before you get the Verified badge.');
+  s.g('Get-verified', () => {
+    const x = MX + 20, w = MW - 40;
+    s.rect(MX, 188, MW, 568, p.row, { r: 14 });
+    const tw = s.text(x, 224, 'Get verified', { size: 18, weight: 700 });
+    chip(s, x + tw + 12, 205, 'Not verified yet', { h: 24, tone: 'wait' });
+    s.para(x, 254, 'Once you’re approved you get the Verified badge, and you can open stall slots, post jobs and send booking requests.', w, { size: 14, lh: 21 });
+    s.g('Drop-zone', () => {
+      s.rect(x, 292, w, 170, p.bg, { r: 16, stroke: p.line, sw: 2, dash: '6 5' });
+      s.rect(x + w / 2 - 16, 316, 32, 32, p.thumb, { r: 8 });
+      s.text(x + w / 2, 372, 'Upload your documents', { size: 14, weight: 600, anchor: 'middle' });
+      s.text(x + w / 2, 392, 'Drag files here or choose them', { size: 12, fill: p.muted, anchor: 'middle' });
+      button(s, x + w / 2 - btnW('Choose files', 13, 34) / 2, 410, 'Choose files', { h: 34 });
+    });
+    row(s, x, 478, w, 56, { lead: 'sq', z: 30, title: 'Document-1.pdf', sub: 'Uploaded today', right: { buttons: [{ label: 'Remove' }] } });
+    row(s, x, 538, w, 56, { lead: 'sq', z: 30, title: 'Document-2.jpg', sub: 'Uploaded today', right: { buttons: [{ label: 'Remove' }] } });
+    s.line(x, 536, x + w, 536, p.div);
+    note(s, x, 610, w, 'Only Tezera admins can see these documents.', { pad: 16 });
+    buttonsRight(s, x + w, 690, [{ label: 'Submit for review', kind: 'pri', to: 'O05' }], { h: 44 });
+  });
+  const y = card(s, RX, 188, RW, 'What happens next', (cx, cy, cw) => {
+    s.line(cx + 6, cy + 10, cx + 6, cy + 128, p.div, { sw: 2 });
+    let ty = cy;
+    [['Upload documents', 'You are here.', true], ['Pending', 'An admin reviews your documents.'], ['Approved or rejected', 'Approved: you get the Verified badge. Rejected: you see the reason.']].forEach(([t, d, done]) => {
+      s.circle(cx + 6, ty + 6, 6, done ? p.pri : p.row, done ? {} : { stroke: p.pri, sw: 2 });
+      s.text(cx + 24, ty + 11, t, { size: 14, weight: 600 });
+      ty = s.para(cx + 24, ty + 30, d, cw - 24, { size: 12, fill: p.muted, lh: 17 }) + 26;
+    });
+    return ty - 20;
+  });
+  card(s, RX, y + 16, RW, 'Locked until you’re verified', (cx, cy, cw) => {
+    let ry = cy;
+    for (const t of ['Opening stall slots', 'Posting jobs', 'Sending booking requests']) { row(s, cx, ry, cw, 44, { lead: 'sq', z: 22, title: t }); ry += 50; }
+    return ry - 6;
+  });
+});
+
+screen('O29', 'Reviews', s => {
+  const p = s.p;
+  shell(s, 'Reviews');
+  pageTitle(s, 'Reviews', 'From providers you worked with and people who marked your events Going');
+  const t4 = (MW - 36) / 4;
+  [['★ 4.6', 'Average rating'], ['214', 'Reviews'], ['Top Rated', 'Tier'], ['#4', 'Rank among organisers', 'O31']].forEach(([v, l, to], i) => stat(s, MX + i * (t4 + 12), 188, t4, 88, v, l, { to, vs: v.length > 6 ? 22 : 28 }));
+  tabs(s, MX, 318, [{ label: 'From providers (38)', on: true }, { label: 'From consumers (176)' }], MW);
+  s.g('Averages', () => {
+    s.rect(MX, 352, MW, 84, p.row, { r: 14 });
+    s.text(MX + 20, 380, 'Averages from providers', { size: 13, weight: 600, fill: p.muted });
+    [['★ 4.7', 'Payment'], ['★ 4.5', 'Communication'], ['★ 4.6', 'Planning']].forEach(([v, k], i) => {
+      s.text(MX + 20 + i * 240, 412, v, { size: 18, weight: 700 });
+      s.text(MX + 82 + i * 240, 412, k, { size: 13, fill: p.muted });
+    });
+  });
+  s.g('Review-list', () => {
+    const x = MX + 20, w = MW - 40;
+    s.rect(MX, 452, MW, 372, p.row, { r: 14 });
+    let y = 484;
+    [
+      ['Pulse Sound & Light · Vendor · Rooftop Sessions Vol. 1 · Oct', '★ 5 · Payment 5 · Communication 5 · Planning 4.5', 'Paid on time and the run-of-show was clear.'],
+      ['Tharindu Jayawardena · Freelancer · Indie Night Vol. 3 · Sep', '★ 4.5 · Payment 5 · Communication 4 · Planning 4.5', 'Good brief. The stage times moved on the night without warning.'],
+      ['Spice Route Catering · Vendor · Colombo Music Fest 2025 · Dec', '★ 4 · Payment 4 · Communication 4 · Planning 4.5', 'Busy, well-run fest. Power for the stalls arrived late.'],
+    ].forEach(([by, r, t], i) => {
+      if (i) s.line(x, y - 22, x + w, y - 22, p.div);
+      s.text(x, y, by, { size: 12, fill: p.muted, max: w - 80 });
+      button(s, x + w - textWidth('Report', 13, 600), y - 15, 'Report', { h: 20, size: 13, kind: 'link' });
+      s.text(x, y + 24, r, { size: 13, weight: 700 });
+      s.text(x, y + 48, t, { size: 14, max: w });
+      y += 118;
+    });
+  });
+  s.text(MX, 852, 'Report a review that breaks the rules. An admin checks it and hides it if it does.', { size: 12, fill: p.muted });
+  const y = card(s, RX, 188, RW, 'Waiting for your review', (cx, cy, cw) => {
+    row(s, cx, cy, cw, 72, { lead: 'sq', title: 'Pulse Sound & Light', sub: 'Sound and lighting', meta: 'Rooftop Sessions Vol. 1', metaFill: p.muted, right: { buttons: [{ label: 'Review', kind: 'pri', to: 'O30' }] } });
+    row(s, cx, cy + 80, cw, 72, { lead: 'sq', title: 'Batik Lane', sub: 'Stall vendor', meta: 'Rooftop Sessions Vol. 1', metaFill: p.muted, right: { buttons: [{ label: 'Review', kind: 'pri', to: 'O30', spot: 'Review · Batik Lane' }] } });
+    return cy + 152;
+  });
+  card(s, RX, y + 16, RW, 'From consumers', (cx, cy, cw) => {
+    let ry = cy;
+    for (const [k, v] of [['Organisation', '★ 4.7'], ['Value for money', '★ 4.4'], ['Overall experience', '★ 4.6']]) {
+      row(s, cx, ry, cw, 44, { title: k, ts: 13, right: { text: v, size: 13, weight: 700, fill: p.text } });
+      ry += 50;
+    }
+    return ry - 6;
+  });
+});
+
+screen('O30', 'Review a provider', s => {
+  const p = s.p;
+  shell(s, 'Reviews');
+  pageTitle(s, 'Review a provider', 'Pulse Sound & Light · Sound and lighting · Rooftop Sessions Vol. 1 · Sat 24 Oct', { right: FR });
+  banner(s, MX, 186, FW, { tone: 'green', title: 'Booking completed on Sat 24 Oct', sub: 'One review per booking · reviews show your name' });
+  card(s, MX, 266, FW, 'Pulse Sound & Light · Sound and lighting', (cx, cy, cw) => {
+    slider(s, cx, cy + 14, cw, 'Quality', 5, 5);
+    slider(s, cx, cy + 74, cw, 'Punctuality', 4, 5);
+    slider(s, cx, cy + 134, cw, 'Communication', 5, 5);
+    slider(s, cx, cy + 194, cw, 'Value for money', 4, 5);
+    return field(s, cx, cy + 254, cw, 'Write a review (optional)', 'What was it like to work with Pulse Sound & Light?', { area: true, h: 110, ph: true });
+  }, { pad: 20 });
+  const bw = (FW - 10) / 2;
+  button(s, MX, 724, 'Save for later', { h: 48, w: bw, to: 'O29' });
+  button(s, MX + bw + 10, 724, 'Submit review', { h: 48, w: bw, kind: 'pri', to: 'O29' });
+});
+
+screen('O31', 'Leaderboards', s => {
+  const p = s.p;
+  shell(s, 'Leaderboards');
+  pageTitle(s, 'Leaderboards', 'Rank orders search results. Tiers: New, Rising and Top Rated.');
+  label(s, MX, 213, 'Top organisers', { note: 'All districts' });
+  s.g('Table-Top-organisers', () => {
+    s.rect(MX, 232, MW, 6 * 64 + 16, p.row, { r: 14 });
+    [['1', 'Hill Events', '★ 4.8 · 412 reviews', 'Top Rated'], ['2', 'Punchline LK', '★ 4.7 · 268 reviews', 'Top Rated'], ['3', 'TechLK', '★ 4.7 · 190 reviews', 'Top Rated'], ['4', 'Agastra Events (you)', '★ 4.6 · 214 reviews', 'Top Rated', true], ['5', 'SoundWave LK', '★ 4.5 · 96 reviews', 'Rising'], ['6', 'Lotus Live', '★ 4.4 · 58 reviews', 'Rising']]
+      .forEach(([n, t, sub, tier, you], i) => {
+        const y = 240 + i * 64;
+        if (you) s.rect(MX + 8, y, MW - 16, 60, p.card, { r: 12 });
+        else if (i) s.line(MX + 20, y - 2, MR - 20, y - 2, p.div);
+        s.text(MX + 36, y + 37, n, { size: 18, weight: 800, fill: p.muted, anchor: 'middle' });
+        s.rect(MX + 62, y + 12, 36, 36, p.thumb, { r: 10 });
+        s.text(MX + 112, y + 26, t, { size: 14, weight: 700 });
+        s.text(MX + 112, y + 45, sub, { size: 12, fill: p.muted });
+        chip(s, MR - 20 - chipW(tier, 22), y + 19, tier, { h: 22, tone: 'info' });
+      });
+  });
+  s.spot(MX + 8, 432, MW - 16, 60, 'Agastra Events (you)', 'O27', 'row');
+  card(s, RX, 188, RW, 'Top providers', (cx, cy, cw) => {
+    chipsRow(s, cx, cy, [['Photography ▾', 'on'], ['Colombo ▾']]);
+    let ry = cy + 42;
+    [['1', 'Frame & Focus Studio', '★ 4.7', 'Top Rated', true], ['2', 'Tharindu Jayawardena', '★ 4.8', 'Top Rated'], ['3', 'Malsha Gunasekara', '★ 4.6', 'Rising'], ['4', 'Nadeesha Perera', '★ 4.6', 'Rising'], ['5', 'Chamath Rodrigo', '★ 4.3', 'New']].forEach(([n, name, rt, tier, sq]) => {
+      rankRow(s, cx, ry, cw, n, name, rt, tier, sq, { to: n === '2' ? 'O18' : undefined });
+      ry += 58;
+    });
+    return ry - 6;
+  });
+});
+
+screen('O32', 'Settings', s => {
+  const p = s.p;
+  shell(s, 'Settings');
+  pageTitle(s, 'Settings', 'Account, notifications, language and safety', { right: FR });
+  const list = (y, items) => s.g('Settings-list', () => {
+    s.rect(MX, y, FW, items.length * 56, p.row, { r: 14 });
+    items.forEach((it, i) => {
+      const ry = y + i * 56;
+      if (i) s.line(MX + 16, ry, FR - 16, ry, p.div);
+      s.rect(MX + 16, ry + 20, 16, 16, p.thumb, { r: 4 });
+      if (it.sub) { s.text(MX + 44, ry + 25, it.t, { size: 14, weight: 600 }); s.text(MX + 44, ry + 43, it.sub, { size: 12, fill: p.muted }); }
+      else s.text(MX + 44, ry + 33, it.t, { size: 14, weight: it.danger ? 700 : 600, fill: it.danger ? p.red : p.text });
+      if (it.v) s.text(FR - 18, ry + 33, it.v, { size: 13, fill: p.muted, anchor: 'end' });
+      if (it.toggle != null) toggle(s, FR - 62, ry + 16, it.toggle);
+      if (it.to !== undefined) s.spot(MX, ry, FW, 56, it.t, it.to, 'row', it.note);
+    });
+    return y + items.length * 56;
+  });
+  label(s, MX, 199, 'Account');
+  let y = list(218, [{ t: 'Logged in with', v: 'agastra@example.com' }, { t: 'Account type', v: 'Organiser · each account has one role' }, { t: 'Log out', v: '›', to: 'O02' }]);
+  label(s, MX, y + 29, 'Notifications');
+  y = list(y + 48, [
+    { t: 'Bookings, quotes and verification', sub: 'Always on in the app · also by push and email', toggle: true },
+    { t: 'New messages', toggle: true },
+    { t: 'Stall applications', toggle: true },
+    { t: 'Questions on your events', toggle: true },
+    { t: 'Likes and comments on your posts', toggle: false },
+  ]);
+  label(s, MX, y + 29, 'Appearance and language');
+  const half = (FW - 16) / 2;
+  card(s, MX, y + 48, half, 'Language', (cx, cy) => { chipsRow(s, cx, cy + 2, [['English', 'on'], ['සිංහල'], ['தமிழ்']], { h: 32 }); return cy + 34; }, { pad: 20, fill: p.row });
+  card(s, MX + half + 16, y + 48, half, 'Theme', (cx, cy) => { chipsRow(s, cx, cy + 2, [['Light', 'on'], ['Dark'], ['System']], { h: 32 }); return cy + 34; }, { pad: 20, fill: p.row });
+  label(s, MX, y + 179, 'Safety');
+  list(y + 198, [{ t: 'Blocked users', v: '2  ›' }]);
+});
+
+/* ---------- Journeys and groups ---------- */
+
+const FLOWS = [
+  { name: 'Get started', note: 'New organisers create an account, verify their phone, set up their profile and send documents for verification. Returning organisers log in straight to the dashboard.',
+    rows: [[['O01', 'Create account'], ['O03', 'Verify'], ['O04', 'Continue'], ['O28', 'Submit for review'], ['O05']], [['O02', 'Log in'], ['O05']]] },
+  { name: 'Publish an event', note: 'Create the event page and publish it. Events with no map yet start from a floor plan; then draw zones, stalls and pins.',
+    rows: [[['O07', 'Create event'], ['O08', 'Publish'], ['O09']], [['O11', 'Choose file'], ['O12', 'View listing'], ['O13']]] },
+  { name: 'Run the day', note: 'Set the live status and send announcements on the day. Postponing or cancelling tells everyone who marked Going or Interested.',
+    rows: [[['O05', 'Update status'], ['O09', 'Postponed'], ['O10', 'Postpone event'], ['O07']], [['O09', '3 questions waiting'], ['O15', 'Board tab'], ['O16']]] },
+  { name: 'Fill your stalls', note: 'Open stall slots, approve or reject applications, invite vendors, and give each vendor a stall number on the map.',
+    rows: [[['O09', 'Stall applications'], ['O13', 'Open map builder'], ['O12']]] },
+  { name: 'Hire vendors and freelancers', note: 'Search and send a booking request with a brief and terms, or post a job and compare quotes. Each accepted quote becomes a booking.',
+    rows: [[['O17', 'View profile'], ['O18', 'Send booking request'], ['O19', 'Send request'], ['O14', 'Open booking'], ['O22']], [['O14', 'Post a job'], ['O20', 'Post job'], ['O21', 'Accept and create bookings'], ['O22']]] },
+  { name: 'Messages and community', note: 'Act on notifications, chat with providers and consumers, and take part in event boards and communities.',
+    rows: [[['O06', 'Open'], ['O22', 'Message'], ['O23']], [['O24', 'Reply'], ['O25']]] },
+  { name: 'After the event', note: 'Mark a booking completed to open reviews for both sides, review the provider, then see your reviews and rank.',
+    rows: [[['O22', 'Mark completed'], ['O30', 'Submit review'], ['O29', 'Rank'], ['O31']]] },
+  { name: 'Promote and profile', note: 'Post images and reels linked to your events. Keep your profile, verification and settings up to date.',
+    rows: [[['O26', 'Event link'], ['O09']], [['O27', 'See verification'], ['O28']], [['O27', 'Edit profile'], ['O32']]] },
+];
+const GROUPS = [
+  ['Get started', ['O01', 'O02', 'O03', 'O04']],
+  ['Home', ['O05', 'O06']],
+  ['My events', ['O07', 'O08', 'O09', 'O10', 'O11', 'O12', 'O13', 'O14', 'O15', 'O16']],
+  ['Hiring', ['O17', 'O18', 'O19', 'O20', 'O21', 'O22']],
+  ['People', ['O23', 'O24', 'O25']],
+  ['Promote', ['O26']],
+  ['You', ['O27', 'O28', 'O29', 'O30', 'O31', 'O32']],
+];
+
+function buildAll() {
+  const SCREENS = {}, SVGS = { light: {}, dark: {} }, warnings = [];
+  for (const def of DEFS) {
+    for (const pal of ['light', 'dark']) {
+      const s = new Screen(def.id, def.name, pal);
+      def.draw(s);
+      const { H, svg } = s.render();
+      SVGS[pal][def.id] = svg;
+      if (pal === 'light') {
+        SCREENS[def.id] = { id: def.id, name: def.name, W, H, spots: s.spots };
+        warnings.push(...s.warnings);
+      }
+    }
+  }
+  return { SCREENS, SVGS, warnings };
+}
+/* GENERATOR END */
+
+/* ---------- Viewer (same behaviour as the consumer flow) ---------- */
+const { SCREENS, SVGS, warnings: WARNINGS } = buildAll();
+if (WARNINGS.length) console.warn(`Text too wide for its space:\n${WARNINGS.join('\n')}`);
+let palette = 'light', current = 'O05', path = ['O05'];
+const blobs = {};
+const file = id => { const k = palette + id; if (!blobs[k]) blobs[k] = URL.createObjectURL(new Blob([SVGS[palette][id]], { type: 'image/svg+xml' })); return blobs[k]; };
+const el = (tag, props = {}, kids = []) => { const e = document.createElement(tag); Object.assign(e, props); kids.forEach(k => e.append(k)); return e; };
+
+function toast(msg) {
+  let t = document.querySelector('.toast');
+  if (!t) { t = el('div', { className: 'toast' }); t.setAttribute('role', 'status'); document.body.append(t); }
+  t.textContent = msg; t.hidden = false;
+  clearTimeout(toast.t); toast.t = setTimeout(() => { t.hidden = true; }, 3200);
+}
+
+function renderMap() {
+  const root = document.getElementById('map-view'); root.textContent = '';
+  FLOWS.forEach((fl, fi) => {
+    const box = el('article', { className: 'flow' }, [el('h2', { textContent: `${fi + 1}. ${fl.name}` }), el('p', { textContent: fl.note })]);
+    fl.rows.forEach(r => {
+      const track = el('div', { className: 'track' });
+      r.forEach(([id, via], i) => {
+        const sc = SCREENS[id];
+        const th = el('button', { className: 'thumb', type: 'button' }, [el('img', { src: file(id), alt: `${sc.name} screen`, loading: 'lazy' }), el('span', {}, [el('b', { textContent: id }), sc.name])]);
+        th.addEventListener('click', () => { path = [id]; current = id; setView('click'); });
+        const step = el('div', { className: 'step' }, [th]);
+        if (via && i < r.length - 1) {
+          const a = el('div', { className: 'arrow' });
+          a.innerHTML = '<svg viewBox="0 0 120 14" preserveAspectRatio="none" aria-hidden="true"><line x1="4" y1="7" x2="108" y2="7" stroke="currentColor" stroke-width="2"/><path d="M106 2 L116 7 L106 12" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
+          a.append(el('span', { textContent: via }));
+          step.append(a);
+        }
+        track.append(step);
+      });
+      box.append(track);
+    });
+    root.append(box);
+  });
+}
+
+function renderList() {
+  const nav = document.getElementById('screen-list'); nav.textContent = '';
+  GROUPS.forEach(([g, ids]) => {
+    const d = el('div');
+    ids.forEach(id => {
+      const b = el('button', { type: 'button' }, [el('b', { textContent: id }), SCREENS[id].name]);
+      if (id === current) b.setAttribute('aria-current', 'page');
+      b.addEventListener('click', () => { path = [id]; show(id, true); });
+      d.append(b);
+    });
+    nav.append(el('h3', { textContent: g }), d);
+  });
+}
+
+function go(id) { path.push(id); show(id); }
+
+function show(id, reset) {
+  current = id;
+  const sc = SCREENS[id];
+  renderList();
+  const box = document.getElementById('screen');
+  box.innerHTML = SVGS[palette][id].replace(/^<\?xml[^>]*>/, '');
+  const svg = box.querySelector('svg');
+  if (svg) { svg.removeAttribute('width'); svg.removeAttribute('height'); svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', `${sc.name} screen`); }
+  sc.spots.forEach(sp => {
+    const title = sp.label + (sp.to ? ` → ${SCREENS[sp.to].name}` : ' · not in this prototype');
+    const b = el('button', { className: 'hot' + (sp.to ? '' : ' dead'), type: 'button', title });
+    b.setAttribute('aria-label', title);
+    Object.assign(b.style, { left: `${sp.x / sc.W * 100}%`, top: `${sp.y / sc.H * 100}%`, width: `${sp.w / sc.W * 100}%`, height: `${sp.h / sc.H * 100}%` });
+    b.addEventListener('click', () => { if (!sp.to) { toast(sp.note || `${sp.label.replace(/^Sidebar · /, '')} is not in this prototype yet.`); return; } go(sp.to); });
+    box.append(b);
+  });
+  const cr = document.getElementById('crumbs'); cr.textContent = '';
+  path.slice(-6).forEach((pid, i, arr) => {
+    const b = el('button', { type: 'button', textContent: `${pid} ${SCREENS[pid].name}` });
+    b.addEventListener('click', () => { path = path.slice(0, path.length - (arr.length - 1 - i)); show(pid); });
+    cr.append(b);
+    if (i < arr.length - 1) cr.append('›');
+  });
+  const out = document.getElementById('out'); out.textContent = '';
+  const seen = new Set(), items = [];
+  sc.spots.forEach(sp => { const k = sp.label + sp.to; if (seen.has(k) || sp.kind === 'nav' || sp.kind === 'top') return; seen.add(k); items.push(sp); });
+  out.append(el('h3', { textContent: `Links on ${id} ${sc.name}` + (items.length ? '' : ' · only the sidebar and top bar') }));
+  const ul = el('ul');
+  items.forEach(sp => {
+    const b = el('button', { type: 'button', textContent: sp.to || '–' });
+    b.addEventListener('click', () => { if (sp.to) go(sp.to); else toast(sp.note || 'Not in this prototype yet.'); });
+    ul.append(el('li', {}, [b, el('span', { textContent: sp.label + (sp.to ? ` → ${SCREENS[sp.to].name}` : '') })]));
+  });
+  out.append(ul);
+  if (!reset) window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+}
+
+function setView(v) {
+  document.getElementById('v-map').setAttribute('aria-pressed', String(v === 'map'));
+  document.getElementById('v-click').setAttribute('aria-pressed', String(v === 'click'));
+  document.getElementById('map-view').hidden = v !== 'map';
+  document.getElementById('click-view').hidden = v !== 'click';
+  if (v === 'click') show(current, true);
+}
+function setPalette(pal) {
+  palette = pal;
+  document.getElementById('p-light').setAttribute('aria-pressed', String(pal === 'light'));
+  document.getElementById('p-dark').setAttribute('aria-pressed', String(pal === 'dark'));
+  renderMap();
+  if (!document.getElementById('click-view').hidden) show(current, true);
+}
+function copySvg() {
+  const svg = SVGS[palette][current];
+  const done = () => toast(`Copied ${current} ${SCREENS[current].name} as SVG. Paste it into Figma.`);
+  const fallback = () => {
+    const ta = el('textarea', { value: svg });
+    ta.setAttribute('readonly', '');
+    Object.assign(ta.style, { position: 'fixed', top: '0', left: '0', opacity: '0' });
+    document.body.append(ta);
+    ta.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    ta.remove();
+    if (ok) done(); else toast('Copying is blocked in this view. Open the file in a browser to copy the SVG.');
+  };
+  try { navigator.clipboard.writeText(svg).then(done, fallback); } catch (e) { fallback(); }
+}
+// Deep links: #O12 opens that screen in the click-through, #O12-dark in the dark palette, #map the flow map.
+function fromHash() {
+  const m = /^#(O\d\d)(?:-(dark|light))?$/.exec(location.hash);
+  if (m && SCREENS[m[1]]) {
+    if (m[2] && m[2] !== palette) setPalette(m[2]);
+    path = [m[1]]; current = m[1];
+    setView('click');
+  } else if (location.hash === '#map') setView('map');
+}
+document.getElementById('v-map').addEventListener('click', () => setView('map'));
+document.getElementById('v-click').addEventListener('click', () => setView('click'));
+document.getElementById('p-light').addEventListener('click', () => setPalette('light'));
+document.getElementById('p-dark').addEventListener('click', () => setPalette('dark'));
+document.getElementById('btn-back').addEventListener('click', () => { if (path.length > 1) { path.pop(); show(path[path.length - 1]); } });
+document.getElementById('btn-copy').addEventListener('click', copySvg);
+document.getElementById('show-hot').addEventListener('change', e => document.getElementById('screen').classList.toggle('show-hot', e.target.checked));
+addEventListener('hashchange', fromHash);
+renderMap();
+fromHash();
+</script>

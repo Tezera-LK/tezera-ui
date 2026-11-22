@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Verification</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&amp;family=Instrument+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#050316}a:hover{color:#050316}
+.h{font-family:'Bricolage Grotesque',system-ui,sans-serif;letter-spacing:-.02em;margin:0;line-height:1.1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;box-sizing:border-box;border-radius:14px 14px 3px 14px;border:1.5px solid #70a992;background:#70a992;color:#050316;font:600 15px 'Instrument Sans',system-ui,sans-serif;text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn:hover{filter:brightness(.94)}
+.btn.o{background:transparent;border-color:#050316}
+.card{background:rgba(255,255,255,.6);border:1.5px solid #b6c3a7;border-radius:20px 20px 4px 20px;padding:22px;box-sizing:border-box}
+.panel{background:#658095;border-radius:24px 24px 6px 24px;padding:24px;box-sizing:border-box;color:#050316}
+.tag{display:inline-flex;align-items:center;min-height:24px;padding:0 10px;border-radius:999px;background:#b6c3a7;color:#050316;font:600 12px 'Instrument Sans',system-ui,sans-serif;white-space:nowrap}
+.pri{background:transparent;border:1px dashed #050316;font-weight:500}
+.muted{color:rgba(5,3,22,.72)}
+.drop{border:2px dashed #658095;border-radius:18px 18px 4px 18px;min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:20px;background:rgba(255,255,255,.5)}
+.file{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px 14px 3px 14px;background:#e9e7e2}
+.seg{display:inline-flex;border:1.5px solid #050316;border-radius:14px 14px 3px 14px;overflow:hidden}
+.seg button{min-height:40px;padding:0 16px;border:0;font:600 14px 'Instrument Sans',system-ui,sans-serif;cursor:pointer;color:#050316}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #e9e7e2; font-family: 'Instrument Sans', system-ui, sans-serif; color: #050316; font-size: 15px; line-height: 1.5">
+  <dc-import name="Topbar" hint-size="100%,84px"></dc-import>
+  <div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 28px; padding: 24px 28px 56px; max-width: 1440px; margin: 0 auto; box-sizing: border-box">
+    <div style="flex: 0 1 250px; min-width: 220px">
+      <dc-import name="Sidebar" active="verification" hint-size="100%,960px"></dc-import>
+    </div>
+    <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 24px">
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 12px">
+        <div>
+          <h1 class="h" style="font-size: 40px; font-weight: 800">Verification</h1>
+          <p class="muted" style="margin: 6px 0 0">The Verified badge lets you accept bookings and lifts you in organisers' searches.</p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+          <span class="muted" style="font-size: 13px; font-weight: 600">Preview state</span>
+          <div class="seg" role="radiogroup" aria-label="Preview verification state">
+            <sc-for list="{{states}}" as="s" hint-placeholder-count="3">
+              <button role="radio" aria-checked="{{s.sel}}" onClick="{{s.pick}}" style="background: {{s.bg}}">{{s.label}}</button>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+
+      <section class="panel" aria-labelledby="st" style="display: flex; flex-direction: column; gap: 16px">
+        <h2 id="st" class="h" style="font-size: 26px; font-weight: 800">{{title}}</h2>
+        <p style="margin: 0; font-weight: 500; max-width: 64ch">{{body}}</p>
+        <ol style="list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px">
+          <sc-for list="{{steps}}" as="s" hint-placeholder-count="3">
+            <li style="background: {{s.bg}}; border-radius: 16px 16px 4px 16px; padding: 14px; display: flex; flex-direction: column; gap: 4px">
+              <span style="font-size: 13px; font-weight: 700">{{s.n}}</span>
+              <strong>{{s.label}}</strong>
+              <span style="font-size: 14px">{{s.note}}</span>
+            </li>
+          </sc-for>
+        </ol>
+        <sc-if value="{{isRejected}}" hint-placeholder-val="{{false}}">
+          <div style="background: #e9e7e2; border-radius: 16px 16px 4px 16px; padding: 16px">
+            <strong style="display: block">Reason from the admin</strong>
+            The registration certificate is cut off at the bottom. Upload a full scan and send it again.
+          </div>
+        </sc-if>
+      </section>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; align-items: start">
+        <section class="card" aria-labelledby="docs" style="display: flex; flex-direction: column; gap: 14px">
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap"><h2 id="docs" class="h" style="font-size: 22px; font-weight: 700">Documents</h2></div>
+          <div class="file">
+            <span aria-hidden="true" style="width: 36px; height: 44px; border-radius: 8px 8px 2px 8px; background: #658095"></span>
+            <span style="flex: 1"><strong style="display: block">Business registration</strong><span class="muted" style="font-size: 14px">kottu-lab-br.pdf · uploaded 18 Oct</span></span>
+            <span class="tag pri">Proposed</span>
+          </div>
+          <label class="drop">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#050316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5"></path><rect x="3" y="15" width="18" height="6" rx="2"></rect></svg>
+            <strong>Drop a file or browse</strong>
+            <span class="muted" style="font-size: 14px">PDF, JPG or PNG</span>
+            <input type="file" style="position: absolute; width: 1px; height: 1px; opacity: 0">
+          </label>
+          <button class="btn" style="align-self: flex-start">Send for review</button>
+        </section>
+
+        <section class="card" aria-labelledby="found" style="display: flex; flex-direction: column; gap: 12px">
+          <h2 id="found" class="h" style="font-size: 22px; font-weight: 700">How organisers find you</h2>
+          <p style="margin: 0">Provider search filters by category, district, rating, rank and verified. Your rank score orders the results.</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px">
+            <span class="tag">F&amp;B stall and catering</span><span class="tag">Colombo</span><span class="tag">Gampaha</span><span class="tag">Kalutara</span><span class="tag pri">Verified: not yet</span>
+          </div>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px">
+            <a class="btn o" href="Profile.dc.html">Edit profile</a>
+            <a class="btn o" href="Reviews.dc.html">See leaderboard</a>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1200}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { s: 'pending' }; }
+  renderVals() {
+    const s = this.state.s;
+    const copy = {
+      pending: ['In review', 'An admin is checking your documents. You can reply to requests and send quotes meanwhile, but you cannot accept a booking yet.'],
+      approved: ['Verified', 'Your Verified badge is on your profile, in search and in community threads. You can now accept bookings.'],
+      rejected: ['Not approved yet', 'An admin could not verify the documents. Fix the issue below and send them again.']
+    };
+    const done = '#70a992', now = '#e9e7e2', todo = '#b6c3a7';
+    const steps = [
+      { n: 'Step 1', label: 'Upload documents', note: 'Sent 18 Oct', bg: done },
+      { n: 'Step 2', label: 'Admin review', note: s === 'pending' ? 'Usually a few days' : 'Reviewed 21 Oct', bg: s === 'pending' ? now : done },
+      { n: 'Step 3', label: 'Decision', note: s === 'approved' ? 'Approved' : s === 'rejected' ? 'Rejected with a reason' : 'Waiting', bg: s === 'approved' ? done : s === 'rejected' ? now : todo }
+    ];
+    const defs = [['pending', 'Pending'], ['approved', 'Approved'], ['rejected', 'Rejected']];
+    return {
+      title: copy[s][0], body: copy[s][1], steps, isRejected: s === 'rejected',
+      states: defs.map(([k, label]) => ({ label, sel: String(k === s), bg: k === s ? '#70a992' : 'transparent', pick: () => this.setState({ s: k }) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

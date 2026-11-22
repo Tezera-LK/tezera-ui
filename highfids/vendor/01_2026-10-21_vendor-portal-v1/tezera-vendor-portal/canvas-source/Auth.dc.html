@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Log in or sign up</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&amp;family=Instrument+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#050316}a:hover{color:#050316}
+.h{font-family:'Bricolage Grotesque',system-ui,sans-serif;letter-spacing:-.02em;margin:0;line-height:1.1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;box-sizing:border-box;border-radius:14px 14px 3px 14px;border:1.5px solid #70a992;background:#70a992;color:#050316;font:600 15px 'Instrument Sans',system-ui,sans-serif;text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn:hover{filter:brightness(.94)}
+.btn.o{background:transparent;border-color:#050316}
+.tab{min-height:48px;padding:0 22px;border:0;border-radius:18px 18px 0 0;font:600 15px 'Instrument Sans',system-ui,sans-serif;color:#050316;cursor:pointer}
+.fld{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:14px}
+.in{min-height:46px;border:1.5px solid #658095;border-radius:12px 12px 3px 12px;background:#fff;padding:0 14px;font:400 15px 'Instrument Sans',system-ui,sans-serif;color:#050316;box-sizing:border-box;width:100%}
+.muted{color:rgba(5,3,22,.72)}
+.pri{display:inline-flex;align-items:center;min-height:22px;padding:0 9px;border-radius:999px;border:1px dashed #050316;font:500 12px 'Instrument Sans',system-ui,sans-serif}
+.step{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #e9e7e2; font-family: 'Instrument Sans', system-ui, sans-serif; color: #050316; font-size: 15px; line-height: 1.5; display: flex; flex-wrap: wrap">
+  <section aria-label="tezera" style="flex: 1 1 420px; background: #70a992; padding: 40px 48px; box-sizing: border-box; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; min-height: 420px">
+    <div aria-hidden="true" style="position: absolute; right: -60px; top: -40px; width: 460px; display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 6px; opacity: 0.9">
+      <sc-for list="{{tiles}}" as="t" hint-placeholder-count="24">
+        <i style="display: block; aspect-ratio: 1 / 0.92; border-radius: 24%; grid-column: {{t.col}}; background: {{t.bg}}"></i>
+      </sc-for>
+    </div>
+    <a href="Main.dc.html" style="position: relative; font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 800; font-size: 32px; text-decoration: none">tezera</a>
+    <div style="position: relative">
+      <p class="h" style="font-size: 64px; font-weight: 800; max-width: 9ch">Find the fit.</p>
+      <p style="max-width: 40ch; font-size: 17px; margin: 16px 0 0">Show your services, answer booking requests and job posts, and run your stalls in one place.</p>
+    </div>
+  </section>
+
+  <main style="flex: 1 1 520px; padding: 48px clamp(20px, 5vw, 72px); box-sizing: border-box; display: flex; flex-direction: column; justify-content: center">
+    <div style="max-width: 560px; width: 100%; margin: 0 auto">
+      <div role="tablist" aria-label="Account" style="display: flex; gap: 4px; flex-wrap: wrap">
+        <button class="tab" role="tab" aria-selected="{{selLogin}}" onClick="{{goLogin}}" style="background: {{bgLogin}}">Log in</button>
+        <button class="tab" role="tab" aria-selected="{{selSignup}}" onClick="{{goSignup}}" style="background: {{bgSignup}}">Sign up</button>
+        <button class="tab" role="tab" aria-selected="{{selReset}}" onClick="{{goReset}}" style="background: {{bgReset}}">Forgot password</button>
+      </div>
+      <div style="background: #658095; border-radius: 0 24px 6px 24px; padding: 14px">
+        <div style="background: #e9e7e2; border-radius: 18px 18px 4px 18px; padding: 28px; display: flex; flex-direction: column; gap: 18px">
+
+          <sc-if value="{{isLogin}}" hint-placeholder-val="{{true}}">
+            <h1 class="h" style="font-size: 30px; font-weight: 800">Welcome back</h1>
+            <label class="fld">Email or phone number<input class="in" type="text" placeholder="you@example.lk or 07X XXX XXXX"></label>
+            <label class="fld">Password<input class="in" type="password" placeholder="Your password"></label>
+            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px">
+              <a class="btn" href="Main.dc.html">Log in</a>
+              <button onClick="{{goReset}}" style="background: none; border: 0; font: 600 15px 'Instrument Sans', system-ui, sans-serif; text-decoration: underline; cursor: pointer; min-height: 44px; color: #050316">Forgot password?</button>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{isSignup}}" hint-placeholder-val="{{false}}">
+            <div style="display: flex; gap: 16px; flex-wrap: wrap" aria-label="Sign-up progress">
+              <span class="step"><span style="width: 24px; height: 24px; border-radius: 8px; display: grid; place-items: center; background: {{s1}}">1</span>Contact</span>
+              <span class="step"><span style="width: 24px; height: 24px; border-radius: 8px; display: grid; place-items: center; background: {{s2}}">2</span>Verify</span>
+              <span class="step"><span style="width: 24px; height: 24px; border-radius: 8px; display: grid; place-items: center; background: {{s3}}">3</span>Role and age</span>
+            </div>
+            <sc-if value="{{step1}}" hint-placeholder-val="{{true}}">
+              <h1 class="h" style="font-size: 30px; font-weight: 800">Create your account</h1>
+              <label class="fld">Email or phone number<input class="in" type="text" placeholder="you@example.lk or 07X XXX XXXX"></label>
+              <label class="fld">Password<input class="in" type="password" placeholder="At least 8 characters"></label>
+              <button class="btn" onClick="{{next}}" style="align-self: flex-start">Send code</button>
+            </sc-if>
+            <sc-if value="{{step2}}" hint-placeholder-val="{{false}}">
+              <h1 class="h" style="font-size: 30px; font-weight: 800">Enter the code</h1>
+              <p class="muted" style="margin: 0">We sent a 6-digit code to your email or phone.</p>
+              <label class="fld">Code<input class="in" type="text" inputmode="numeric" placeholder="000000" style="letter-spacing: 0.3em; font-size: 20px; max-width: 220px"></label>
+              <div style="display: flex; gap: 10px; flex-wrap: wrap">
+                <button class="btn" onClick="{{next}}">Verify</button>
+                <button class="btn o" onClick="{{back}}">Back</button>
+              </div>
+            </sc-if>
+            <sc-if value="{{step3}}" hint-placeholder-val="{{false}}">
+              <h1 class="h" style="font-size: 30px; font-weight: 800">How will you use tezera?</h1>
+              <div role="radiogroup" aria-label="Role" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+                <label style="display: flex; gap: 10px; align-items: center; min-height: 52px; padding: 0 14px; border: 1.5px solid #658095; border-radius: 14px 14px 3px 14px"><input type="radio" name="role">Organiser</label>
+                <label style="display: flex; gap: 10px; align-items: center; min-height: 52px; padding: 0 14px; border: 2px solid #050316; background: #70a992; border-radius: 14px 14px 3px 14px; font-weight: 700"><input type="radio" name="role" checked>Vendor</label>
+                <label style="display: flex; gap: 10px; align-items: center; min-height: 52px; padding: 0 14px; border: 1.5px solid #658095; border-radius: 14px 14px 3px 14px"><input type="radio" name="role">Freelancer</label>
+                <label style="display: flex; gap: 10px; align-items: center; min-height: 52px; padding: 0 14px; border: 1.5px solid #658095; border-radius: 14px 14px 3px 14px"><input type="radio" name="role">Attendee</label>
+              </div>
+              <p class="muted" style="margin: 0; font-size: 14px">One role per account. To attend events too, use a second account.</p>
+              <label class="fld">Date of birth <span class="pri">16 or older, proposed</span><input class="in" type="date"></label>
+              <label style="display: flex; gap: 10px; align-items: flex-start; font-size: 14px"><input type="checkbox" style="margin-top: 4px; width: 18px; height: 18px">I am under 18 and a parent or guardian agreed to this account.</label>
+              <div style="display: flex; gap: 10px; flex-wrap: wrap">
+                <a class="btn" href="Profile.dc.html">Create account and set up profile</a>
+                <button class="btn o" onClick="{{back}}">Back</button>
+              </div>
+            </sc-if>
+          </sc-if>
+
+          <sc-if value="{{isReset}}" hint-placeholder-val="{{false}}">
+            <sc-if value="{{reset1}}" hint-placeholder-val="{{true}}">
+              <h1 class="h" style="font-size: 30px; font-weight: 800">Reset your password</h1>
+              <label class="fld">Email or phone number<input class="in" type="text" placeholder="you@example.lk or 07X XXX XXXX"></label>
+              <button class="btn" onClick="{{resetNext}}" style="align-self: flex-start">Send reset code</button>
+            </sc-if>
+            <sc-if value="{{reset2}}" hint-placeholder-val="{{false}}">
+              <h1 class="h" style="font-size: 30px; font-weight: 800">Choose a new password</h1>
+              <label class="fld">Reset code<input class="in" type="text" inputmode="numeric" placeholder="000000"></label>
+              <label class="fld">New password<input class="in" type="password" placeholder="At least 8 characters"></label>
+              <button class="btn" onClick="{{goLogin}}" style="align-self: flex-start">Save and log in</button>
+            </sc-if>
+          </sc-if>
+
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { tab: 'login', step: 1, reset: 1 }; }
+  renderVals() {
+    const { tab, step, reset } = this.state;
+    const on = '#658095', off = '#b6c3a7';
+    const ks = ['#658095', '#b6c3a7', '#e9e7e2', '#050316'];
+    const tiles = [];
+    for (let y = 0; y < 6; y++) for (let x = 0; x < 4; x++) {
+      const k = (x * 7 + y * 3) % 9;
+      tiles.push({ col: (y % 2 === 0 && x === 0) ? '2 / span 2' : 'span 2', bg: k === 4 ? 'transparent' : ks[k % 3] });
+    }
+    return {
+      tiles,
+      isLogin: tab === 'login', isSignup: tab === 'signup', isReset: tab === 'reset',
+      selLogin: String(tab === 'login'), selSignup: String(tab === 'signup'), selReset: String(tab === 'reset'),
+      bgLogin: tab === 'login' ? on : off, bgSignup: tab === 'signup' ? on : off, bgReset: tab === 'reset' ? on : off,
+      step1: step === 1, step2: step === 2, step3: step === 3,
+      s1: step >= 1 ? '#70a992' : '#b6c3a7', s2: step >= 2 ? '#70a992' : '#b6c3a7', s3: step >= 3 ? '#70a992' : '#b6c3a7',
+      reset1: reset === 1, reset2: reset === 2,
+      goLogin: () => this.setState({ tab: 'login', reset: 1 }),
+      goSignup: () => this.setState({ tab: 'signup', step: 1 }),
+      goReset: () => this.setState({ tab: 'reset', reset: 1 }),
+      next: () => this.setState({ step: Math.min(3, step + 1) }),
+      back: () => this.setState({ step: Math.max(1, step - 1) }),
+      resetNext: () => this.setState({ reset: 2 })
+    };
+  }
+}
+</script>
+</body>
+</html>

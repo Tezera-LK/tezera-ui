@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Feed and events · tezera vendor portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&amp;family=Instrument+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#050316}a:hover{color:#050316}
+.h{font-family:'Bricolage Grotesque',system-ui,sans-serif;letter-spacing:-.02em;margin:0;line-height:1.1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;box-sizing:border-box;border-radius:14px 14px 3px 14px;border:1.5px solid #70a992;background:#70a992;color:#050316;font:600 15px 'Instrument Sans',system-ui,sans-serif;text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn:hover{filter:brightness(.94)}
+.btn.o{background:transparent;border-color:#050316}
+.act{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border-radius:12px 12px 3px 12px;border:0;background:transparent;font:600 14px 'Instrument Sans',system-ui,sans-serif;color:#050316;cursor:pointer}
+.act:hover{background:#b6c3a7}
+.tag{display:inline-flex;align-items:center;min-height:24px;padding:0 10px;border-radius:999px;background:#b6c3a7;color:#050316;font:600 12px 'Instrument Sans',system-ui,sans-serif;white-space:nowrap}
+.org{background:#526c80;color:#fff}
+.muted{color:rgba(5,3,22,.72)}
+.post{background:rgba(255,255,255,.6);border:1.5px solid #b6c3a7;border-radius:22px 22px 5px 22px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.pnl{background:#658095;border-radius:22px 22px 5px 22px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.inner{background:#e9e7e2;border-radius:16px 16px 4px 16px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.in{min-height:44px;border:1.5px solid #658095;border-radius:12px 12px 3px 12px;background:#fff;padding:0 14px;font:400 15px 'Instrument Sans',system-ui,sans-serif;color:#050316;box-sizing:border-box;width:100%}
+</style>
+</head>
+<body>
+<div id="app" data-page="Feed"></div>
+<template id="tpl-Feed">
+<div style="min-height: 100vh; background: #e9e7e2; font-family: 'Instrument Sans', system-ui, sans-serif; color: #050316; font-size: 15px; line-height: 1.5">
+  <template data-dc-import name="Topbar" hint-size="100%,84px"></template>
+  <div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 28px; padding: 24px 28px 56px; max-width: 1440px; margin: 0 auto; box-sizing: border-box">
+    <div style="flex: 0 1 250px; min-width: 220px">
+      <template data-dc-import name="Sidebar" active="feed" hint-size="100%,960px"></template>
+    </div>
+    <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+      <div style="flex: 999 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 18px">
+        <div>
+          <h1 class="h" style="font-size: 40px; font-weight: 800">Feed</h1>
+          <p class="muted" style="margin: 6px 0 0">Posts, reels and new events from organisers you follow. Only organisers post here.</p>
+        </div>
+        <template data-sc-for list="{{posts}}" as="p" hint-placeholder-count="2">
+          <article class="post">
+            <div style="display: flex; gap: 12px; align-items: center">
+              <span aria-hidden="true" style="width: 44px; height: 44px; border-radius: 13px 13px 3px 13px; background: #526c80"></span>
+              <span style="flex: 1"><strong style="display: block">{{p.org}}</strong><span class="muted" style="font-size: 14px">{{p.time}}</span></span>
+              <span class="tag">{{p.kind}}</span>
+            </div>
+            <p style="margin: 0">{{p.text}}</p>
+            <div role="img" aria-label="{{p.media}}" style="aspect-ratio: {{p.ratio}}; border-radius: 16px 16px 4px 16px; background: #b6c3a7; display: grid; place-items: center; font-weight: 600; font-size: 14px">{{p.media}}</div>
+            <template data-sc-if value="{{p.isEvent}}" hint-placeholder-val="{{false}}">
+              <a href="Event.html" style="display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 14px 14px 3px 14px; background: #e9e7e2; text-decoration: none">
+                <span><strong style="display: block">Colombo Food Fair</strong><span style="font-size: 14px">Sun 8 Nov · BMICH · 40 stalls</span></span><span class="btn o" style="min-height: 38px">Event page</span>
+              </a>
+            </template>
+            <div style="display: flex; gap: 4px; flex-wrap: wrap; border-top: 1.5px solid #b6c3a7; padding-top: 6px">
+              <button class="act" onClick="{{p.like}}" aria-pressed="{{p.likedStr}}" style="background: {{p.likeBg}}">{{p.likeLabel}} · {{p.likes}}</button>
+              <button class="act" onClick="{{p.toggleComments}}">Comment · {{p.comments}}</button>
+              <button class="act" onClick="{{p.toggleShare}}">Share</button>
+            </div>
+            <template data-sc-if value="{{p.showShare}}" hint-placeholder-val="{{false}}">
+              <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 12px; border-radius: 14px 14px 3px 14px; background: #e9e7e2">
+                <span aria-hidden="true" style="width: 84px; height: 64px; border-radius: 10px; background: #b6c3a7"></span>
+                <span style="flex: 1 1 200px"><strong style="display: block">tzra.lk/cff26</strong><span class="muted" style="font-size: 14px">Short link with a preview image</span></span>
+                <button class="btn" style="min-height: 40px">WhatsApp</button><button class="btn" style="min-height: 40px">Instagram</button><button class="btn o" style="min-height: 40px">Copy link</button>
+              </div>
+            </template>
+            <template data-sc-if value="{{p.showComments}}" hint-placeholder-val="{{false}}">
+              <div style="display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 14px 14px 3px 14px; background: #e9e7e2">
+                <p style="margin: 0; font-size: 14px"><strong>Lime and Leaf</strong> <span class="tag">Vendor</span> Can't wait, see you at zone B!</p>
+                <div style="display: flex; gap: 8px"><label style="flex: 1"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden">Comment</span><input class="in" placeholder="Add a comment"></label><button class="btn">Post</button></div>
+              </div>
+            </template>
+          </article>
+        </template>
+      </div>
+
+      <aside style="flex: 1 1 280px; display: flex; flex-direction: column; gap: 16px; min-width: 0">
+        <section class="pnl" aria-labelledby="fo">
+          <h2 id="fo" class="h" style="font-size: 20px; font-weight: 700">Organisers to follow</h2>
+          <template data-sc-for list="{{orgs}}" as="o" hint-placeholder-count="3">
+            <div class="inner" style="flex-direction: row; align-items: center">
+              <span aria-hidden="true" style="width: 40px; height: 40px; border-radius: 12px 12px 3px 12px; background: #526c80; flex: 0 0 auto"></span>
+              <span style="flex: 1; min-width: 0"><strong style="display: block">{{o.name}}</strong><span style="font-size: 13px">{{o.meta}}</span></span>
+              <button class="btn" onClick="{{o.toggle}}" style="min-height: 38px; padding: 0 14px; background: {{o.bg}}; border-color: {{o.border}}">{{o.label}}</button>
+            </div>
+          </template>
+        </section>
+        <section class="pnl" aria-labelledby="ue">
+          <h2 id="ue" class="h" style="font-size: 20px; font-weight: 700">New events near you</h2>
+          <a class="inner" href="Event.html" style="text-decoration: none"><strong>Colombo Food Fair</strong><span style="font-size: 14px">Sun 8 Nov · You have stall B-12</span></a>
+          <a class="inner" href="Stalls.html" style="text-decoration: none"><strong>Kandy Fest</strong><span style="font-size: 14px">Sat 5 Dec · Stall slots open</span></a>
+        </section>
+      </aside>
+    </main>
+  </div>
+</div>
+</template>
+<script type="text/x-dc" id="js-Feed">
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { liked: {}, share: -1, comm: -1, follow: { 0: true } }; }
+  renderVals() {
+    const { liked, share, comm, follow } = this.state;
+    const data = [
+      { org: 'Harbour Lights Events', time: '2 h ago', kind: 'New event', text: 'Colombo Food Fair is back. 40 stalls, live music and a kids zone.', media: 'Event poster', ratio: '16 / 9', isEvent: true, likes: 128, comments: 14 },
+      { org: 'Kandy Fest Co.', time: 'Yesterday', kind: 'Reel', text: 'Behind the scenes at last year’s lake-side stage build.', media: 'Reel, 0:42', ratio: '4 / 3', isEvent: false, likes: 342, comments: 31 }
+    ];
+    const orgs = [
+      { name: 'Harbour Lights Events', meta: 'Verified · 24 events' },
+      { name: 'Lotus Weddings', meta: 'Verified · 61 events' },
+      { name: 'Coastline Collective', meta: '6 events' }
+    ];
+    return {
+      posts: data.map((p, k) => {
+        const l = !!liked[k];
+        return { ...p, likes: p.likes + (l ? 1 : 0), likeLabel: l ? 'Liked' : 'Like', likedStr: String(l), likeBg: l ? '#70a992' : 'transparent',
+          showShare: share === k, showComments: comm === k,
+          like: () => this.setState({ liked: { ...liked, [k]: !l } }),
+          toggleShare: () => this.setState({ share: share === k ? -1 : k }),
+          toggleComments: () => this.setState({ comm: comm === k ? -1 : k }) };
+      }),
+      orgs: orgs.map((o, k) => {
+        const f = !!follow[k];
+        return { ...o, label: f ? 'Following' : 'Follow', bg: f ? 'transparent' : '#70a992', border: f ? '#050316' : '#70a992',
+          toggle: () => this.setState({ follow: { ...follow, [k]: !f } }) };
+      })
+    };
+  }
+}
+</script>
+<template id="tpl-Topbar">
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px 24px; padding: 16px 28px; background: #e9e7e2; border-bottom: 1.5px solid #b6c3a7; font-family: 'Instrument Sans', system-ui, sans-serif; color: #050316; box-sizing: border-box; width: 100%">
+  <a href="Main.html" style="font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 800; font-size: 28px; letter-spacing: -0.02em; text-decoration: none; color: #050316; flex: 0 0 auto; padding: 4px 0">tezera</a>
+  <label style="flex: 1 1 280px; max-width: 540px; margin: 0 auto; display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 16px; background: rgba(255,255,255,0.75); border-radius: 999px; box-sizing: border-box">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#050316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="6"></circle><path d="M15 15l5 5"></path></svg>
+    <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search</span>
+    <input type="search" placeholder="Search events, organisers, job posts" style="flex: 1; min-width: 0; border: 0; background: transparent; font: 400 15px 'Instrument Sans', system-ui, sans-serif; color: #050316; outline-offset: 4px">
+  </label>
+  <div style="display: flex; align-items: center; gap: 10px; flex: 0 0 auto">
+    <a href="Messages.html" aria-label="Messages, 2 unread" style="width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.75); display: grid; place-items: center; position: relative">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#050316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H10l-5 4v-4H4z"></path></svg>
+      <span style="position: absolute; top: 6px; right: 6px; width: 10px; height: 10px; border-radius: 50%; background: #050316; border: 2px solid #e9e7e2"></span>
+    </a>
+    <a href="Notifications.html" aria-label="Notifications, 3 new" style="width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.75); display: grid; place-items: center; position: relative">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#050316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"></path><path d="M10 21h4"></path></svg>
+      <span style="position: absolute; top: 6px; right: 6px; width: 10px; height: 10px; border-radius: 50%; background: #050316; border: 2px solid #e9e7e2"></span>
+    </a>
+    <a href="Profile.html" style="min-height: 36px; padding: 0 18px; display: inline-flex; align-items: center; border-radius: 999px; background: #70a992; color: #050316; font-weight: 600; font-size: 14px; text-decoration: none">Vendor</a>
+  </div>
+</header>
+</template>
+<script type="text/x-dc" id="js-Topbar">
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+<template id="tpl-Sidebar">
+<nav aria-label="Vendor menu" style="width: 100%; box-sizing: border-box; background: #70a992; border-radius: 28px 28px 6px 28px; padding: 26px 16px 20px; display: flex; flex-direction: column; gap: 20px; font-family: 'Instrument Sans', system-ui, sans-serif; color: #050316">
+  <template data-sc-for list="{{groups}}" as="group" hint-placeholder-count="3">
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <h2 style="margin: 0 0 4px; text-align: center; font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.01em">{{group.title}}</h2>
+      <template data-sc-for list="{{group.items}}" as="item" hint-placeholder-count="5">
+        <a href="{{item.href}}" aria-current="{{item.current}}" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 12px 12px 3px 12px; text-decoration: none; color: #050316; font-size: 15px; background: {{item.bg}}; font-weight: {{item.weight}}">
+          <span aria-hidden="true" style="width: 12px; height: 11px; border-radius: 4px 4px 1px 4px; flex: 0 0 auto; background: {{item.tile}}"></span>
+          <span style="flex: 1">{{item.label}}</span>
+          <template data-sc-if value="{{item.hasCount}}" hint-placeholder-val="{{false}}">
+            <span style="min-width: 22px; height: 22px; padding: 0 6px; box-sizing: border-box; border-radius: 999px; background: #050316; color: #e9e7e2; font-size: 12px; font-weight: 700; display: grid; place-items: center">{{item.count}}</span>
+          </template>
+        </a>
+      </template>
+    </div>
+  </template>
+  <a href="Verification.html" style="display: block; margin-top: 4px; padding: 14px; border-radius: 16px 16px 4px 16px; background: #e9e7e2; color: #050316; text-decoration: none; font-size: 13px; line-height: 1.4">
+    <span style="display: block; font-weight: 700; font-size: 14px">Verification pending</span>
+    You need the Verified badge to accept bookings. Check status
+  </a>
+</nav>
+</template>
+<script type="text/x-dc" id="js-Sidebar">
+class Component extends DCLogic {
+  renderVals() {
+    const active = this.props.active ?? 'dashboard';
+    const mk = (key, label, href, count) => {
+      const on = key === active;
+      return {
+        key, label, href,
+        current: on ? 'page' : 'false',
+        bg: on ? '#e9e7e2' : '#b6c3a7',
+        weight: on ? '700' : '500',
+        tile: on ? '#050316' : '#658095',
+        hasCount: !!count, count: count || ''
+      };
+    };
+    return {
+      groups: [
+        { title: 'General', items: [
+          mk('dashboard', 'Dashboard', 'Main.html'),
+          mk('feed', 'Feed and events', 'Feed.html'),
+          mk('community', 'Community', 'Community.html'),
+          mk('messages', 'Messages', 'Messages.html', 2),
+          mk('notifications', 'Notifications', 'Notifications.html', 3)
+        ]},
+        { title: 'Vendor tools', items: [
+          mk('requests', 'Booking requests', 'Requests.html', 2),
+          mk('jobs', 'Job posts', 'Jobs.html'),
+          mk('stalls', 'Stalls', 'Stalls.html', 1),
+          mk('bookings', 'My bookings', 'Bookings.html'),
+          mk('mystall', 'My stall listing', 'MyStall.html'),
+          mk('payments', 'Payments', 'Payments.html')
+        ]},
+        { title: 'Account', items: [
+          mk('profile', 'My profile', 'Profile.html'),
+          mk('reviews', 'Reviews and rank', 'Reviews.html'),
+          mk('verification', 'Verification', 'Verification.html'),
+          mk('settings', 'Settings', 'Settings.html')
+        ]}
+      ]
+    };
+  }
+}
+</script>
+<script>
+/* tezera wireframe runtime: renders the page templates in this file and wires up buttons. */
+(function () {
+  class DCLogic {
+    constructor(props) { this.props = props || {}; this.state = {}; }
+    setState(patch) {
+      const p = typeof patch === 'function' ? patch(this.state, this.props) : patch;
+      this.state = Object.assign({}, this.state, p);
+      if (this.__inst) this.__inst.update();
+    }
+    forceUpdate() { if (this.__inst) this.__inst.update(); }
+  }
+
+  const HOLE = /\{\{\s*([^}]+?)\s*\}\}/g;
+  const WHOLE = /^\s*\{\{\s*([^}]+?)\s*\}\}\s*$/;
+
+  function lookup(path, scope) {
+    if (path === 'true') return true;
+    if (path === 'false') return false;
+    if (path === 'null') return null;
+    if (/^-?\d+(\.\d+)?$/.test(path)) return Number(path);
+    const parts = path.split('.');
+    let v = scope[parts[0]];
+    for (let i = 1; i < parts.length && v != null; i++) v = v[parts[i]];
+    return v;
+  }
+  const interp = (s, scope) => s.replace(HOLE, (_, p) => { const v = lookup(p, scope); return v == null ? '' : String(v); });
+  const camel = (s) => s.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+
+  const defs = {};
+  function def(name) {
+    if (defs[name]) return defs[name];
+    const tpl = document.getElementById('tpl-' + name);
+    const js = document.getElementById('js-' + name);
+    const Cls = new Function('DCLogic', js.textContent + '\nreturn Component;')(DCLogic);
+    return (defs[name] = { tpl, Cls });
+  }
+
+  class Instance {
+    constructor(name, props) {
+      this.name = name;
+      const d = def(name);
+      this.tpl = d.tpl;
+      this.logic = new d.Cls(props || {});
+      this.logic.props = props || {};
+      this.logic.__inst = this;
+      this.children = {};
+      if (this.logic.componentDidMount) setTimeout(() => this.logic.componentDidMount(), 0);
+    }
+    mount(host) { this.host = host; this.update(); }
+    update() {
+      if (!this.host) return;
+      const scope = this.logic.renderVals ? (this.logic.renderVals() || {}) : {};
+      this.importCount = 0;
+      const frag = document.createDocumentFragment();
+      this.renderInto(frag, this.tpl.content, scope);
+      this.host.replaceChildren(frag);
+    }
+    renderInto(out, parent, scope) {
+      for (const node of Array.from(parent.childNodes)) {
+        if (node.nodeType === 3) {
+          out.appendChild(document.createTextNode(node.data.indexOf('{{') >= 0 ? interp(node.data, scope) : node.data));
+        } else if (node.nodeType === 1) {
+          this.renderEl(out, node, scope);
+        }
+      }
+    }
+    renderEl(out, node, scope) {
+      if (node.tagName === 'TEMPLATE') {
+        if (node.hasAttribute('data-sc-for')) {
+          const m = (node.getAttribute('list') || '').match(WHOLE);
+          const list = m ? lookup(m[1], scope) : [];
+          const as = node.getAttribute('as') || 'item';
+          (list || []).forEach((item, i) => {
+            const s = Object.create(scope); s[as] = item; s.$index = i;
+            this.renderInto(out, node.content, s);
+          });
+          return;
+        }
+        if (node.hasAttribute('data-sc-if')) {
+          const m = (node.getAttribute('value') || '').match(WHOLE);
+          if (m && lookup(m[1], scope)) this.renderInto(out, node.content, scope);
+          return;
+        }
+        if (node.hasAttribute('data-dc-import')) {
+          const name = node.getAttribute('name');
+          const props = {};
+          for (const a of Array.from(node.attributes)) {
+            if (a.name === 'name' || a.name === 'data-dc-import' || a.name.indexOf('hint-') === 0) continue;
+            const m = a.value.match(WHOLE);
+            props[camel(a.name)] = m ? lookup(m[1], scope) : interp(a.value, scope);
+          }
+          const key = (this.importCount++) + ':' + name;
+          let child = this.children[key];
+          if (!child) child = this.children[key] = new Instance(name, props);
+          child.logic.props = props;
+          const host = document.createElement('div');
+          host.style.display = 'contents';
+          out.appendChild(host);
+          child.mount(host);
+          return;
+        }
+      }
+      const el = document.importNode(node, false);
+      for (const a of Array.from(node.attributes)) {
+        if (a.value.indexOf('{{') < 0) continue;
+        const m = a.value.match(WHOLE);
+        if (m) {
+          const v = lookup(m[1], scope);
+          if (/^on/.test(a.name) && typeof v === 'function') {
+            el.removeAttribute(a.name);
+            el.addEventListener(a.name.slice(2).toLowerCase(), v);
+          } else if (v === false || v == null) {
+            el.removeAttribute(a.name);
+          } else {
+            el.setAttribute(a.name, v === true ? '' : String(v));
+          }
+        } else {
+          el.setAttribute(a.name, interp(a.value, scope));
+        }
+      }
+      this.renderInto(el, node.tagName === 'TEMPLATE' ? node.content : node, scope);
+      out.appendChild(el);
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const app = document.getElementById('app');
+    new Instance(app.getAttribute('data-page')).mount(app);
+  });
+})();
+
+</script>
+</body>
+</html>

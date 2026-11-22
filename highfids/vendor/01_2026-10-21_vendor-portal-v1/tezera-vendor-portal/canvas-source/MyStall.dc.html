@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>My stall listing</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&amp;family=Instrument+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#050316}a:hover{color:#050316}
+.h{font-family:'Bricolage Grotesque',system-ui,sans-serif;letter-spacing:-.02em;margin:0;line-height:1.1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;box-sizing:border-box;border-radius:14px 14px 3px 14px;border:1.5px solid #70a992;background:#70a992;color:#050316;font:600 15px 'Instrument Sans',system-ui,sans-serif;text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn:hover{filter:brightness(.94)}
+.btn.o{background:transparent;border-color:#050316}
+.tab{min-height:48px;padding:0 22px;border:0;border-radius:18px 18px 0 0;font:600 15px 'Instrument Sans',system-ui,sans-serif;color:#050316;cursor:pointer}
+.card{background:rgba(255,255,255,.6);border:1.5px solid #b6c3a7;border-radius:20px 20px 4px 20px;padding:22px;box-sizing:border-box;display:flex;flex-direction:column;gap:12px}
+.box{background:#e9e7e2;border-radius:18px 18px 4px 18px;padding:20px;display:flex;flex-direction:column;gap:12px;box-sizing:border-box}
+.tag{display:inline-flex;align-items:center;min-height:24px;padding:0 10px;border-radius:999px;background:#b6c3a7;color:#050316;font:600 12px 'Instrument Sans',system-ui,sans-serif;white-space:nowrap}
+.org{background:#526c80;color:#fff}
+.pri{background:transparent;border:1px dashed #050316;font-weight:500}
+.muted{color:rgba(5,3,22,.72)}
+.banner{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px 12px 3px 12px;background:#b6c3a7;font-weight:600;font-size:14px}
+.in{min-height:46px;border:1.5px solid #658095;border-radius:12px 12px 3px 12px;background:#fff;padding:0 14px;font:400 15px 'Instrument Sans',system-ui,sans-serif;color:#050316;box-sizing:border-box;width:100%}
+.fld{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:14px}
+.stall{aspect-ratio:1/.92;border-radius:24%;display:grid;place-items:center;font-size:11px;font-weight:700}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #e9e7e2; font-family: 'Instrument Sans', system-ui, sans-serif; color: #050316; font-size: 15px; line-height: 1.5">
+  <dc-import name="Topbar" hint-size="100%,84px"></dc-import>
+  <div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 28px; padding: 24px 28px 56px; max-width: 1440px; margin: 0 auto; box-sizing: border-box">
+    <div style="flex: 0 1 250px; min-width: 220px">
+      <dc-import name="Sidebar" active="mystall" hint-size="100%,960px"></dc-import>
+    </div>
+    <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 20px">
+      <div>
+        <h1 class="h" style="font-size: 40px; font-weight: 800">My stall listing</h1>
+        <p class="muted" style="margin: 6px 0 0">What attendees see when they tap your stall on the venue map.</p>
+      </div>
+
+      <div>
+        <div role="tablist" aria-label="Stalls" style="display: flex; gap: 4px; flex-wrap: wrap">
+          <sc-for list="{{tabs}}" as="t" hint-placeholder-count="2">
+            <button class="tab" role="tab" aria-selected="{{t.sel}}" onClick="{{t.pick}}" style="background: {{t.bg}}">{{t.label}}</button>
+          </sc-for>
+        </div>
+        <div style="background: #658095; border-radius: 0 24px 6px 24px; padding: 14px; display: flex; flex-direction: column; gap: 14px">
+          <div class="box" style="flex-direction: row; flex-wrap: wrap; align-items: center; gap: 18px">
+            <div style="text-align: center; background: #050316; color: #e9e7e2; border-radius: 16px 16px 4px 16px; padding: 12px 18px">
+              <span style="display: block; font-size: 12px; font-weight: 600">Stall</span><span class="h" style="font-size: 32px; font-weight: 800">{{cur.number}}</span>
+            </div>
+            <div style="flex: 1 1 260px">
+              <span class="tag org">{{cur.org}}</span>
+              <h2 class="h" style="font-size: 24px; font-weight: 800; margin-top: 6px">{{cur.event}}</h2>
+              <p style="margin: 2px 0 0">{{cur.when}} · {{cur.zone}}</p>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-start">
+              <span style="font-weight: 600">Stall fee {{cur.fee}}</span>
+              <span class="tag" style="background: {{feeBg}}; color: {{feeFg}}">{{feeStatus}}</span>
+            </div>
+          </div>
+
+          <sc-if value="{{unpaid}}" hint-placeholder-val="{{false}}">
+            <div class="box">
+              <div class="banner"><span aria-hidden="true" style="width: 12px; height: 11px; border-radius: 4px 4px 1px 4px; background: #050316"></span>Test payment, no real money</div>
+              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap"><h3 class="h" style="font-size: 20px; font-weight: 700">Pay the stall fee</h3><span class="tag pri">Should</span></div>
+              <p style="margin: 0">Pay through the organiser's connected PayHere account, or pay them outside the app and they mark it paid.</p>
+              <div style="display: flex; gap: 10px; flex-wrap: wrap"><button class="btn" onClick="{{pay}}">Pay LKR 12,000 in sandbox</button><a class="btn o" href="Messages.dc.html">Ask the organiser</a></div>
+            </div>
+          </sc-if>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start">
+            <div class="box" style="flex: 3 1 360px; min-width: 0">
+              <h3 class="h" style="font-size: 20px; font-weight: 700">Listing for this event</h3>
+              <label class="fld">Short description<textarea class="in" style="padding: 12px 14px; min-height: 84px">Chicken and cheese kottu made to order, plus fresh lime juice. Veg options all day.</textarea></label>
+              <div role="radiogroup" aria-label="Prices to show" style="display: flex; flex-direction: column; gap: 8px">
+                <strong style="font-size: 14px">Prices to show</strong>
+                <button onClick="{{useEvent}}" role="radio" aria-checked="{{evSel}}" style="display: flex; gap: 10px; align-items: center; min-height: 48px; padding: 0 14px; border-radius: 14px 14px 3px 14px; border: 1.5px solid #050316; background: {{evBg}}; font: 500 15px 'Instrument Sans', system-ui, sans-serif; color: #050316; cursor: pointer; text-align: left">Items and prices for this event</button>
+                <button onClick="{{useProfile}}" role="radio" aria-checked="{{prSel}}" style="display: flex; gap: 10px; align-items: center; min-height: 48px; padding: 0 14px; border-radius: 14px 14px 3px 14px; border: 1.5px solid #050316; background: {{prBg}}; font: 500 15px 'Instrument Sans', system-ui, sans-serif; color: #050316; cursor: pointer; text-align: left">Use the prices on my profile</button>
+              </div>
+              <sc-if value="{{isEvent}}" hint-placeholder-val="{{true}}">
+                <div style="display: flex; flex-direction: column; gap: 8px">
+                  <sc-for list="{{items}}" as="it" hint-placeholder-count="4">
+                    <div style="display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) 44px; gap: 8px">
+                      <input class="in" aria-label="Item name" value="{{it.name}}">
+                      <input class="in" aria-label="Price in LKR" value="{{it.price}}">
+                      <button aria-label="Remove item" style="width: 44px; height: 46px; border: 1.5px solid #050316; border-radius: 12px; background: none; cursor: pointer">×</button>
+                    </div>
+                  </sc-for>
+                  <button class="btn o" style="align-self: flex-start">Add item</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{isProfile}}" hint-placeholder-val="{{false}}">
+                <p style="margin: 0">Showing your profile prices. <a href="Profile.dc.html" style="font-weight: 600">Edit them on your profile</a></p>
+              </sc-if>
+              <p class="muted" style="margin: 0; font-size: 14px">Only approved stalls get a listing. The organiser can hide an entry that breaks the event's rules.</p>
+              <button class="btn" style="align-self: flex-start">Save listing</button>
+            </div>
+
+            <div class="box" style="flex: 2 1 300px; min-width: 0">
+              <h3 class="h" style="font-size: 20px; font-weight: 700">What attendees see</h3>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center">
+                <label style="flex: 1 1 160px; display: flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border-radius: 999px; background: #fff"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden">Search the map by item</span><input value="kottu" style="border: 0; flex: 1; min-width: 0; font: 400 14px 'Instrument Sans', system-ui, sans-serif"></label>
+                <span class="tag" style="background: #70a992">Food</span><span class="tag">Drinks</span><span class="tag pri">Type filter: Should</span>
+              </div>
+              <div aria-label="Venue map preview, zone B, your stall highlighted" role="img" style="background: #fff; border-radius: 14px 14px 3px 14px; padding: 12px">
+                <span style="font-size: 12px; font-weight: 700">{{cur.zone}}</span>
+                <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px; margin-top: 6px">
+                  <sc-for list="{{map}}" as="m" hint-placeholder-count="12">
+                    <span class="stall" style="background: {{m.bg}}; color: {{m.fg}}">{{m.n}}</span>
+                  </sc-for>
+                </div>
+                <span style="display: block; margin-top: 8px; font-size: 12px">Dark: your stall, found by 'kottu'. Green: other stalls selling it.</span>
+              </div>
+              <div style="background: #fff; border-radius: 16px 16px 4px 16px; padding: 14px; display: flex; flex-direction: column; gap: 8px">
+                <div style="display: flex; gap: 10px; align-items: center">
+                  <span aria-hidden="true" style="width: 48px; height: 48px; border-radius: 14px 14px 3px 14px; background: #70a992"></span>
+                  <span><strong style="display: block">Kottu Lab</strong><span style="font-size: 13px">Stall {{cur.number}} · {{cur.zone}}</span></span>
+                </div>
+                <p style="margin: 0; font-size: 14px">Chicken and cheese kottu made to order, plus fresh lime juice.</p>
+                <div style="font-size: 14px; display: grid; grid-template-columns: 1fr auto; gap: 2px 10px">
+                  <sc-for list="{{items}}" as="it" hint-placeholder-count="4"><span>{{it.name}}</span><strong>LKR {{it.price}}</strong></sc-for>
+                </div>
+                <a href="Profile.dc.html" style="font-weight: 600; font-size: 14px">View profile</a>
+              </div>
+              <p class="muted" style="margin: 0; font-size: 14px">You also appear in the zone's stall list, and 'Find on map' on the event's vendor list jumps here.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { i: 0, paid: { 0: true }, src: 'event' }; }
+  renderVals() {
+    const { i, paid, src } = this.state;
+    const data = [
+      { org: 'Harbour Lights Events', event: 'Colombo Food Fair', when: 'Sun 8 Nov', zone: 'Zone B, food court', number: 'B-12', fee: 'LKR 15,000', mine: 11 },
+      { org: 'Harbour Lights Events', event: 'Galle Face Night Market', when: 'Sun 15 Nov', zone: 'Zone A, main stage', number: 'A-04', fee: 'LKR 12,000', mine: 3 }
+    ];
+    const cur = data[i];
+    const isPaid = !!paid[i];
+    const sellers = [2, 7];
+    const map = [];
+    for (let k = 0; k < 18; k++) {
+      const n = (i === 0 ? 'B-' : 'A-') + String(k + 1).padStart(2, '0');
+      const mine = k === cur.mine;
+      map.push({ n, bg: mine ? '#050316' : sellers.indexOf(k) >= 0 ? '#70a992' : '#b6c3a7', fg: mine ? '#e9e7e2' : '#050316' });
+    }
+    const defs = ['Colombo Food Fair', 'Galle Face Night Market'];
+    return {
+      tabs: defs.map((label, k) => ({ label, sel: String(k === i), bg: k === i ? '#658095' : '#b6c3a7', pick: () => this.setState({ i: k }) })),
+      cur, map,
+      unpaid: !isPaid,
+      feeStatus: isPaid ? 'Paid and confirmed' : 'Unpaid',
+      feeBg: isPaid ? '#70a992' : '#050316', feeFg: isPaid ? '#050316' : '#e9e7e2',
+      pay: () => this.setState({ paid: { ...paid, [i]: true } }),
+      isEvent: src === 'event', isProfile: src === 'profile',
+      evSel: String(src === 'event'), prSel: String(src === 'profile'),
+      evBg: src === 'event' ? '#70a992' : 'transparent', prBg: src === 'profile' ? '#70a992' : 'transparent',
+      useEvent: () => this.setState({ src: 'event' }), useProfile: () => this.setState({ src: 'profile' }),
+      items: [{ name: 'Chicken kottu', price: '1,200' }, { name: 'Cheese kottu', price: '1,500' }, { name: 'Veg kottu', price: '950' }, { name: 'Fresh lime juice', price: '400' }]
+    };
+  }
+}
+</script>
+</body>
+</html>

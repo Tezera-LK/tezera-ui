@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Side menu</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&amp;family=Instrument+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<nav aria-label="Vendor menu" style="width: 100%; box-sizing: border-box; background: #70a992; border-radius: 28px 28px 6px 28px; padding: 26px 16px 20px; display: flex; flex-direction: column; gap: 20px; font-family: 'Instrument Sans', system-ui, sans-serif; color: #050316">
+  <sc-for list="{{groups}}" as="group" hint-placeholder-count="3">
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <h2 style="margin: 0 0 4px; text-align: center; font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.01em">{{group.title}}</h2>
+      <sc-for list="{{group.items}}" as="item" hint-placeholder-count="5">
+        <a href="{{item.href}}" aria-current="{{item.current}}" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 12px 12px 3px 12px; text-decoration: none; color: #050316; font-size: 15px; background: {{item.bg}}; font-weight: {{item.weight}}">
+          <span aria-hidden="true" style="width: 12px; height: 11px; border-radius: 4px 4px 1px 4px; flex: 0 0 auto; background: {{item.tile}}"></span>
+          <span style="flex: 1">{{item.label}}</span>
+          <sc-if value="{{item.hasCount}}" hint-placeholder-val="{{false}}">
+            <span style="min-width: 22px; height: 22px; padding: 0 6px; box-sizing: border-box; border-radius: 999px; background: #050316; color: #e9e7e2; font-size: 12px; font-weight: 700; display: grid; place-items: center">{{item.count}}</span>
+          </sc-if>
+        </a>
+      </sc-for>
+    </div>
+  </sc-for>
+  <a href="Verification.dc.html" style="display: block; margin-top: 4px; padding: 14px; border-radius: 16px 16px 4px 16px; background: #e9e7e2; color: #050316; text-decoration: none; font-size: 13px; line-height: 1.4">
+    <span style="display: block; font-weight: 700; font-size: 14px">Verification pending</span>
+    You need the Verified badge to accept bookings. Check status
+  </a>
+</nav>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"active":{"editor":"enum","options":["dashboard","feed","community","messages","notifications","requests","jobs","stalls","bookings","mystall","payments","profile","reviews","verification","settings"],"default":"dashboard"},"$preview":{"width":260,"height":960}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const active = this.props.active ?? 'dashboard';
+    const mk = (key, label, href, count) => {
+      const on = key === active;
+      return {
+        key, label, href,
+        current: on ? 'page' : 'false',
+        bg: on ? '#e9e7e2' : '#b6c3a7',
+        weight: on ? '700' : '500',
+        tile: on ? '#050316' : '#658095',
+        hasCount: !!count, count: count || ''
+      };
+    };
+    return {
+      groups: [
+        { title: 'General', items: [
+          mk('dashboard', 'Dashboard', 'Main.dc.html'),
+          mk('feed', 'Feed and events', 'Feed.dc.html'),
+          mk('community', 'Community', 'Community.dc.html'),
+          mk('messages', 'Messages', 'Messages.dc.html', 2),
+          mk('notifications', 'Notifications', 'Notifications.dc.html', 3)
+        ]},
+        { title: 'Vendor tools', items: [
+          mk('requests', 'Booking requests', 'Requests.dc.html', 2),
+          mk('jobs', 'Job posts', 'Jobs.dc.html'),
+          mk('stalls', 'Stalls', 'Stalls.dc.html', 1),
+          mk('bookings', 'My bookings', 'Bookings.dc.html'),
+          mk('mystall', 'My stall listing', 'MyStall.dc.html'),
+          mk('payments', 'Payments', 'Payments.dc.html')
+        ]},
+        { title: 'Account', items: [
+          mk('profile', 'My profile', 'Profile.dc.html'),
+          mk('reviews', 'Reviews and rank', 'Reviews.dc.html'),
+          mk('verification', 'Verification', 'Verification.dc.html'),
+          mk('settings', 'Settings', 'Settings.dc.html')
+        ]}
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

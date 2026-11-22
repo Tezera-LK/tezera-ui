@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Booking requests</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&amp;family=Instrument+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#050316}a:hover{color:#050316}
+.h{font-family:'Bricolage Grotesque',system-ui,sans-serif;letter-spacing:-.02em;margin:0;line-height:1.1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;box-sizing:border-box;border-radius:14px 14px 3px 14px;border:1.5px solid #70a992;background:#70a992;color:#050316;font:600 15px 'Instrument Sans',system-ui,sans-serif;text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn:hover{filter:brightness(.94)}
+.btn.o{background:transparent;border-color:#050316}
+.btn.k{background:#050316;border-color:#050316;color:#e9e7e2}
+.tag{display:inline-flex;align-items:center;min-height:24px;padding:0 10px;border-radius:999px;background:#b6c3a7;color:#050316;font:600 12px 'Instrument Sans',system-ui,sans-serif;white-space:nowrap}
+.org{background:#526c80;color:#fff}
+.pri{background:transparent;border:1px dashed #050316;font-weight:500}
+.muted{color:rgba(5,3,22,.72)}
+.box{background:#e9e7e2;border-radius:18px 18px 4px 18px;padding:20px;display:flex;flex-direction:column;gap:12px}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.kv div{display:flex;flex-direction:column}
+.kv span{font-size:13px;font-weight:600;color:rgba(5,3,22,.72)}
+.in{min-height:46px;border:1.5px solid #658095;border-radius:12px 12px 3px 12px;background:#fff;padding:0 14px;font:400 15px 'Instrument Sans',system-ui,sans-serif;color:#050316;box-sizing:border-box;width:100%}
+.fld{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:14px}
+.reqbtn{display:flex;flex-direction:column;gap:6px;text-align:left;width:100%;padding:16px;border-radius:20px 20px 4px 20px;border:0;cursor:pointer;font:400 15px 'Instrument Sans',system-ui,sans-serif;color:#050316}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #e9e7e2; font-family: 'Instrument Sans', system-ui, sans-serif; color: #050316; font-size: 15px; line-height: 1.5">
+  <dc-import name="Topbar" hint-size="100%,84px"></dc-import>
+  <div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 28px; padding: 24px 28px 56px; max-width: 1440px; margin: 0 auto; box-sizing: border-box">
+    <div style="flex: 0 1 250px; min-width: 220px">
+      <dc-import name="Sidebar" active="requests" hint-size="100%,960px"></dc-import>
+    </div>
+    <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 20px">
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 12px">
+        <div>
+          <h1 class="h" style="font-size: 40px; font-weight: 800">Booking requests</h1>
+          <p class="muted" style="margin: 6px 0 0">Organisers who picked you. Check them, then accept, decline or quote.</p>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap"><span class="tag">2 new</span><span class="tag">1 quoted</span></div>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+        <div role="list" aria-label="Requests" style="flex: 1 1 260px; max-width: 340px; display: flex; flex-direction: column; gap: 12px">
+          <sc-for list="{{reqs}}" as="r" hint-placeholder-count="3">
+            <div role="listitem">
+              <button class="reqbtn" onClick="{{r.pick}}" aria-pressed="{{r.sel}}" style="background: {{r.bg}}">
+                <span style="display: flex; justify-content: space-between; gap: 8px"><span class="tag org">{{r.org}}</span><span class="tag">{{r.status}}</span></span>
+                <strong>{{r.title}}</strong>
+                <span style="font-size: 14px">{{r.when}}</span>
+              </button>
+            </div>
+          </sc-for>
+        </div>
+
+        <section aria-labelledby="dt" style="flex: 999 1 460px; min-width: 0; background: #658095; border-radius: 24px 24px 6px 24px; padding: 16px; display: flex; flex-direction: column; gap: 14px">
+          <div class="box">
+            <div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: flex-start">
+              <div>
+                <span class="tag org">{{cur.org}}</span>
+                <h2 id="dt" class="h" style="font-size: 28px; font-weight: 800; margin-top: 8px">{{cur.title}}</h2>
+                <p style="margin: 4px 0 0">{{cur.event}} · {{cur.when}}</p>
+              </div>
+              <div style="text-align: right"><span class="muted" style="font-size: 13px; font-weight: 600; display: block">Budget</span><span class="h" style="font-size: 26px; font-weight: 800">{{cur.budget}}</span></div>
+            </div>
+          </div>
+
+          <sc-if value="{{isView}}" hint-placeholder-val="{{true}}">
+            <div class="box">
+              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap"><h3 class="h" style="font-size: 20px; font-weight: 700">Brief</h3><span class="muted" style="font-size: 13px">Only the fields the organiser filled in</span></div>
+              <div class="kv">
+                <sc-for list="{{cur.brief}}" as="b" hint-placeholder-count="4">
+                  <div><span>{{b.k}}</span>{{b.v}}</div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px">
+              <div class="box">
+                <h3 class="h" style="font-size: 20px; font-weight: 700">Check the organiser</h3>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap"><span class="tag">{{cur.verified}}</span><span class="tag">{{cur.past}}</span></div>
+                <p style="margin: 0"><strong>{{cur.rating}}</strong> from other providers' reviews</p>
+                <p style="margin: 0; display: flex; gap: 8px; align-items: center; flex-wrap: wrap"><strong>{{cur.ontime}}</strong> of bookings paid on time <span class="tag pri">Should</span></p>
+                <a href="Event.dc.html" style="font-weight: 600">See their events</a>
+              </div>
+              <div class="box">
+                <h3 class="h" style="font-size: 20px; font-weight: 700">Terms you agree to</h3>
+                <p style="margin: 0"><strong>Payment:</strong> {{cur.pay}}</p>
+                <p style="margin: 0"><strong>Cancellation:</strong> {{cur.cancel}}</p>
+              </div>
+            </div>
+
+            <div class="box" style="flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px">
+              <button class="btn" onClick="{{accept}}">Accept booking</button>
+              <button class="btn o" onClick="{{openQuote}}">Send my own quote</button>
+              <a class="btn o" href="Messages.dc.html">Chat with organiser</a>
+              <button class="btn o" onClick="{{decline}}">Decline</button>
+              <span class="muted" style="font-size: 13px; flex-basis: 100%">Accepting needs the Verified badge. Quotes are proposed and can carry your own terms.</span>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{isQuote}}" hint-placeholder-val="{{false}}">
+            <div class="box">
+              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap"><h3 class="h" style="font-size: 22px; font-weight: 700">Your quote</h3><span class="tag pri">Proposed</span></div>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px">
+                <label class="fld">Total price (LKR)<input class="in" type="text" value="205,000"></label>
+                <label class="fld">Deposit on accepting<input class="in" type="text" value="30%"></label>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 8px">
+                <strong style="font-size: 14px">Instalments</strong>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 44px; gap: 10px; align-items: center"><input class="in" aria-label="Instalment 1 amount" value="LKR 71,750"><input class="in" type="date" aria-label="Instalment 1 due date"><button aria-label="Remove instalment 1" style="width: 44px; height: 44px; border: 1.5px solid #050316; border-radius: 12px; background: none; cursor: pointer">×</button></div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 44px; gap: 10px; align-items: center"><input class="in" aria-label="Instalment 2 amount" value="LKR 71,750"><input class="in" type="date" aria-label="Instalment 2 due date"><button aria-label="Remove instalment 2" style="width: 44px; height: 44px; border: 1.5px solid #050316; border-radius: 12px; background: none; cursor: pointer">×</button></div>
+                <button class="btn o" style="align-self: flex-start">Add instalment</button>
+              </div>
+              <label class="fld">Cancellation terms<textarea class="in" rows="3" style="padding: 12px 14px; min-height: 90px">Organiser cancels within 7 days of the event: deposit kept. I cancel: full refund of anything paid.</textarea></label>
+              <label class="fld">Message to the organiser<textarea class="in" rows="3" style="padding: 12px 14px; min-height: 90px" placeholder="What's included, what you need from them"></textarea></label>
+              <div style="display: flex; gap: 10px; flex-wrap: wrap">
+                <button class="btn" onClick="{{sendQuote}}">Send quote</button>
+                <button class="btn o" onClick="{{toView}}">Back to request</button>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{isDone}}" hint-placeholder-val="{{false}}">
+            <div class="box" style="align-items: flex-start">
+              <h3 class="h" style="font-size: 28px; font-weight: 800">{{doneTitle}}</h3>
+              <p style="margin: 0">{{doneBody}}</p>
+              <div style="display: flex; gap: 10px; flex-wrap: wrap">
+                <sc-if value="{{showBooking}}" hint-placeholder-val="{{true}}"><a class="btn" href="Booking.dc.html">Open booking</a></sc-if>
+                <button class="btn o" onClick="{{toView}}">Back to request</button>
+              </div>
+            </div>
+          </sc-if>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { i: 0, mode: 'view' }; }
+  renderVals() {
+    const { i, mode } = this.state;
+    const data = [
+      { org: 'Harbour Lights Events', title: 'Catering for 300 guests', event: 'Kandy Lake Lights', when: 'Sun 29 Nov, 5 pm to 11 pm', status: 'New', budget: 'LKR 180k to 220k',
+        brief: [{ k: 'Service', v: 'Buffet dinner, rice and curry plus kottu station' }, { k: 'Duration', v: '6 hours' }, { k: 'Expected audience', v: '300 guests' }, { k: 'Deliverables', v: 'Food, serving staff, clean-up' }, { k: 'Run-of-show', v: 'Dinner service 7 pm to 9 pm' }, { k: 'Equipment provided', v: 'Tables, water and power points' }],
+        verified: 'Verified organiser', past: '24 past events', rating: '4.7 average', ontime: '92%',
+        pay: '30% deposit when you accept, the rest in two instalments, the last one by the event day.',
+        cancel: 'If the organiser cancels within 7 days of the event, you keep the deposit. If you cancel, everything paid is refunded.' },
+      { org: 'Coastline Collective', title: 'Snack stall for a product launch', event: 'Launch night, Colombo 3', when: 'Sat 14 Nov, 6 pm to 9 pm', status: 'New', budget: 'LKR 60,000',
+        brief: [{ k: 'Service', v: 'Finger food for walk-around guests' }, { k: 'Expected audience', v: '120 guests' }],
+        verified: 'Verified organiser', past: '6 past events', rating: '4.3 average', ontime: '100%',
+        pay: 'Full amount paid outside the app, within 7 days after the event.',
+        cancel: 'Either side can cancel up to 3 days before at no cost.' },
+      { org: 'Kandy Fest Co.', title: 'Drinks stall, two days', event: 'Kandy Fest', when: 'Sat 5 Dec and Sun 6 Dec', status: 'Quoted', budget: 'LKR 90,000',
+        brief: [{ k: 'Service', v: 'Fresh juice and tea' }, { k: 'Duration', v: '2 days' }, { k: 'Expected audience', v: '2,000 a day' }],
+        verified: 'Verification pending', past: '2 past events', rating: 'No reviews yet', ontime: 'Not enough data',
+        pay: '50% deposit, 50% on the first day.', cancel: 'Deposit refunded if cancelled more than 14 days before.' }
+    ];
+    const cur = data[i];
+    let doneTitle = '', doneBody = '', showBooking = false;
+    if (mode === 'accepted') { doneTitle = 'Booked. The organiser has your details.'; doneBody = 'The deposit is due next. You will see each instalment on the booking record.'; showBooking = true; }
+    if (mode === 'declined') { doneTitle = 'Request declined.'; doneBody = 'The organiser is told. It stays in your list as declined.'; }
+    if (mode === 'quoted') { doneTitle = 'Quote sent.'; doneBody = 'The organiser accepts or declines it. Accepted means the booking is confirmed on your terms.'; }
+    return {
+      reqs: data.map((r, k) => ({ ...r, sel: String(k === i), bg: k === i ? '#70a992' : 'rgba(255,255,255,.6)', pick: () => this.setState({ i: k, mode: 'view' }) })),
+      cur,
+      isView: mode === 'view', isQuote: mode === 'quote', isDone: mode === 'accepted' || mode === 'declined' || mode === 'quoted',
+      doneTitle, doneBody, showBooking,
+      accept: () => this.setState({ mode: 'accepted' }),
+      decline: () => this.setState({ mode: 'declined' }),
+      openQuote: () => this.setState({ mode: 'quote' }),
+      sendQuote: () => this.setState({ mode: 'quoted' }),
+      toView: () => this.setState({ mode: 'view' })
+    };
+  }
+}
+</script>
+</body>
+</html>

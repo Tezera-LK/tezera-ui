@@ -1,0 +1,10 @@
+{
+  "name": "Tezera Organiser until verified importer",
+  "id": "tezera-tezera-organiser-until-verified",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": [
+    "figma"
+  ],
+  "documentAccess": "dynamic-page"
+}

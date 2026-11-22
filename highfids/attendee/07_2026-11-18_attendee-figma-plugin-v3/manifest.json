@@ -1,0 +1,10 @@
+{
+  "name": "Tezera Attendee importer · 18 Nov",
+  "id": "tezera-tezera-attendee-18-nov",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": [
+    "figma"
+  ],
+  "documentAccess": "dynamic-page"
+}
