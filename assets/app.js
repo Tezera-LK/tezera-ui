@@ -177,7 +177,7 @@
     main.replaceChildren(h('div', { class: 'overview' },
       h('section', { class: 'hero' },
         h('h1', null, 'Every version of every ', h('em', null, 'flow'), '.'),
-        h('p', null, 'Figma keeps no history of these wireframes, so this site does. Pick an account type on the left, then step through its lo-fi and hi-fi versions in date order.'),
+        h('p', null, 'Figma’s version history covers its own files. These HTML exports and plugins live outside Figma, so this site keeps their history. Pick an account type on the left, then step through its lo-fi and hi-fi versions in date order.'),
         h('div', { class: 'stats num' },
           h('span', null, h('b', null, all.length), 'versions'),
           h('span', null, h('b', null, data.roles.length), 'account types'),
@@ -244,7 +244,7 @@
   function renderPlugin(v) {
     const files = v.files || [];
     return h('section', { class: 'plugin-panel', 'aria-label': 'Plugin details' },
-      h('p', null, 'A Figma development plugin that draws this version of the wireframes into a Figma file. Figma has no version history for it, so each export is kept here.'),
+      h('p', null, 'A Figma development plugin that draws this version of the wireframes into a Figma file. The plugin code lives outside Figma, so Figma’s version history doesn’t cover it. Each export is kept here.'),
       h('dl', null,
         v.pluginName ? [h('dt', null, 'Plugin name'), h('dd', null, v.pluginName)] : null,
         h('dt', null, 'Exported'), h('dd', { class: 'num' }, fmtDate(v.date)),

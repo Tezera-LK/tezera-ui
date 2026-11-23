@@ -1,7 +1,8 @@
 # tezera-ui
 
-Version history of the tezera wireframes. Figma keeps no history for these exports, so this repo does,
-and GitHub Pages serves a dashboard (`index.html`) to browse them.
+Version history of the tezera wireframes. Figma's version history covers its own files, but these HTML
+exports and Figma plugins live outside Figma, so this repo keeps their history. GitHub Pages serves a
+dashboard (`index.html`) to browse them.
 
 ## Adding a version
 
